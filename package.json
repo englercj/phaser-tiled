@@ -1,0 +1,36 @@
+{
+  "name": "phaser-tiled",
+  "version": "1.0.0",
+  "description": "A tilemap implementation for phaser focusing on large complex maps",
+  "author": "Chad Engler <chad@pantherdev.com>",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "homepage": "https://github.com/englercj/phaser-tiled",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/englercj/phaser-tiled.git"
+  },
+  "bugs": {
+    "url": "https://github.com/englercj/phaser-tiled/issues"
+  },
+  "keywords": [
+    "phaser",
+    "html5",
+    "tilemap",
+    "tile",
+    "map"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "browserify": "^5.11.1",
+    "gulp": "^3.8.8",
+    "gulp-jshint": "^1.8.4",
+    "gulp-util": "^3.0.1",
+    "jshint-summary": "^0.4.0",
+    "vinyl-source-stream": "^0.1.1",
+    "watchify": "^1.0.2"
+  },
+  "engine": {
+    "phaser": "^2.1.0"
+  }
+}
