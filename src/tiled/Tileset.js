@@ -26,11 +26,14 @@ var utils = require('../utils');
 //TODO: Support external tilesets (TSX files) via the "source" attribute
 //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
 function Tileset(texture, settings) {
-    //initialize the base Texture class
-    if (texture instanceof Array) {
+    if (typeof texture === 'string') {
+        PIXI.Texture.call(this, PIXI.BaseTextureCache[texture]);
+    }
+    else if (Array.isArray(texture)) {
         this.multi = true;
         PIXI.Texture.call(this, texture[0].baseTexture);
-    } else {
+    }
+    else {
         PIXI.Texture.call(this, texture.baseTexture || texture);
     }
 

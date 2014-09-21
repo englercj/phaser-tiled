@@ -1,6 +1,8 @@
 var Tilelayer = require('./Tilelayer'),
+    Objectlayer = require('./Objectlayer'),
+    Tile = require('./Tile'),
     Tileset = require('./Tileset'),
-    ObjectGroup = require('./ObjectGroup');
+    TilemapParser = require('./TilemapParser');
 
 /**
  * Tiled map that represents an entire tile map with multiple layers or object groups.
@@ -21,8 +23,12 @@ var Tilelayer = require('./Tilelayer'),
  * @param {number} [height=10] - The height of the map in tiles. If this map is created from Tiled or
  *      CSV data you don't need to specify this.
  */
-function Tilemap(game, key, tileWidth, tileHeight, width, height) {
-    Phaser.Group.call(this);
+function Tilemap(game, key, tileWidth, tileHeight, width, height, group) {
+    var data = TilemapParser.parse(game, key, tileWidth, tileHeight, width, height);
+
+    Phaser.Group.call(this, game, group, key);
+
+    this.type = Phaser.TILEMAP;
 
     /**
      * The game instance this tilemap belongs to
@@ -30,7 +36,7 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height) {
      * @property game
      * @type Game
      */
-    this.game = game;
+    // this.game = game;
 
     /**
      * The key of this map data in the Phaser.Cache.
@@ -40,8 +46,6 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height) {
      */
     this.key = key;
 
-    var data = Phaser.TilemapParser.parse(this.game, key, tileWidth, tileHeight, width, height);
-
     if (data === null) {
         return;
     }
@@ -49,12 +53,14 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height) {
     /**
      * @property {number} width - The width of the map (in tiles).
      */
-    this.width = data.width;
+    // this.width = data.width;
 
     /**
      * @property {number} height - The height of the map (in tiles).
      */
-    this.height = data.height;
+    // this.height = data.height;
+
+    this.size = new Phaser.Point(data.width, data.height);
 
     /**
      * @property {number} tileWidth - The base width of the tiles in the map (in pixels).
@@ -159,12 +165,15 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height) {
      */
     // this._tempB = 0;
 
+    // TODO: needed?
+    this.scaledTileSize = new Phaser.Point(this.tileWidth, this.tileHeight);
+
     this.tilesets = [];
 
     // create each tileset
     for(var t = 0, tl = data.tilesets.length; t < tl; ++t) {
         var ts = data.tilesets[t];
-        this.tilesets.push(new Tileset(game.cache.getImage(ts.name), ts));
+        this.tilesets.push(new Tileset(ts.name, ts));
     }
 
     this.layers = [];
@@ -177,27 +186,26 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height) {
 
         switch(ldata.type) {
             case 'tilelayer':
-                lyr = new Tilelayer(game, this, i, width, height);
+                lyr = new Tilelayer(game, this, ldata, width, height);
                 this.layers.push(lyr);
                 break;
 
             case 'objectgroup':
-                lyr = new ObjectGroup(game, this, i, width, height);
+                // lyr = new Objectlayer(game, this, ldata, width, height);
                 this.objects.push(lyr);
                 break;
 
             case 'imagelayer':
                 //TODO: layer texture data
-                lyr = new Phaser.Sprite(game);
+                lyr = new Tile(game);
                 this.images.push(lyr);
+                this.addChild(lyr);
                 break;
         }
-
-        this.addChild(lyr);
     }
 
-    // TODO: needed?
-    this.scaledTileSize = new Phaser.Point(this.tileWidth, this.tileHeight);
+    // update the world bounds
+    this.game.world.setBounds(0, 0, this.widthInPixels, this.heightInPixels);
 }
 
 Tilemap.prototype = Object.create(Phaser.Group.prototype);

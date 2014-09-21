@@ -1,5 +1,5 @@
 /* jshint maxlen:200 */
-var utils = require('../');
+var utils = require('../utils');
 
 var TilemapParser = {
     /**
@@ -8,10 +8,14 @@ var TilemapParser = {
      * @method parse
      * @param {Phaser.Game} game - Game reference to the currently running game.
      * @param {string} key - The key of the tilemap in the Cache.
-     * @param {number} [tileWidth=32] - The pixel width of a single map tile. If using CSV data you must specify this. Not required if using Tiled map data.
-     * @param {number} [tileHeight=32] - The pixel height of a single map tile. If using CSV data you must specify this. Not required if using Tiled map data.
-     * @param {number} [width=10] - The width of the map in tiles. If this map is created from Tiled or CSV data you don't need to specify this.
-     * @param {number} [height=10] - The height of the map in tiles. If this map is created from Tiled or CSV data you don't need to specify this.
+     * @param {number} [tileWidth=32] - The pixel width of a single map tile. If using CSV data you must
+     *      specify this. Not required if using Tiled map data.
+     * @param {number} [tileHeight=32] - The pixel height of a single map tile. If using CSV data you must
+     *      specify this. Not required if using Tiled map data.
+     * @param {number} [width=10] - The width of the map in tiles. If this map is created from Tiled or
+     *      CSV data you don't need to specify this.
+     * @param {number} [height=10] - The height of the map in tiles. If this map is created from Tiled or
+     *      CSV data you don't need to specify this.
      * @return {object} The parsed map object.
      */
     parse: function (game, key, tileWidth, tileHeight, width, height) {

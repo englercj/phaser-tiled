@@ -5,8 +5,8 @@
  * @extends Phaser.Sprite
  * @constructor
  */
-function Tile() {
-    Phaser.Sprite.apply(this, arguments);
+function Tile(game, x, y, key, frame) {
+    Phaser.Sprite.call(this, game, x, y, key, frame);
 
     this.type = Phaser.TILESPRITE;
 

@@ -21,10 +21,8 @@ var Tile = require('./Tile'),
 // for discussions about this implementation:
 //   see: https://github.com/GoodBoyDigital/pixi.js/issues/48
 //   and: https://github.com/photonstorm/phaser/issues/1145
-function Tilelayer(game, map, index, width, height) {
-    Phaser.Group.call(this);
-
-    var layer = map.layers[index];
+function Tilelayer(game, map, layer, width, height) {
+    Phaser.Group.call(this, game, map);
 
     // Non-Tiled related properties
 
@@ -34,7 +32,7 @@ function Tilelayer(game, map, index, width, height) {
      * @property game
      * @type Phaser.Game
      */
-    this.game = game;
+    // this.game = game;
 
     /**
      * The map instance this tilelayer belongs to
@@ -50,7 +48,7 @@ function Tilelayer(game, map, index, width, height) {
      * @property index
      * @type Number
      */
-    this.index = index;
+    // this.index = index;
 
     /**
      * The const type of this object.
@@ -180,9 +178,9 @@ Tilelayer.prototype.updateRenderArea = function (width, height) {
 
     if (width !== this._renderArea.width) {
         this._renderArea.width = Phaser.Math.ceil(width / this.map.scaledTileSize.x) + 1;
-        this._renderArea.width = (this._renderArea.x + this._renderArea.width > this.map.size.x) ?
 
         // ensure we don't go outside the map size
+        this._renderArea.width = (this._renderArea.x + this._renderArea.width > this.map.size.x) ?
             (this.map.size.x - this._renderArea.x) : this._renderArea.width;
     }
 
@@ -214,9 +212,6 @@ Tilelayer.prototype.resizeWorld = function () {
 Tilelayer.prototype.postUpdate = function () {
     Phaser.Group.prototype.postUpdate.call(this);
 
-    this.scrollX = this.game.camera.x * this.scrollFactor.x;
-    this.scrollY = this.game.camera.y * this.scrollFactor.y;
-
     if (this.fixedToCamera) {
         this.position.x = (this.game.camera.view.x + this.cameraOffset.x) / this.game.camera.scale.x;
         this.position.y = (this.game.camera.view.y + this.cameraOffset.y) / this.game.camera.scale.y;
@@ -230,6 +225,10 @@ Tilelayer.prototype.postUpdate = function () {
 
         return this;
     }
+
+    this.scrollX = this.game.camera.x * this.scrollFactor.x;
+    this.scrollY = this.game.camera.y * this.scrollFactor.y;
+    this.updatePan();
 };
 
 /**
@@ -253,8 +252,8 @@ Tilelayer.prototype.setupTiles = function () {
     this._buffered.left = this._buffered.right = this._buffered.top = this._buffered.bottom = false;
 
     // reset panDelta
-    this._scrollDelta.x = this.scroll.x % this.map.scaledTileSize.x;
-    this._scrollDelta.y = this.scroll.y % this.map.scaledTileSize.y;
+    this._scrollDelta.x = this._scroll.x % this.map.scaledTileSize.x;
+    this._scrollDelta.y = this._scroll.y % this.map.scaledTileSize.y;
 };
 
 /**
@@ -338,8 +337,7 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
         posX,
         posY,
         // hitArea,
-        interactive,
-        blendMode;
+        interactive;
 
     // if no tileset, return
     if (!set) {
@@ -350,9 +348,9 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
     texture = set.getTileTexture(tileId);
     props = set.getTileProperties(tileId);
     // hitArea = props.hitArea || set.properties.hitArea;
-    interactive = this._getInteractive(set, props);
-    posX = (toTileX * this.map.tileSize.x) + set.tileoffset.x;
-    posY = (toTileY * this.map.tileSize.y) + set.tileoffset.y;
+    // interactive = this._getInteractive(set, props);
+    posX = (toTileX * this.map.tileWidth) + set.tileoffset.x;
+    posY = (toTileY * this.map.tileHeight) + set.tileoffset.y;
 
     // due to the fact that we use top-left anchors for everything, but tiled uses bottom-left
     // we need to move the position of each tile down by a single map-tile height. That is why
@@ -364,23 +362,25 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
 
     // if we couldn't find a tile from the pool, then create a new tile
     if (!tile) {
-        tile = new Tile(texture);
+        tile = new Tile(this.game, posX, posY, texture);
         tile.anchor.y = 1;
 
         this.addChild(tile);
     }
+    else {
+        tile.position.x = posX;
+        tile.position.y = posY;
 
-    tile.blendMode = (blendMode = props.blendMode || this.properties.blendMode) ?
-        PIXI.blendModes[blendMode] : PIXI.blendModes.NORMAL;
+        tile.setTexture(texture);
+    }
+
+    tile.blendMode = (props.blendMode || this.properties.blendMode) ?
+        Phaser.blendModes[(props.blendMode || this.properties.blendMode)] : Phaser.blendModes.NORMAL;
 
     // tile.interactive = interactive;
     // tile.hitArea = hitArea;
-    tile.mass = props.mass || 0;
-    tile.position.x = posX;
-    tile.position.y = posY;
+    // tile.mass = props.mass || 0;
     tile.visible = true;
-
-    tile.setTexture(texture);
 
     // if(tile.mass) {
     //     tile.enablePhysics(this.state.physics);
@@ -489,19 +489,19 @@ Tilelayer.prototype.updatePan = function () {
  */
 Tilelayer.prototype._renderLeft = function (forceNew) {
     //move all the far right tiles to the left side
-    for(var i = 0; i < this._rendered.height + 1; ++i) {
+    for(var i = 0; i < this._renderArea.height + 1; ++i) {
         this.moveTileSprite(
-            forceNew ? -1 : this._rendered.right,
-            forceNew ? -1 : this._rendered.top + i,
-            this._rendered.left - 1,
-            this._rendered.top + i
+            forceNew ? -1 : this._renderArea.right,
+            forceNew ? -1 : this._renderArea.top + i,
+            this._renderArea.left - 1,
+            this._renderArea.top + i
         );
     }
 
-    this._rendered.x--;
+    this._renderArea.x--;
 
     if (forceNew) {
-        this._rendered.width++;
+        this._renderArea.width++;
     }
 };
 
@@ -514,21 +514,21 @@ Tilelayer.prototype._renderLeft = function (forceNew) {
  */
 Tilelayer.prototype._renderRight = function (forceNew) {
     //move all the far left tiles to the right side
-    for(var i = 0; i < this._rendered.height + 1; ++i) {
+    for(var i = 0; i < this._renderArea.height + 1; ++i) {
         this.moveTileSprite(
-            forceNew ? -1 : this._rendered.left,
-            forceNew ? -1 : this._rendered.top + i,
-            this._rendered.right + 1,
-            this._rendered.top + i
+            forceNew ? -1 : this._renderArea.left,
+            forceNew ? -1 : this._renderArea.top + i,
+            this._renderArea.right + 1,
+            this._renderArea.top + i
         );
     }
 
     if (!forceNew) {
-        this._rendered.x++;
+        this._renderArea.x++;
     }
 
     if (forceNew) {
-        this._rendered.width++;
+        this._renderArea.width++;
     }
 };
 
@@ -541,19 +541,19 @@ Tilelayer.prototype._renderRight = function (forceNew) {
  */
 Tilelayer.prototype._renderUp = function (forceNew) {
     //move all the far bottom tiles to the top side
-    for(var i = 0; i < this._rendered.width + 1; ++i) {
+    for(var i = 0; i < this._renderArea.width + 1; ++i) {
         this.moveTileSprite(
-            forceNew ? -1 : this._rendered.left + i,
-            forceNew ? -1 : this._rendered.bottom,
-            this._rendered.left + i,
-            this._rendered.top - 1
+            forceNew ? -1 : this._renderArea.left + i,
+            forceNew ? -1 : this._renderArea.bottom,
+            this._renderArea.left + i,
+            this._renderArea.top - 1
         );
     }
 
-    this._rendered.y--;
+    this._renderArea.y--;
 
     if (forceNew) {
-        this._rendered.height++;
+        this._renderArea.height++;
     }
 };
 
@@ -566,21 +566,21 @@ Tilelayer.prototype._renderUp = function (forceNew) {
  */
 Tilelayer.prototype._renderDown = function (forceNew) {
     //move all the far top tiles to the bottom side
-    for(var i = 0; i < this._rendered.width + 1; ++i) {
+    for(var i = 0; i < this._renderArea.width + 1; ++i) {
         this.moveTileSprite(
-            forceNew ? -1 : this._rendered.left + i,
-            forceNew ? -1 : this._rendered.top,
-            this._rendered.left + i,
-            this._rendered.bottom + 1
+            forceNew ? -1 : this._renderArea.left + i,
+            forceNew ? -1 : this._renderArea.top,
+            this._renderArea.left + i,
+            this._renderArea.bottom + 1
         );
     }
 
     if(!forceNew) {
-        this._rendered.y++;
+        this._renderArea.y++;
     }
 
     if(forceNew) {
-        this._rendered.height++;
+        this._renderArea.height++;
     }
 };
 
@@ -609,7 +609,7 @@ Tilelayer.prototype.destroy = function () {
     this._tilePool = null;
     this._buffered = null;
     this._scroll = null;
-    this._rendered = null;
+    this._renderArea = null;
 };
 
 Object.defineProperty(Tilelayer.prototype, 'scrollX', {
@@ -618,7 +618,7 @@ Object.defineProperty(Tilelayer.prototype, 'scrollX', {
     },
     set: function (value) {
         if (value !== this._scroll.x) {
-            this._scrollDelta.x = value - this._scroll.x;
+            this._scrollDelta.x += value - this._scroll.x;
             this._scroll.x = value;
             // this.updateRenderArea(this._renderArea.width, this._renderArea.height);
         }
@@ -631,7 +631,7 @@ Object.defineProperty(Tilelayer.prototype, 'scrollY', {
     },
     set: function (value) {
         if (value !== this._scroll.y) {
-            this._scrollDelta.y = value - this._scroll.y;
+            this._scrollDelta.y += value - this._scroll.y;
             this._scroll.y = value;
             // this.updateRenderArea(this._renderArea.width, this._renderArea.height);
         }

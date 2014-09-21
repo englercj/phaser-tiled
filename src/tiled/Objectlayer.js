@@ -10,8 +10,8 @@ var utils = require('../utils');
  * @param map {Tilemap} The tilemap instance that this belongs to
  * @param group {Object} All the settings for the layer
  */
-function ObjectGroup(map, group) {
-    Phaser.Group.call(this);
+function ObjectGroup(game, map, group, width, height) {
+    Phaser.Group.call(this, game, map);
 
     /**
      * The map instance this object group belongs to
