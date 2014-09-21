@@ -1,14 +1,15 @@
 var gulp = require('gulp'),
     path = require('path'),
     gutil = require('gulp-util'),
-    source = require('vinyl-source-stream'),
+    jshint = require('gulp-jshint'),
+    source  = require('vinyl-source-stream'),
     watchify = require('watchify'),
     browserify = require('browserify'),
 
     index = './src/index.js',
     outdir = './build',
-    bundle = 'Phaser.Plugin.Debug',
-    outfile = 'phaser-debug.js';
+    bundle = 'Phaser.Plugin.Tiled',
+    outfile = 'phaser-tiled.js';
 
 function rebundle(file) {
     if (file) {
@@ -46,6 +47,18 @@ gulp.task('dev', function() {
  *****/
 gulp.task('build', function () {
     return rebundle.call(createBundler());
+});
+
+/*****
+ * JSHint task, lints the lib and test *.js files.
+ *****/
+gulp.task('jshint', function () {
+    return gulp.src([
+            './src/**/*.js',
+            'gulpfile.js'
+        ])
+        .pipe(jshint())
+        .pipe(jshint.reporter('jshint-summary'));
 });
 
 /*****
