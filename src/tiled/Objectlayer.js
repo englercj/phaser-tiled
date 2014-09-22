@@ -13,6 +13,8 @@ var utils = require('../utils');
 function ObjectGroup(game, map, group, width, height) {
     Phaser.Group.call(this, game, map);
 
+    // Non-Tiled related properties
+
     /**
      * The map instance this object group belongs to
      *
@@ -22,20 +24,13 @@ function ObjectGroup(game, map, group, width, height) {
     this.map = map;
 
     /**
-     * The game instance this object group belongs to
+     * The const type of this object.
      *
-     * @property game
-     * @type Game
+     * @property type
+     * @type Number
+     * @default
      */
-    this.game = map.game;
-
-    /**
-     * The state instance this object group belongs to
-     *
-     * @property state
-     * @type Game
-     */
-    this.state = map.state;
+    this.type = Phaser.TILEMAPLAYER;
 
     /**
      * The name of the group
@@ -45,6 +40,8 @@ function ObjectGroup(game, map, group, width, height) {
      * @default ''
      */
     this.name = group.name || '';
+
+    // Tiled related properties
 
     /**
      * The color to display objects in this group
@@ -60,7 +57,7 @@ function ObjectGroup(game, map, group, width, height) {
      * @property properties
      * @type Object
      */
-    this.properties = utils.parseTiledProperties(group.properties) || {};
+    this.properties = utils.parseTiledProperties(group.properties);
 
     /**
      * The objects in this group that can be spawned
@@ -70,23 +67,23 @@ function ObjectGroup(game, map, group, width, height) {
      */
     this.objects = group.objects;
 
-    //translate some tiled properties to our inherited properties
     /**
-     * The type of the layer, should always be 'objectgroup'
+     * The Tiled type of tile layer, should always be 'objectgroup'
      *
-     * @property type
+     * @property layerType
      * @type String
      * @default 'objectgroup'
+     * @readOnly
      */
-    this.type = group.type || 'objectgroup';
+    this.layerType = layer.type || 'objectgroup';
 
-    //translate some tiled properties to our inherited properties
+    // translate some tiled properties to our inherited properties
     this.position.x = group.x || 0;
     this.position.y = group.y || 0;
     this.alpha = group.opacity !== undefined ? group.opacity : 1;
     this.visible = group.visible !== undefined ? group.visible : true;
 
-    if(this.properties.batch) {
+    if (this.properties.batch) {
         this.container = this.addChild(new Phaser.SpriteBatch());
     } else {
         this.container = this;
@@ -101,28 +98,27 @@ function ObjectGroup(game, map, group, width, height) {
  * @chainable
  */
 ObjectGroup.prototype.spawn = function () {
-    var game = this.game; //this.Tilemap.GameState.Game
-
-    //we go through these backwards so that things that are higher in the
-    //list of object gets rendered on top.
+    // we go through these backwards so that things that are higher in the
+    // list of object gets rendered on top.
     for(var i = this.objects.length - 1; i >= 0; --i) {
         var o = this.objects[i],
-            props = utils.parseTiledProperties(o.properties) || {},
+            props = utils.parseTiledProperties(o.properties),
             set,
             interactive,
             obj;
 
         props.tileprops = {};
 
-        //create a sprite with that texture
+        // gid means a sprite from a tileset texture
         if (o.gid) {
-            set = this.parent.getTileset(o.gid);
+            set = this.map.getTileset(o.gid);
 
+            // if the tileset exists
             if (set) {
                 props.texture = set.getTileTexture(o.gid);
                 props.tileprops = set.getTileProperties(o.gid);
 
-                //if no hitArea then use the tileset's if available
+                // if no hitArea then use the tileset's if available
                 if (!props.hitArea) {
                     if (props.tileprops.hitArea) {
                         props.hitArea = props.tileprops.hitArea;
@@ -133,137 +129,139 @@ ObjectGroup.prototype.spawn = function () {
                 }
             }
         }
-        //non-sprite object (usually to define an "area" on a map)
-        else {
-            if (!props.hitArea) {
-                //define a hitArea
-                if (o.polyline) {
-                    props.hitArea = this._getPolyline(o);
-                }
-                else if (o.polygon) {
-                    props.hitArea = this._getPolygon(o);
-                }
-                else if (o.ellipse) {
-                    props.hitArea = this._getEllipse(o);
-                }
-                else {
-                    props.hitArea = this._getRectangle(o);
-                }
-            }
-        }
+        // non-sprite object (usually to define an "area" on a map)
+        // else {
+        //     if (!props.hitArea) {
+        //         if (o.polyline) {
+        //             props.hitArea = this._getPolyline(o);
+        //         }
+        //         else if (o.polygon) {
+        //             props.hitArea = this._getPolygon(o);
+        //         }
+        //         else if (o.ellipse) {
+        //             props.hitArea = this._getEllipse(o);
+        //         }
+        //         else {
+        //             props.hitArea = this._getRectangle(o);
+        //         }
+        //     }
+        // }
 
-        o.name = o.name || props.name || props.tileprops.name;
-        o.type = o.type || props.type || props.tileprops.type;
+        o.name = o.name || props.name || props.tileprops.name || '';
+        o.type = o.type || props.type || props.tileprops.type || '';
 
-        //a manually specified string texture
+        // a manually specified string texture
         if (typeof props.texture === 'string') {
-            props.texture = game.cache.getTexture(props.texture);
+            props.texture = PIXI.TextureCache[props.texture];
         }
 
-        //just a regular DisplayObject
+        // just a regular DisplayObject
         if (!props.texture) {
             obj = new Phaser.Group();
 
             obj.width = o.width;
             obj.height = o.height;
             obj.name = o.name;
-            obj.type = o.type;
             obj.rotation = o.rotation;
+            obj.objectType = o.type;
 
-            //these are treated as sensor bodies, so always enable physics
             obj.position.x = o.x;
             obj.position.y = o.y;
 
+            // these are treated as sensor bodies, so always enable physics
             obj.sensor = true;
-            obj.hitArea = props.hitArea;
+            // obj.hitArea = props.hitArea;
 
-            obj.enablePhysics(game.physics);
+            // obj.enablePhysics(this.game.physics);
         } else {
-            //some variable for the user if they want them
-            //these will be passed through to a custom sprite if wanted
             props.width = o.width;
             props.height = o.height;
-            props.zIndex = this.zIndex;
 
-            obj = game.spritepool.create(o.name, props.texture, props);
+            obj = this.map.spritepool.create(o.type, props.texture, props);
 
-            //assign some values
             obj.name = o.name;
             obj.type = o.type;
             obj.position.x = o.x;
             obj.position.y = o.y;
 
-            obj.mass = props.mass || props.tileprops.mass;
-            obj.inertia = props.inertia || props.tileprops.inertia;
-            obj.friction = props.friction || props.tileprops.friction;
-            obj.sensor = props.sensor || props.tileprops.sensor;
-            obj.hitArea = props.hitArea;
+            // obj.mass = props.mass || props.tileprops.mass;
+            // obj.inertia = props.inertia || props.tileprops.inertia;
+            // obj.friction = props.friction || props.tileprops.friction;
+            // obj.sensor = props.sensor || props.tileprops.sensor;
+            // obj.hitArea = props.hitArea;
             obj.blendMode = (props.blendMode || this.properties.blendMode) ?
                 PIXI.blendModes[(props.blendMode || this.properties.blendMode)] : PIXI.blendModes.NORMAL;
 
             var a = props.anchor || props.tileprops.anchor;
+            obj.anchor.x = a ? a[0] : 0;
             obj.anchor.y = a ? a[1] : 1;
-            obj.anchor.x = a ? a[0] : (this.parent.orientation === 'isometric' ? 0.5 : 0);
 
-            if (obj.mass) {
-                obj.enablePhysics(game.physics);
-            }
+            // if (obj.mass) {
+            //     obj.enablePhysics(this.game.physics);
+            // }
 
             if (props.tileprops) {
                 if (props.tileprops.flippedX) {
                     obj.scale.x = -1;
-                    obj.anchor.x = a ? a[0] : 1;
                 }
 
                 if (props.tileprops.flippedY) {
                     obj.scale.y = -1;
-                    obj.anchor.y = a ? a[1] : 0;
                 }
 
-                //IDK if this is the correct angle, there are no docs for `rotatedCW`
-                if (props.tileprops.rotatedCW) {
-                    obj.rotation = Phaser.Math.degreesToRadians(45);
+                // from Tiled Editor:
+                // https://github.com/bjorn/tiled/blob/b059a13b2864ea029fb741a90780d31cf5b67043/src/libtiled/maprenderer.cpp#L135-L145
+                if (props.tileprops.flippedAD) {
+                    obj.rotation = Phaser.Math.degToRad(90);
+                    obj.scale.x *= -1;
+
+                    var sx = obj.scale.x;
+                    obj.scale.x = obj.scale.y;
+                    obj.scale.y = sx;
+
+                    var halfDiff = (o.height / 2) - (o.width / 2);
+                    obj.position.y += halfDiff;
+                    obj.position.x += halfDiff;
                 }
             }
 
             if (props.animation || props.tileprops.animation) {
-                if (obj.goto) {
-                    obj.goto(0, props.animation || props.tileprops.animation).play();
+                if (obj.animations) {
+                    obj.animations.play(props.animation || props.tileprops.animation);
                 }
             }
 
-            //set some more stuffz
             if (typeof o.rotation === 'number') {
-                obj.setRotation(o.rotation);
+                obj.rotation = o.rotation;
             }
         }
 
         //visible was recently added to Tiled, default old versions to true
         obj.visible = o.visible !== undefined ? !!o.visible : true;
 
-        if (this.parent.orientation === 'isometric') {
-            var toTileX = o.x / this.parent.tileSize.x,
-                toTileY = o.y / this.parent.tileSize.y;
+        // if (this.map.orientation === 'isometric') {
+        //     var toTileX = o.x / this.map.tileWidth,
+        //         toTileY = o.y / this.map.tileWidth;
 
-            //This cannot be the simplest form of this...
-            o.x = (toTileX * this.parent.tileSize.x) - ((toTileY - 1) * (this.parent.tileSize.x / 2));
-            o.y = (toTileY * this.parent.tileSize.y / 2) + (toTileX * this.parent.tileSize.y);
-        }
+        //     //This cannot be the simplest form of this...
+        //     o.x = (toTileX * this.map.tileWidth) - ((toTileY - 1) * (this.map.tileWidth / 2));
+        //     o.y = (toTileY * this.map.tileWidth / 2) + (toTileX * this.map.tileWidth);
+        // }
 
-        interactive = this._getInteractive(set, props);
+        // interactive = this._getInteractive(set, props);
 
-        //pass through all events
-        if (interactive) {
-            obj.interactive = interactive;
+        // //pass through all events
+        // if (interactive) {
+        //     obj.interactive = interactive;
 
-            obj.click = this.onObjectEvent.bind(this, 'click', obj);
-            obj.mousedown = this.onObjectEvent.bind(this, 'mousedown', obj);
-            obj.mouseup = this.onObjectEvent.bind(this, 'mouseup', obj);
-            obj.mousemove = this.onObjectEvent.bind(this, 'mousemove', obj);
-            obj.mouseout = this.onObjectEvent.bind(this, 'mouseout', obj);
-            obj.mouseover = this.onObjectEvent.bind(this, 'mouseover', obj);
-            obj.mouseupoutside = this.onObjectEvent.bind(this, 'mouseupoutside', obj);
-        }
+        //     obj.click = this.onObjectEvent.bind(this, 'click', obj);
+        //     obj.mousedown = this.onObjectEvent.bind(this, 'mousedown', obj);
+        //     obj.mouseup = this.onObjectEvent.bind(this, 'mouseup', obj);
+        //     obj.mousemove = this.onObjectEvent.bind(this, 'mousemove', obj);
+        //     obj.mouseout = this.onObjectEvent.bind(this, 'mouseout', obj);
+        //     obj.mouseover = this.onObjectEvent.bind(this, 'mouseover', obj);
+        //     obj.mouseupoutside = this.onObjectEvent.bind(this, 'mouseupoutside', obj);
+        // }
 
         //set custom properties
         obj.properties = {};
@@ -285,7 +283,7 @@ ObjectGroup.prototype.spawn = function () {
 };
 
 /**
- * Called internally whenever an event happens on an object, used to echo to the parent.
+ * Called internally whenever an event happens on an object, used to echo to the map.
  *
  * @method onObjectEvent
  * @param eventName {String} The name of the event
@@ -294,7 +292,7 @@ ObjectGroup.prototype.spawn = function () {
  * @private
  */
 ObjectGroup.prototype.onObjectEvent = function (eventName, obj, data) {
-    this.parent.onObjectEvent(eventName, obj, data);
+    this.map.onObjectEvent(eventName, obj, data);
 };
 
 /**
@@ -371,18 +369,19 @@ ObjectGroup.prototype._getInteractive = function (set, props) {
             props.tileprops.interactive || //tile object interactive
             (set && set.properties.interactive) || //tileset interactive
             this.properties.interactive || //layer interactive
-            this.parent.properties.interactive; //map interactive
+            this.map.properties.interactive; //map interactive
 };
 
 /**
  * Despawns all the sprites associated with this layer
  *
  * @method despawn
+ * @param destroy {Boolean} Should we destroy the children as well?
  * @return {ObjectGroup} Returns itself.
  * @chainable
  */
-ObjectGroup.prototype.despawn = function () {
-    return Phaser.Group.prototype.destroyAllChildren.call(this);
+ObjectGroup.prototype.despawn = function (destroy) {
+    return Phaser.Group.prototype.removeAll.call(this, destroy);
 };
 
 /**
@@ -391,8 +390,7 @@ ObjectGroup.prototype.despawn = function () {
  * @method destroy
  */
 ObjectGroup.prototype.destroy = function () {
-    this.despawn();
-    Phaser.Group.prototype.destroy.call(this);
+    Phaser.Group.prototype.destroy.apply(this, arguments);
 
     this.map = null;
     this.game = null;

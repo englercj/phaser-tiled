@@ -197,9 +197,9 @@ Tileset.prototype.getTileProperties = function (tileId) {
     }
 
     var flags = Tileset.FLAGS,
-        flippedX = tileId & flags.FlippedX,
-        flippedY = tileId & flags.FlippedY,
-        rotatedCW = tileId & flags.RotatedCW;
+        flippedX = tileId & flags.FLIPPED_HORZ,
+        flippedY = tileId & flags.FLIPPED_VERT,
+        flippedAD = tileId & flags.FLIPPED_ANTI_DIAG;
 
     tileId = (tileId & ~Tileset.FLAGS.ALL) - this.firstgid;
 
@@ -219,7 +219,7 @@ Tileset.prototype.getTileProperties = function (tileId) {
 
     props.flippedX = flippedX;
     props.flippedY = flippedY;
-    props.rotatedCW = rotatedCW;
+    props.flippedAD = flippedAD;
 
     return props;
 };
@@ -271,9 +271,9 @@ Tileset.prototype.contains = function (tileId) {
  * @static
  */
 Tileset.FLAGS = {
-    FlippedX: 0x80000000,
-    FlippedY: 0x40000000,
-    RotatedCW: 0x20000000
+    FLIPPED_HORZ: 0x80000000,
+    FLIPPED_VERT: 0x40000000,
+    FLIPPED_ANTI_DIAG: 0x20000000
 };
 
 var mask = 0;

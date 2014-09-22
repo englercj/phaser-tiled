@@ -27,14 +27,6 @@ function Tilelayer(game, map, layer, width, height) {
     // Non-Tiled related properties
 
     /**
-     * The game instance this tilelayer belongs to
-     *
-     * @property game
-     * @type Phaser.Game
-     */
-    // this.game = game;
-
-    /**
      * The map instance this tilelayer belongs to
      *
      * @property map
@@ -170,6 +162,12 @@ function Tilelayer(game, map, layer, width, height) {
 
     // this.physicsContainer = new SpriteBatch();
     // this.createPhysicalTiles();
+
+    if (this.properties.batch) {
+        this.container = this.addChild(new Phaser.SpriteBatch());
+    } else {
+        this.container = this;
+    }
 }
 
 Tilelayer.prototype = Object.create(Phaser.Group.prototype);
@@ -382,7 +380,7 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
         tile = new Tile(this.game, posX, posY, texture);
         // tile.anchor.y = 1;
 
-        this.addChild(tile);
+        this.container.addChild(tile);
     }
     else {
         tile.position.x = posX;
@@ -611,7 +609,7 @@ Tilelayer.prototype._renderDown = function (forceNew) {
  * @method destroy
  */
 Tilelayer.prototype.destroy = function () {
-    Phaser.Group.prototype.destroy.call(this);
+    Phaser.Group.prototype.destroy.apply(this, arguments);
 
     this.state = null;
     this.name = null;

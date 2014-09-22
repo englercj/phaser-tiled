@@ -12,6 +12,17 @@ var utils = require('./utils');
  */
 function Tiled(game, parent) {
     Phaser.Plugin.call(this, game, parent);
+
+    this.originals = {
+        gameObjectFactory: {
+            tiledmap: Phaser.GameObjectFactory.prototype.tiledmap
+        },
+        loader: {
+            tiledmap: Phaser.Loader.prototype.tiledmap,
+            loadFile: Phaser.Loader.prototype.loadFile,
+            xmlLoadComplete: Phaser.Loader.prototype.xmlLoadComplete
+        }
+    };
 }
 
 //  Extends the Phaser.Plugin template, setting up values we need
@@ -27,14 +38,24 @@ Tiled.Tilelayer    = require('./tiled/Tilelayer');
 Tiled.Objectlayer  = require('./tiled/Objectlayer');
 
 Tiled.prototype.init = function () {
-    // patch a couple new functions in
+    Phaser.Plugin.prototype.init.apply(this, arguments);
+
     Phaser.GameObjectFactory.prototype.tiledmap = GameObjectFactory_tiledmap;
     Phaser.Loader.prototype.tiledmap = Loader_tiledmap;
     Phaser.Loader.prototype.loadFile = Loader_loadFile;
     Phaser.Loader.prototype.xmlLoadComplete = Loader_xmlLoadComplete;
 };
 
-var originalLoadFile = Phaser.Loader.prototype.loadFile;
+Tiled.prototype.destroy = function () {
+    Phaser.Plugin.prototype.destroy.apply(this, arguments);
+
+    Phaser.GameObjectFactory.prototype.tiledmap = this.originals.gameObjectFactory.tiledmap;
+    Phaser.Loader.prototype.tiledmap = this.originals.loader.tiledmap;
+    Phaser.Loader.prototype.loadFile = this.originals.loader.loadFile;
+    Phaser.Loader.prototype.xmlLoadComplete = this.originals.loader.xmlLoadComplete;
+
+    this.originals = null;
+};
 
 function GameObjectFactory_tiledmap(key, tileWidth, tileHeight, width, height, group) {
     return new Tiled.Tilemap(this.game, key, tileWidth, tileHeight, width, height, group);

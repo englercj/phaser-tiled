@@ -4,6 +4,8 @@ var Tilelayer = require('./Tilelayer'),
     Tileset = require('./Tileset'),
     TilemapParser = require('./TilemapParser');
 
+// TODO: object spritepool
+
 /**
  * Tiled map that represents an entire tile map with multiple layers or object groups.
  * Often it is easier to create a tilemap using the object factor on a world, rather
@@ -90,7 +92,7 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height, group) {
     /**
      * @property {object} properties - Map specific properties as specified in Tiled.
      */
-    this.properties = data.properties;
+    this.properties = utils.parseTiledProperties(data.properties);
 
     /**
      * @property {number} widthInPixels - The width of the map in pixels based on width * tileWidth.
@@ -272,7 +274,7 @@ Tilemap.prototype.getTileset = function (tileId) {
  * @method destroy
  */
 Tilemap.prototype.destroy = function () {
-    Phaser.Group.prototype.destroy.call(this);
+    Phaser.Group.prototype.destroy.apply(this, arguments);
 
     this.game = null;
     this.properties = null;
