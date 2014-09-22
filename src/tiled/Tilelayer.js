@@ -159,9 +159,14 @@ function Tilelayer(game, map, layer, width, height) {
     this._scrollDelta = new Phaser.Point(); // the current delta of scroll since the last sprite move
     this._renderArea = new Phaser.Rectangle(); // the area to render in tiles
 
+    this._camWidth = 0;
+    this._camHeight = 0;
+    this._camScaleX = 0;
+    this._camScaleY = 0;
+    this._scaledTileSize = new Phaser.Point();
     this.dirty = true;
 
-    this.updateRenderArea(width, height);
+    // this.updateRenderArea(width, height);
 
     // this.physicsContainer = new SpriteBatch();
     // this.createPhysicalTiles();
@@ -172,27 +177,37 @@ Tilelayer.prototype.constructor = Tilelayer;
 
 module.exports = Tilelayer;
 
-Tilelayer.prototype.updateRenderArea = function (width, height) {
-    this._renderArea.x = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.x / this.map.scaledTileSize.x), 0);
-    this._renderArea.y = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.y / this.map.scaledTileSize.y), 0);
+Tilelayer.prototype.updateRenderArea = function () {
+    if (this._camWidth !== this.game.camera.view.width ||
+        this._camHeight !== this.game.camera.view.height ||
+        this._camScaleX !== this.game.camera.scale.x ||
+        this._camScaleY !== this.game.camera.scale.y)
+    {
+        this._camWidth = this.game.camera.view.width;
+        this._camHeight = this.game.camera.view.height;
+        this._camScaleX= this.game.camera.scale.x;
+        this._camScaleY = this.game.camera.scale.y;
 
-    if (width !== this._renderArea.width) {
-        this._renderArea.width = Phaser.Math.ceil(width / this.map.scaledTileSize.x) + 1;
+        this._scaledTileSize.x = this.map.tileWidth * this.game.camera.scale.x;
+        this._scaledTileSize.y = this.map.tileHeight * this.game.camera.scale.y;
 
-        // ensure we don't go outside the map size
+        this._renderArea.width = Phaser.Math.ceil(this.game.camera.view.width / this._scaledTileSize.x);
+
+        // ensure we don't go outside the map width
         this._renderArea.width = (this._renderArea.x + this._renderArea.width > this.map.size.x) ?
             (this.map.size.x - this._renderArea.x) : this._renderArea.width;
-    }
 
-    if (height !== this._renderArea.height) {
-        this._renderArea.height = Phaser.Math.ceil(height / this.map.scaledTileSize.y) + 1;
+        this._renderArea.height = Phaser.Math.ceil(this.game.camera.view.width / this._scaledTileSize.y);
 
-        // ensure we don't go outside the map size
+        // ensure we don't go outside the map height
         this._renderArea.height = (this._renderArea.y + this._renderArea.height > this.map.size.y) ?
             (this.map.size.y - this._renderArea.y) : this._renderArea.height;
+
+        this.dirty = true;
     }
 
-    this.dirty = true;
+    this._renderArea.x = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.x / this._scaledTileSize.x), 0);
+    this._renderArea.y = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.y / this._scaledTileSize.y), 0);
 };
 
 /**
@@ -216,6 +231,8 @@ Tilelayer.prototype.postUpdate = function () {
         this.position.x = (this.game.camera.view.x + this.cameraOffset.x) / this.game.camera.scale.x;
         this.position.y = (this.game.camera.view.y + this.cameraOffset.y) / this.game.camera.scale.y;
     }
+
+    this.updateRenderArea();
 
     if (this.dirty) {
         this.dirty = false;
@@ -242,8 +259,8 @@ Tilelayer.prototype.setupTiles = function () {
     this.clearTiles();
 
     // setup a tile for each location in the renderArea
-    for(var y = this._renderArea.y; y < this._renderArea.bottom; ++y) {
-        for(var x = this._renderArea.x; x < this._renderArea.right; ++x) {
+    for(var x = this._renderArea.x; x < this._renderArea.right; ++x) {
+        for(var y = this._renderArea.y; y < this._renderArea.bottom; ++y) {
             this.moveTileSprite(-1, -1, x, y);
         }
     }
@@ -252,8 +269,8 @@ Tilelayer.prototype.setupTiles = function () {
     this._buffered.left = this._buffered.right = this._buffered.top = this._buffered.bottom = false;
 
     // reset panDelta
-    this._scrollDelta.x = this._scroll.x % this.map.scaledTileSize.x;
-    this._scrollDelta.y = this._scroll.y % this.map.scaledTileSize.y;
+    this._scrollDelta.x = this._scroll.x % this._scaledTileSize.x;
+    this._scrollDelta.y = this._scroll.y % this._scaledTileSize.y;
 };
 
 /**
@@ -302,8 +319,8 @@ Tilelayer.prototype.clearTile = function (tile, remove) {
 };
 
 Tilelayer.prototype._freeTile = function (x, y) {
-    if (this.tiles[y] && this.tiles[y][x]) {
-        this.clearTile(this.tiles[y][x]);
+    if (this.tiles[x] && this.tiles[x][y]) {
+        this.clearTile(this.tiles[x][y]);
     }
 };
 
@@ -319,14 +336,14 @@ Tilelayer.prototype._freeTile = function (x, y) {
  * @return {Tile} The sprite to display
  */
 Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, toTileY) {
-    // free the tiles we are dealing with
-    this._freeTile(toTileX, toTileY);
-    this._freeTile(fromTileX, fromTileY);
-
     // if off the map, just ignore it
     if (toTileX < 0 || toTileY < 0 || toTileX >= this.map.size.x || toTileY >= this.map.size.y) {
         return;
     }
+
+    // free the tiles we are dealing with
+    this._freeTile(toTileX, toTileY);
+    this._freeTile(fromTileX, fromTileY);
 
     var tile,
         id = (toTileX + (toTileY * this.size.x)),
@@ -355,7 +372,7 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
     // due to the fact that we use top-left anchors for everything, but tiled uses bottom-left
     // we need to move the position of each tile down by a single map-tile height. That is why
     // there is an addition of "this.map.tileSize.y" to the coords
-    // posY += this.map.tileSize.y;
+    // posY += this.map.tileHeight;
 
     // grab a new tile from the pool
     tile = this._tilePool.pop();
@@ -363,7 +380,7 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
     // if we couldn't find a tile from the pool, then create a new tile
     if (!tile) {
         tile = new Tile(this.game, posX, posY, texture);
-        tile.anchor.y = 1;
+        // tile.anchor.y = 1;
 
         this.addChild(tile);
     }
@@ -421,8 +438,8 @@ Tilelayer.prototype.updatePan = function () {
 
     var dx = this._scrollDelta.x,
         dy = this._scrollDelta.y,
-        tszX = this.map.scaledTileSize.x,
-        tszY = this.map.scaledTileSize.y;
+        tszX = this._scaledTileSize.x,
+        tszY = this._scaledTileSize.y;
 
     // First, check if we need to build a buffer around the viewport
     // usually this happens on the first pan after a full render
@@ -618,7 +635,7 @@ Object.defineProperty(Tilelayer.prototype, 'scrollX', {
     },
     set: function (value) {
         if (value !== this._scroll.x) {
-            this._scrollDelta.x += value - this._scroll.x;
+            this._scrollDelta.x -= value - this._scroll.x;
             this._scroll.x = value;
             // this.updateRenderArea(this._renderArea.width, this._renderArea.height);
         }
@@ -631,7 +648,7 @@ Object.defineProperty(Tilelayer.prototype, 'scrollY', {
     },
     set: function (value) {
         if (value !== this._scroll.y) {
-            this._scrollDelta.y += value - this._scroll.y;
+            this._scrollDelta.y -= value - this._scroll.y;
             this._scroll.y = value;
             // this.updateRenderArea(this._renderArea.width, this._renderArea.height);
         }

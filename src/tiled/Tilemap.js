@@ -165,9 +165,6 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height, group) {
      */
     // this._tempB = 0;
 
-    // TODO: needed?
-    this.scaledTileSize = new Phaser.Point(this.tileWidth, this.tileHeight);
-
     this.tilesets = [];
 
     // create each tileset
