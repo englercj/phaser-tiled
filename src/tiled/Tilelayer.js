@@ -197,7 +197,7 @@ Tilelayer.prototype.updateRenderArea = function () {
         this._renderArea.width = (this._renderArea.x + this._renderArea.width > this.map.size.x) ?
             (this.map.size.x - this._renderArea.x) : this._renderArea.width;
 
-        this._renderArea.height = Phaser.Math.ceil(this.game.camera.view.width / this._scaledTileSize.y);
+        this._renderArea.height = Phaser.Math.ceil(this.game.camera.view.height / this._scaledTileSize.y);
 
         // ensure we don't go outside the map height
         this._renderArea.height = (this._renderArea.y + this._renderArea.height > this.map.size.y) ?
@@ -505,17 +505,19 @@ Tilelayer.prototype.updatePan = function () {
  * @private
  */
 Tilelayer.prototype._renderLeft = function (forceNew) {
+    if (!forceNew) {
+        this._renderArea.x--;
+    }
+
     //move all the far right tiles to the left side
-    for(var i = 0; i < this._renderArea.height + 1; ++i) {
+    for(var i = 0; i < this._renderArea.height; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.right,
             forceNew ? -1 : this._renderArea.top + i,
-            this._renderArea.left - 1,
+            this._renderArea.left,
             this._renderArea.top + i
         );
     }
-
-    this._renderArea.x--;
 
     if (forceNew) {
         this._renderArea.width++;
@@ -531,11 +533,11 @@ Tilelayer.prototype._renderLeft = function (forceNew) {
  */
 Tilelayer.prototype._renderRight = function (forceNew) {
     //move all the far left tiles to the right side
-    for(var i = 0; i < this._renderArea.height + 1; ++i) {
+    for(var i = 0; i < this._renderArea.height; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.left,
             forceNew ? -1 : this._renderArea.top + i,
-            this._renderArea.right + 1,
+            this._renderArea.right,
             this._renderArea.top + i
         );
     }
@@ -557,17 +559,19 @@ Tilelayer.prototype._renderRight = function (forceNew) {
  * @private
  */
 Tilelayer.prototype._renderUp = function (forceNew) {
+    if (!forceNew) {
+        this._renderArea.y--;
+    }
+
     //move all the far bottom tiles to the top side
-    for(var i = 0; i < this._renderArea.width + 1; ++i) {
+    for(var i = 0; i < this._renderArea.width; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.left + i,
             forceNew ? -1 : this._renderArea.bottom,
             this._renderArea.left + i,
-            this._renderArea.top - 1
+            this._renderArea.top
         );
     }
-
-    this._renderArea.y--;
 
     if (forceNew) {
         this._renderArea.height++;
@@ -583,12 +587,12 @@ Tilelayer.prototype._renderUp = function (forceNew) {
  */
 Tilelayer.prototype._renderDown = function (forceNew) {
     //move all the far top tiles to the bottom side
-    for(var i = 0; i < this._renderArea.width + 1; ++i) {
+    for(var i = 0; i < this._renderArea.width; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.left + i,
             forceNew ? -1 : this._renderArea.top,
             this._renderArea.left + i,
-            this._renderArea.bottom + 1
+            this._renderArea.bottom
         );
     }
 
