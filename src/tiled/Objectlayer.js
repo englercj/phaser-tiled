@@ -4,13 +4,13 @@ var utils = require('../utils');
  * Tiled object group is a special layer that contains entities
  * TODO: This is all trash
  *
- * @class ObjectGroup
+ * @class Objectlayer
  * @extends Phaser.Group
  * @constructor
  * @param map {Tilemap} The tilemap instance that this belongs to
  * @param group {Object} All the settings for the layer
  */
-function ObjectGroup(game, map, group, width, height) {
+function Objectlayer(game, map, group, width, height) {
     Phaser.Group.call(this, game, map);
 
     // Non-Tiled related properties
@@ -90,14 +90,19 @@ function ObjectGroup(game, map, group, width, height) {
     }
 }
 
+Objectlayer.prototype = Object.create(Phaser.Group.prototype);
+Objectlayer.prototype.constructor = Objectlayer;
+
+module.exports = Objectlayer;
+
 /**
  * Spawns all the entities associated with this layer, and properly sets their attributes
  *
  * @method spawn
- * @return {ObjectGroup} Returns itself.
+ * @return {Objectlayer} Returns itself.
  * @chainable
  */
-ObjectGroup.prototype.spawn = function () {
+Objectlayer.prototype.spawn = function () {
     // we go through these backwards so that things that are higher in the
     // list of object gets rendered on top.
     for(var i = this.objects.length - 1; i >= 0; --i) {
@@ -291,7 +296,7 @@ ObjectGroup.prototype.spawn = function () {
  * @param data {mixed} The event data that was passed along
  * @private
  */
-ObjectGroup.prototype.onObjectEvent = function (eventName, obj, data) {
+Objectlayer.prototype.onObjectEvent = function (eventName, obj, data) {
     this.map.onObjectEvent(eventName, obj, data);
 };
 
@@ -303,7 +308,7 @@ ObjectGroup.prototype.onObjectEvent = function (eventName, obj, data) {
  * @return {Polygon} The polygon created
  * @private
  */
-ObjectGroup.prototype._getPolygon = function (o) {
+Objectlayer.prototype._getPolygon = function (o) {
     var points = [];
     for(var i = 0, il = o.polygon.length; i < il; ++i) {
         points.push(new Phaser.Point(o.polygon[i].x, o.polygon[i].y));
@@ -320,7 +325,7 @@ ObjectGroup.prototype._getPolygon = function (o) {
  * @return {Polygon} The polyline created
  * @private
  */
-ObjectGroup.prototype._getPolyline = function (o) {
+Objectlayer.prototype._getPolyline = function (o) {
     var points = [];
     for(var i = 0, il = o.polyline.length; i < il; ++i) {
         points.push(new Phaser.Point(o.polyline[i].x, o.polyline[i].y));
@@ -337,7 +342,7 @@ ObjectGroup.prototype._getPolyline = function (o) {
  * @return {Ellipse} The ellipse created
  * @private
  */
-ObjectGroup.prototype._getEllipse = function (o) {
+Objectlayer.prototype._getEllipse = function (o) {
     return new Phaser.Ellipse(0, 0, o.width, o.height);
 };
 
@@ -349,7 +354,7 @@ ObjectGroup.prototype._getEllipse = function (o) {
  * @return {Rectangle} The rectangle created
  * @private
  */
-ObjectGroup.prototype._getRectangle = function (o) {
+Objectlayer.prototype._getRectangle = function (o) {
     return new Phaser.Rectangle(0, 0, o.width, o.height);
 };
 
@@ -362,7 +367,7 @@ ObjectGroup.prototype._getRectangle = function (o) {
  * @return {Boolean} Whether or not the item is interactive
  * @private
  */
-ObjectGroup.prototype._getInteractive = function (set, props) {
+Objectlayer.prototype._getInteractive = function (set, props) {
     //TODO: This is wrong, if 'false' is set on a lower level a higher level will override
     //first check the lowest level value (on the tile iteself)
     return props.interactive || //obj interactive
@@ -377,10 +382,10 @@ ObjectGroup.prototype._getInteractive = function (set, props) {
  *
  * @method despawn
  * @param destroy {Boolean} Should we destroy the children as well?
- * @return {ObjectGroup} Returns itself.
+ * @return {Objectlayer} Returns itself.
  * @chainable
  */
-ObjectGroup.prototype.despawn = function (destroy) {
+Objectlayer.prototype.despawn = function (destroy) {
     return Phaser.Group.prototype.removeAll.call(this, destroy);
 };
 
@@ -389,7 +394,7 @@ ObjectGroup.prototype.despawn = function (destroy) {
  *
  * @method destroy
  */
-ObjectGroup.prototype.destroy = function () {
+Objectlayer.prototype.destroy = function () {
     Phaser.Group.prototype.destroy.apply(this, arguments);
 
     this.map = null;
@@ -401,5 +406,3 @@ ObjectGroup.prototype.destroy = function () {
     this.objects = null;
     this.type = null;
 };
-
-module.exports = ObjectGroup;
