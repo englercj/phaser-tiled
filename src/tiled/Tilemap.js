@@ -2,7 +2,8 @@ var Tilelayer = require('./Tilelayer'),
     Objectlayer = require('./Objectlayer'),
     Tile = require('./Tile'),
     Tileset = require('./Tileset'),
-    TilemapParser = require('./TilemapParser');
+    TilemapParser = require('./TilemapParser'),
+    utils = require('../utils');
 
 // TODO: object spritepool
 
