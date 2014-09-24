@@ -16,7 +16,7 @@ var Tile = require('./Tile'),
  * @param height {Number} The height of the renderable area of the layer
  */
 //
-// TODO: Allow optional use of SpriteBatch instead of Group?
+// TODO: Add chunk prerendering?
 //
 // for discussions about this implementation:
 //   see: https://github.com/GoodBoyDigital/pixi.js/issues/48
@@ -116,27 +116,6 @@ function Tilelayer(game, map, layer, width, height) {
      */
     this.layerType = layer.type || 'tilelayer';
 
-    /**
-     * Is this layer supposed to be preRendered?
-     *
-     * @property preRender
-     * @type Boolean
-     * @default false
-     */
-    // this.preRender = layer.preRender || this.properties.preRender || this.map.properties.preRender || false;
-
-    /**
-     * The size of a chunk when pre rendering
-     *
-     * @property chunkSize
-     * @type Phaser.Point
-     * @default new Phaser.Point(512, 512)
-     */
-    // this.chunkSize = new Phaser.Point(
-    //     layer.chunkSizeX || layer.chunkSize || this.properties.chunkSizeX || this.properties.chunkSize || 512,
-    //     layer.chunkSizeY || layer.chunkSize || this.properties.chunkSizeY || this.properties.chunkSize || 512
-    // );
-
     //translate some tiled properties to our inherited properties
     this.x = layer.x || 0;
     this.y = layer.y || 0;
@@ -144,7 +123,6 @@ function Tilelayer(game, map, layer, width, height) {
     this.visible = layer.visible !== undefined ? layer.visible : true;
 
     //some private trackers
-    // this._preRendered = false;
     this._tilePool = [];
     this._buffered = { left: false, right: false, top: false, bottom: false };
     this._scroll = new Phaser.Point(); // the current scroll position
@@ -153,11 +131,6 @@ function Tilelayer(game, map, layer, width, height) {
 
     this._scaledTileSize = new Phaser.Point();
     this.dirty = true;
-
-    // this.updateRenderArea(width, height);
-
-    // this.physicsContainer = new SpriteBatch();
-    // this.createPhysicalTiles();
 
     if (this.properties.batch) {
         this.container = this.addChild(new Phaser.SpriteBatch());
@@ -272,20 +245,7 @@ Tilelayer.prototype.setupTiles = function () {
  * @chainable
  */
 Tilelayer.prototype.clearTiles = function (remove) {
-    var c;
-
-    // if(this.preRender && !remove) {
-    //     for(c = this.children.length - 1; c > -1; --c) {
-    //         this.children[c].visible = false;
-    //     }
-
-    //     return;
-    // }
-
-    // force rerender later
-    // this._preRendered = false;
-
-    for (c = this.children.length - 1; c > -1; --c) {
+    for (var c = this.children.length - 1; c > -1; --c) {
         if (this.children[c].type === Phaser.TILESPRITE) {
             this.clearTile(this.children[c], remove);
         }
@@ -293,20 +253,11 @@ Tilelayer.prototype.clearTiles = function (remove) {
 
     this.tiles = {};
 
-    for (var y = 0; y < 14; ++y) {
-        this.tiles[y] = {};
-
-        for (var x = 0; x < 21; ++x) {
-            this.tiles[y][x] = undefined;
-        }
-    }
-
     return this;
 };
 
 Tilelayer.prototype.clearTile = function (tile, remove) {
     tile.visible = false;
-    // tile.disablePhysics();
 
     if (remove) {
         this.removeChild(tile);
@@ -347,31 +298,18 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
     var tile,
         id = (toTileX + (toTileY * this.size.x)),
         tileId = this.tileIds[id],
-        set = this.map.getTileset(tileId),
-        texture,
-        props,
-        posX,
-        posY,
-        // hitArea,
-        interactive;
+        set = this.map.getTileset(tileId);
 
     // if no tileset, return
     if (!set) {
         return;
     }
 
-    //grab some values for the tile
-    texture = set.getTileTexture(tileId);
-    props = set.getTileProperties(tileId);
-    // hitArea = props.hitArea || set.properties.hitArea;
-    // interactive = this._getInteractive(set, props);
-    posX = (toTileX * this.map.tileWidth) + set.tileoffset.x;
-    posY = (toTileY * this.map.tileHeight) + set.tileoffset.y;
-
-    // due to the fact that we use top-left anchors for everything, but tiled uses bottom-left
-    // we need to move the position of each tile down by a single map-tile height. That is why
-    // there is an addition of "this.map.tileSize.y" to the coords
-    // posY += this.map.tileHeight;
+    // calculate some values for the tile
+    var texture = set.getTileTexture(tileId),
+        props = set.getTileProperties(tileId),
+        posX = (toTileX * this.map.tileWidth) + set.tileoffset.x,
+        posY = (toTileY * this.map.tileHeight) + set.tileoffset.y;
 
     // grab a new tile from the pool
     tile = this._tilePool.pop();
@@ -379,7 +317,6 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
     // if we couldn't find a tile from the pool, then create a new tile
     if (!tile) {
         tile = new Tile(this.game, posX, posY, texture);
-        // tile.anchor.y = 1;
 
         this.container.addChild(tile);
     }
@@ -393,27 +330,9 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
     tile.blendMode = (props.blendMode || this.properties.blendMode) ?
         Phaser.blendModes[(props.blendMode || this.properties.blendMode)] : Phaser.blendModes.NORMAL;
 
-    // tile.interactive = interactive;
-    // tile.hitArea = hitArea;
-    // tile.mass = props.mass || 0;
     tile.visible = true;
 
-    // if(tile.mass) {
-    //     tile.enablePhysics(this.state.physics);
-    // }
-
-    // pass through all events
-    // if (interactive) {
-    //     tile.click = this.onTileEvent.bind(this, 'click', tile);
-    //     tile.mousedown = this.onTileEvent.bind(this, 'mousedown', tile);
-    //     tile.mouseup = this.onTileEvent.bind(this, 'mouseup', tile);
-    //     tile.mousemove = this.onTileEvent.bind(this, 'mousemove', tile);
-    //     tile.mouseout = this.onTileEvent.bind(this, 'mouseout', tile);
-    //     tile.mouseover = this.onTileEvent.bind(this, 'mouseover', tile);
-    //     tile.mouseupoutside = this.onTileEvent.bind(this, 'mouseupoutside', tile);
-    // }
-
-    //update sprite position in the map
+    // update sprite reference in the map
     if (!this.tiles[toTileY]) {
         this.tiles[toTileY] = {};
     }
@@ -431,15 +350,6 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
  * @chainable
  */
 Tilelayer.prototype.updatePan = function () {
-    // if (this.preRender) {
-    //     return;
-    // }
-
-    var dx = this._scrollDelta.x,
-        dy = this._scrollDelta.y,
-        tszX = this._scaledTileSize.x,
-        tszY = this._scaledTileSize.y;
-
     // First, check if we need to build a buffer around the viewport
     // usually this happens on the first pan after a full render
     // caused by a viewport resize. We do this buffering here instead
@@ -448,23 +358,23 @@ Tilelayer.prototype.updatePan = function () {
     // reduces the number of tiles that need to be created initially.
 
     // moving world right, so left will be exposed
-    if (dx > 0 && !this._buffered.left) {
+    if (this._scrollDelta.x > 0 && !this._buffered.left) {
         this._buffered.left = true;
         this._renderLeft(true);
     }
-    //moving world left, so right will be exposed
-    else if (dx < 0 && !this._buffered.right) {
+    // moving world left, so right will be exposed
+    else if (this._scrollDelta.x < 0 && !this._buffered.right) {
         this._buffered.right = true;
         this._renderRight(true);
     }
 
-    //moving world down, so top will be exposed
-    if (dy > 0 && !this._buffered.top) {
+    // moving world down, so top will be exposed
+    if (this._scrollDelta.y > 0 && !this._buffered.top) {
         this._buffered.top = true;
         this._renderUp(true);
     }
-    //moving world up, so bottom will be exposed
-    else if (dy < 0 && !this._buffered.bottom) {
+    // moving world up, so bottom will be exposed
+    else if (this._scrollDelta.y < 0 && !this._buffered.bottom) {
         this._buffered.bottom = true;
         this._renderDown(true);
     }
@@ -476,27 +386,27 @@ Tilelayer.prototype.updatePan = function () {
     // (this can happen if you can .pan(x, y) with large values)
 
     // moved position right, so render left
-    while (this._scrollDelta.x >= tszX) {
+    while (this._scrollDelta.x >= this._scaledTileSize.x) {
         this._renderLeft();
-        this._scrollDelta.x -= tszX;
+        this._scrollDelta.x -= this._scaledTileSize.x;
     }
 
     // moved position left, so render right
-    while (this._scrollDelta.x <= -tszX) {
+    while (this._scrollDelta.x <= -this._scaledTileSize.x) {
         this._renderRight();
-        this._scrollDelta.x += tszX;
+        this._scrollDelta.x += this._scaledTileSize.x;
     }
 
     // moved position down, so render up
-    while (this._scrollDelta.y >= tszY) {
+    while (this._scrollDelta.y >= this._scaledTileSize.y) {
         this._renderUp();
-        this._scrollDelta.y -= tszY;
+        this._scrollDelta.y -= this._scaledTileSize.y;
     }
 
     // moved position up, so render down
-    while (this._scrollDelta.y <= -tszY) {
+    while (this._scrollDelta.y <= -this._scaledTileSize.y) {
         this._renderDown();
-        this._scrollDelta.y += tszY;
+        this._scrollDelta.y += this._scaledTileSize.y;
     }
 };
 
@@ -683,170 +593,3 @@ Object.defineProperty(Tilelayer.prototype, 'heightInPixels', {
 // - getTiles
 // -
 // -
-
-
-
-// Tilelayer.prototype.createPhysicalTiles = function () {
-//     var tid, tex, set, props, tile,
-//         szx = this.map.size.x,
-//         tsx = this.map.tileSize.x,
-//         tsy = this.map.tileSize.y;
-//
-//     for(var i = 0; i < this.tileIds.length; ++i) {
-//         tid = this.tileIds[i];
-//         set = this.map.getTileset(tid);
-//
-//         if(!set) continue;
-//
-//         props = set.getTileProperties(tid);
-//
-//         if(!props.mass) continue;
-//
-//         tex = set.getTileTexture(tid);
-//         tile = new Tile(tex);
-//         this.physicsContainer.addChild(tile);
-//
-//         tile.mass = props.mass;
-//         tile.hitArea = props.hitArea || set.properties.hitArea;
-//         tile.setPosition(
-//             ((i % szx) * tsx) + set.tileoffset.x,
-//             (math.floor(i / szx) * tsy) + set.tileoffset.y + tsy
-//         );
-//
-//         tile.enablePhysics(this.state.physics);
-//     }
-// };
-
-/**
- * Renders the map onto different canvases, one per chunk. This only runs once
- * then the canvases are used as a textures for tiles the size of chunks.
- *
- * @method _preRender
- * @private
- */
-// Tilelayer.prototype._preRender = function () {
-//     if(!this.visible)
-//         return;
-//
-//     this._preRendered = true;
-//     this.tileSize = this.chunkSize.clone();
-//
-//     var world = this.map,
-//         width = world.size.x * world.tileSize.x,
-//         height = world.size.y * world.tileSize.y,
-//         xChunks = math.ceil(width / this.chunkSize.x),
-//         yChunks = math.ceil(height / this.chunkSize.y);
-//
-//     //for each chunk
-//     for(var x = 0; x < xChunks; ++x) {
-//         for(var y = 0; y < yChunks; ++y) {
-//             var cw = (x === xChunks - 1) ? width - (x * this.chunkSize.x) : this.chunkSize.x,
-//                 ch = (y === yChunks - 1) ? height - (y * this.chunkSize.y) : this.chunkSize.y;
-//
-//             this._preRenderChunk(x, y, cw, ch);
-//         }
-//     }
-// };
-
-/**
- * Renders a single chunk to a single canvas and creates/places the tile instance for it.
- *
- * @method _preRenderChunk
- * @param cx {Number} The x-coord of this chunk's top left
- * @param cy {Number} The y-coord of this chunk's top left
- * @param w {Number} The width of this chunk
- * @param h {Number} The height of this chunk
- * @private
- */
-// Tilelayer.prototype._preRenderChunk = function (cx, cy, w, h) {
-//     var world = this.map,
-//         tsx = world.tileSize.x,
-//         tsy = world.tileSize.y,
-//         xTiles = w / tsx,
-//         yTiles = h / tsy,
-//         nx = (cx * this.chunkSize.x) % tsx,
-//         ny = (cy * this.chunkSize.y) % tsy,
-//         tx = math.floor(cx * this.chunkSize.x / tsx),
-//         ty = math.floor(cy * this.chunkSize.y / tsy),
-//         sx = world.size.x,
-//         sy = world.size.y,
-//         canvas = document.createElement('canvas'),
-//         ctx = canvas.getContext('2d');
-//
-//     canvas.width = w;
-//     canvas.height = h;
-//
-//     //draw all the tiles in this chunk to the canvas
-//     for(var x = 0; x < xTiles; ++x) {
-//         for(var y = 0; y < yTiles; ++y) {
-//             if(x + tx < sx && y + ty < sy) {
-//                 var id = ((x + tx) + ((y + ty) * sx)),
-//                     tid = this.tileIds[id],
-//                     set = world.getTileset(tid),
-//                     tex, frame;
-//
-//                 if(set) {
-//                     tex = set.getTileTexture(tid);
-//                     frame = tex.frame;
-//
-//                     ctx.drawImage(
-//                         tex.baseTexture.source,
-//                         frame.x,
-//                         frame.y,
-//                         frame.width,
-//                         frame.height,
-//                         (x * tsx) - nx + set.tileoffset.x,
-//                         (y * tsy) - ny + set.tileoffset.y,
-//                         frame.width,
-//                         frame.height
-//                     );
-//                 }
-//             }
-//         }
-//     }
-//
-//     //use the canvas as a texture for a tile to display
-//     var tile = new Tile(Texture.fromCanvas(canvas));
-//     tile.setPosition(
-//         cx * this.chunkSize.x,
-//         cy * this.chunkSize.y
-//     );
-//
-//     if(!this.tiles[cx])
-//         this.tiles[cx] = {};
-//
-//     this.addChild(tile);
-//     this.tiles[cx][cy] = tile;
-// };
-
-
-
-/**
- * Called whenever a tile event occurs, this is used to echo to the parent.
- *
- * @method onTileEvent
- * @param eventName {String} The name of the event
- * @param tile {Tile} The tile the event happened to
- * @param data {mixed} The event data that was passed along
- * @private
- */
-// Tilelayer.prototype.onTileEvent = function (eventName, tile, data) {
-//     this.map.onTileEvent(eventName, tile, data);
-// };
-
-/**
- * Checks if an object should be marked as interactive
- *
- * @method _getInteractive
- * @param set {Tileset} The tileset for the object
- * @param props {Object} The Tiled properties object
- * @return {Boolean} Whether or not the item is interactive
- * @private
- */
-// Tilelayer.prototype._getInteractive = function (set, props) {
-//     //first check the lowest level value (on the tile iteself)
-//     return props.interactive || //obj interactive
-//             (set && set.properties.interactive) || //tileset interactive
-//             this.properties.interactive || //layer interactive
-//             this.map.properties.interactive; //map interactive
-// };
