@@ -60,6 +60,7 @@ function Tilelayer(game, map, layer) {
      * @type Phaser.Point
      * @default new Phaser.Point(1, 1)
      */
+    // TODO: This doesn't actually work yet!
     this.scrollFactor = new Phaser.Point(1, 1);
 
     // Tiled related properties
@@ -174,11 +175,11 @@ Tilelayer.prototype.resizeWorld = function () {
 Tilelayer.prototype.postUpdate = function () {
     Phaser.Group.prototype.postUpdate.call(this);
 
-    // TODO: Untested, does this really mean anything anymore?
-    if (this.fixedToCamera) {
-        this.position.x = (this.game.camera.view.x + this.cameraOffset.x) / this.game.camera.scale.x;
-        this.position.y = (this.game.camera.view.y + this.cameraOffset.y) / this.game.camera.scale.y;
-    }
+    // TODO: Does this really mean anything anymore?
+    // if (this.fixedToCamera) {
+    //     this.position.x = (this.game.camera.view.x + this.cameraOffset.x) / this.game.camera.scale.x;
+    //     this.position.y = (this.game.camera.view.y + this.cameraOffset.y) / this.game.camera.scale.y;
+    // }
 
     // TODO: this seems to not work properly when scale changes on the fly. Look into that...
     if (this.dirty || this.map.dirty) {
@@ -199,8 +200,8 @@ Tilelayer.prototype.postUpdate = function () {
         return this;
     }
 
-    this.scrollX = this.game.camera.x * this.scrollFactor.x;
-    this.scrollY = this.game.camera.y * this.scrollFactor.y;
+    this.scrollX = this.game.camera.x;
+    this.scrollY = this.game.camera.y;
 
     this.updatePan();
 };
