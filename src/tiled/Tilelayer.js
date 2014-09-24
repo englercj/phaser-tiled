@@ -128,7 +128,6 @@ function Tilelayer(game, map, layer, width, height) {
     this._scroll = new Phaser.Point(); // the current scroll position
     this._scrollDelta = new Phaser.Point(); // the current delta of scroll since the last sprite move
     this._renderArea = new Phaser.Rectangle(); // the area to render in tiles
-    this._scaledTileSize = new Phaser.Point(); // tile size scaled by camera
 
     // should we clear and rerender all the tiles
     this.dirty = true;
@@ -147,19 +146,16 @@ Tilelayer.prototype.constructor = Tilelayer;
 module.exports = Tilelayer;
 
 Tilelayer.prototype.setupRenderArea = function () {
-    this._scaledTileSize.x = this.map.tileWidth * this.game.camera.scale.x;
-    this._scaledTileSize.y = this.map.tileHeight * this.game.camera.scale.y;
+    this._renderArea.x = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.x / this.map.scaledTileWidth), 0);
+    this._renderArea.y = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.y / this.map.scaledTileHeight), 0);
 
-    this._renderArea.x = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.x / this._scaledTileSize.x), 0);
-    this._renderArea.y = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.y / this._scaledTileSize.y), 0);
-
-    this._renderArea.width = Phaser.Math.ceil(this.game.camera.view.width / this._scaledTileSize.x);
+    this._renderArea.width = Phaser.Math.ceil(this.game.camera.view.width / this.map.scaledTileWidth);
 
     // ensure we don't go outside the map width
     this._renderArea.width = (this._renderArea.x + this._renderArea.width > this.map.size.x) ?
         (this.map.size.x - this._renderArea.x) : this._renderArea.width;
 
-    this._renderArea.height = Phaser.Math.ceil(this.game.camera.view.height / this._scaledTileSize.y);
+    this._renderArea.height = Phaser.Math.ceil(this.game.camera.view.height / this.map.scaledTileHeight);
 
     // ensure we don't go outside the map height
     this._renderArea.height = (this._renderArea.y + this._renderArea.height > this.map.size.y) ?
@@ -176,7 +172,7 @@ Tilelayer.prototype.resizeWorld = function () {
 };
 
 /**
- * Automatically called by World.postUpdate. Handles scrolling the layer
+ * Automatically called by Tilemap.postUpdate. Handles scrolling the layer and updating the scale
  *
  * @method postUpdate
  */
@@ -188,10 +184,11 @@ Tilelayer.prototype.postUpdate = function () {
         this.position.y = (this.game.camera.view.y + this.cameraOffset.y) / this.game.camera.scale.y;
     }
 
-    if (this.dirty) {
+    if (this.dirty || this.map.dirty) {
+        // no longer dirty
         this.dirty = false;
 
-        // setup the render area
+        // setup the render area, and scaled tilesize
         this.setupRenderArea();
 
         // resize the world to the new size
@@ -229,8 +226,8 @@ Tilelayer.prototype.setupTiles = function () {
     this._buffered.left = this._buffered.right = this._buffered.top = this._buffered.bottom = false;
 
     // reset panDelta
-    this._scrollDelta.x = this._scroll.x % this._scaledTileSize.x;
-    this._scrollDelta.y = this._scroll.y % this._scaledTileSize.y;
+    this._scrollDelta.x = this._scroll.x % this.map.scaledTileWidth;
+    this._scrollDelta.y = this._scroll.y % this.map.scaledTileHeight;
 
     if (this.name === 'ground') {
         console.log('setup');
@@ -388,27 +385,27 @@ Tilelayer.prototype.updatePan = function () {
     // (this can happen if you can .pan(x, y) with large values)
 
     // moved position right, so render left
-    while (this._scrollDelta.x >= this._scaledTileSize.x) {
+    while (this._scrollDelta.x >= this.map.scaledTileWidth) {
         this._renderLeft();
-        this._scrollDelta.x -= this._scaledTileSize.x;
+        this._scrollDelta.x -= this.map.scaledTileWidth;
     }
 
     // moved position left, so render right
-    while (this._scrollDelta.x <= -this._scaledTileSize.x) {
+    while (this._scrollDelta.x <= -this.map.scaledTileWidth) {
         this._renderRight();
-        this._scrollDelta.x += this._scaledTileSize.x;
+        this._scrollDelta.x += this.map.scaledTileWidth;
     }
 
     // moved position down, so render up
-    while (this._scrollDelta.y >= this._scaledTileSize.y) {
+    while (this._scrollDelta.y >= this.map.scaledTileHeight) {
         this._renderUp();
-        this._scrollDelta.y -= this._scaledTileSize.y;
+        this._scrollDelta.y -= this.map.scaledTileHeight;
     }
 
     // moved position up, so render down
-    while (this._scrollDelta.y <= -this._scaledTileSize.y) {
+    while (this._scrollDelta.y <= -this.map.scaledTileHeight) {
         this._renderDown();
-        this._scrollDelta.y += this._scaledTileSize.y;
+        this._scrollDelta.y += this.map.scaledTileHeight;
     }
 };
 
@@ -572,13 +569,13 @@ Object.defineProperty(Tilelayer.prototype, 'scrollY', {
 
 Object.defineProperty(Tilelayer.prototype, 'widthInPixels', {
     get: function () {
-        return this.size.x * this._scaledTileSize.x;
+        return this.size.x * this.map.scaledTileWidth;
     }
 });
 
 Object.defineProperty(Tilelayer.prototype, 'heightInPixels', {
     get: function () {
-        return this.size.y * this._scaledTileSize.y;
+        return this.size.y * this.map.scaledTileHeight;
     }
 });
 

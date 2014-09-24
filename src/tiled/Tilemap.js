@@ -76,6 +76,16 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height, group) {
     this.tileHeight = data.tileheight;
 
     /**
+     * @property {number} scaledTileWidth - The scaled width of the tiles in the map (in pixels).
+     */
+    this.scaledTileWidth = this.tileWidth;
+
+    /**
+     * @property {number} scaledTileHeight - The scaled height of the tiles in the map (in pixels).
+     */
+    this.scaledTileHeight = this.tileHeight;
+
+    /**
      * @property {string} orientation - The orientation of the map data (as specified in Tiled), usually 'orthogonal'.
      */
     this.orientation = data.orientation;
@@ -168,6 +178,13 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height, group) {
      */
     // this._tempB = 0;
 
+    // tell when camera scale is modified
+    this._camScaleX = 0;
+    this._camScaleY = 0;
+
+    // should all layers do a full rerender?
+    this.dirty = true;
+
     this.tilesets = [];
 
     // create each tileset
@@ -240,6 +257,23 @@ module.exports = Tilemap;
 //     return this.createBlankLayer(name, width, height, tileWidth, tileHeight, group);
 // };
 
+
+Tilemap.prototype.postUpdate = function () {
+    if (this._camScaleX !== this.game.camera.scale.x || this._camScaleY !== this.game.camera.scale.y) {
+        this._camScaleX = this.game.camera.scale.x;
+        this._camScaleY = this.game.camera.scale.y;
+
+        this.scaledTileWidth = this.tileWidth * this.game.camera.scale.x;
+        this.scaledTileHeight = this.tileHeight * this.game.camera.scale.y;
+
+        this.dirty = true;
+    }
+
+    Phaser.Group.prototype.postUpdate.apply(this, arguments);
+
+    this.dirty = false;
+};
+
 /**
  * Sets the base tile size for the map.
  *
@@ -250,6 +284,7 @@ module.exports = Tilemap;
 Tilemap.prototype.setTileSize = function (tileWidth, tileHeight) {
     this.tileWidth = tileWidth;
     this.tileHeight = tileHeight;
+
     this.widthInPixels = this.width * tileWidth;
     this.heightInPixels = this.height * tileHeight;
 };
@@ -335,40 +370,6 @@ Tilemap.prototype.clearTiles = function () {
 };
 
 /**
- * Called by a Tilelayer when a tile event occurs. This is so you can listen for
- * the emitted events on the world instead of the tile itself.
- *
- * @method onTileEvent
- * @param eventName {String} The event name to emit, the prefix 'tile.' will be added to it
- * @param tile {Tile} The tile that has the event
- * @param data {InteractionData} The raw interaction object for the event
- * @private
- */
-// Tilemap.prototype.onTileEvent = function (eventName, tile, data) {
-//     this.emit('tile.' + eventName, {
-//         tile: tile,
-//         data: data
-//     });
-// };
-
-/**
- * Called by a ObjectGroup when an object event occurs. This is so you can listen for
- * the emitted events on the world instead of the tile itself.
- *
- * @method onObjectEvent
- * @param eventName {String} The event name to emit, the prefix 'object.' will be added to it
- * @param obj {Sprite|Container} The object that has the event
- * @param data {InteractionData} The raw interaction object for the event
- * @private
- */
-// Tilemap.prototype.onObjectEvent = function (eventName, obj, data) {
-//     this.emit('object.' + eventName, {
-//         object: obj,
-//         data: data
-//     });
-// };
-
-/**
  * Finds a layer based on the string name
  *
  * @method findLayer
@@ -379,7 +380,7 @@ Tilemap.prototype.findLayer = function (name) {
     for(var i = 0, il = this.children.length; i < il; ++i) {
         var o = this.children[i];
 
-        if (o.name === name) {
+        if (o.type === Phaser.TILEMAPLAYER && o.name === name) {
             return o;
         }
     }
