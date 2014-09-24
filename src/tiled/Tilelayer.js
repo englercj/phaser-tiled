@@ -216,7 +216,11 @@ Tilelayer.prototype.postUpdate = function () {
     if (this.dirty) {
         this.dirty = false;
 
+        // setup the render area
         this.setupRenderArea();
+
+        // resize the world to the new size
+        this.resizeWorld();
 
         // render the tiles on the screen
         this.setupTiles();
@@ -240,8 +244,8 @@ Tilelayer.prototype.setupTiles = function () {
     this.clearTiles();
 
     // setup a tile for each location in the renderArea
-    for(var x = this._renderArea.x; x < this._renderArea.right; ++x) {
-        for(var y = this._renderArea.y; y < this._renderArea.bottom; ++y) {
+    for (var x = this._renderArea.x; x < this._renderArea.right; ++x) {
+        for (var y = this._renderArea.y; y < this._renderArea.bottom; ++y) {
             this.moveTileSprite(-1, -1, x, y);
         }
     }
@@ -281,7 +285,7 @@ Tilelayer.prototype.clearTiles = function (remove) {
     // force rerender later
     // this._preRendered = false;
 
-    for(c = this.children.length - 1; c > -1; --c) {
+    for (c = this.children.length - 1; c > -1; --c) {
         if (this.children[c].type === Phaser.TILESPRITE) {
             this.clearTile(this.children[c], remove);
         }
@@ -331,14 +335,14 @@ Tilelayer.prototype._freeTile = function (x, y) {
  * @return {Tile} The sprite to display
  */
 Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, toTileY) {
+    // free the tiles we are dealing with
+    this._freeTile(toTileX, toTileY);
+    this._freeTile(fromTileX, fromTileY);
+
     // if off the map, just ignore it
     if (toTileX < 0 || toTileY < 0 || toTileX >= this.map.size.x || toTileY >= this.map.size.y) {
         return;
     }
-
-    // free the tiles we are dealing with
-    this._freeTile(toTileX, toTileY);
-    this._freeTile(fromTileX, fromTileY);
 
     var tile,
         id = (toTileX + (toTileY * this.size.x)),
@@ -443,23 +447,27 @@ Tilelayer.prototype.updatePan = function () {
     // may try to go negative which has no tiles. Plus doing it here
     // reduces the number of tiles that need to be created initially.
 
-    //moving world right, so left will be exposed
-    // if (dx > 0 && !this._buffered.left) {
-    //     this._renderLeft(this._buffered.left = true);
-    // }
-    // //moving world left, so right will be exposed
-    // else if (dx < 0 && !this._buffered.right) {
-    //     this._renderRight(this._buffered.right = true);
-    // }
+    // moving world right, so left will be exposed
+    if (dx > 0 && !this._buffered.left) {
+        this._buffered.left = true;
+        this._renderLeft(true);
+    }
+    //moving world left, so right will be exposed
+    else if (dx < 0 && !this._buffered.right) {
+        this._buffered.right = true;
+        this._renderRight(true);
+    }
 
-    // //moving world down, so top will be exposed
-    // if (dy > 0 && !this._buffered.top) {
-    //     this._renderUp(this._buffered.top = true);
-    // }
-    // //moving world up, so bottom will be exposed
-    // else if (dy < 0 && !this._buffered.bottom) {
-    //     this._renderDown(this._buffered.bottom = true);
-    // }
+    //moving world down, so top will be exposed
+    if (dy > 0 && !this._buffered.top) {
+        this._buffered.top = true;
+        this._renderUp(true);
+    }
+    //moving world up, so bottom will be exposed
+    else if (dy < 0 && !this._buffered.bottom) {
+        this._buffered.bottom = true;
+        this._renderDown(true);
+    }
 
     // Here is where the actual panning gets done, we check if the pan
     // delta is greater than a scaled tile and if so pan that direction.
@@ -468,25 +476,25 @@ Tilelayer.prototype.updatePan = function () {
     // (this can happen if you can .pan(x, y) with large values)
 
     // moved position right, so render left
-    while(this._scrollDelta.x >= tszX) {
+    while (this._scrollDelta.x >= tszX) {
         this._renderLeft();
         this._scrollDelta.x -= tszX;
     }
 
     // moved position left, so render right
-    while(this._scrollDelta.x <= -tszX) {
+    while (this._scrollDelta.x <= -tszX) {
         this._renderRight();
         this._scrollDelta.x += tszX;
     }
 
     // moved position down, so render up
-    while(this._scrollDelta.y >= tszY) {
+    while (this._scrollDelta.y >= tszY) {
         this._renderUp();
         this._scrollDelta.y -= tszY;
     }
 
     // moved position up, so render down
-    while(this._scrollDelta.y <= -tszY) {
+    while (this._scrollDelta.y <= -tszY) {
         this._renderDown();
         this._scrollDelta.y += tszY;
     }
@@ -503,7 +511,7 @@ Tilelayer.prototype._renderLeft = function (forceNew) {
     this._renderArea.x--;
 
     //move all the far right tiles to the left side
-    for(var i = 0; i < this._renderArea.height; ++i) {
+    for (var i = 0; i < this._renderArea.height; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.right,
             forceNew ? -1 : this._renderArea.top + i,
@@ -512,9 +520,8 @@ Tilelayer.prototype._renderLeft = function (forceNew) {
         );
     }
 
-    if (this.name === 'ground') {
-        console.log('LEFT');
-        console.table(this.tiles);
+    if (forceNew) {
+        this._renderArea.width++;
     }
 };
 
@@ -527,7 +534,7 @@ Tilelayer.prototype._renderLeft = function (forceNew) {
  */
 Tilelayer.prototype._renderRight = function (forceNew) {
     //move all the far left tiles to the right side
-    for(var i = 0; i < this._renderArea.height; ++i) {
+    for (var i = 0; i < this._renderArea.height; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.left,
             forceNew ? -1 : this._renderArea.top + i,
@@ -536,11 +543,12 @@ Tilelayer.prototype._renderRight = function (forceNew) {
         );
     }
 
-    this._renderArea.x++;
+    if (!forceNew) {
+        this._renderArea.x++;
+    }
 
-    if (this.name === 'ground') {
-        console.log('RIGHT');
-        console.table(this.tiles);
+    if (forceNew) {
+        this._renderArea.width++;
     }
 };
 
@@ -555,7 +563,7 @@ Tilelayer.prototype._renderUp = function (forceNew) {
     this._renderArea.y--;
 
     //move all the far bottom tiles to the top side
-    for(var i = 0; i < this._renderArea.width; ++i) {
+    for (var i = 0; i < this._renderArea.width; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.left + i,
             forceNew ? -1 : this._renderArea.bottom,
@@ -564,9 +572,8 @@ Tilelayer.prototype._renderUp = function (forceNew) {
         );
     }
 
-    if (this.name === 'ground') {
-        console.log('UP');
-        console.table(this.tiles);
+    if (forceNew) {
+        this._renderArea.height++;
     }
 };
 
@@ -579,7 +586,7 @@ Tilelayer.prototype._renderUp = function (forceNew) {
  */
 Tilelayer.prototype._renderDown = function (forceNew) {
     //move all the far top tiles to the bottom side
-    for(var i = 0; i < this._renderArea.width; ++i) {
+    for (var i = 0; i < this._renderArea.width; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.left + i,
             forceNew ? -1 : this._renderArea.top,
@@ -588,11 +595,12 @@ Tilelayer.prototype._renderDown = function (forceNew) {
         );
     }
 
-    this._renderArea.y++;
+    if (!forceNew) {
+        this._renderArea.y++;
+    }
 
-    if (this.name === 'ground') {
-        console.log('DOWN');
-        console.table(this.tiles);
+    if (forceNew) {
+        this._renderArea.height++;
     }
 };
 
@@ -652,13 +660,13 @@ Object.defineProperty(Tilelayer.prototype, 'scrollY', {
 
 Object.defineProperty(Tilelayer.prototype, 'widthInPixels', {
     get: function () {
-        return this.size.x * this.map.tileWidth;
+        return this.size.x * this._scaledTileSize.x;
     }
 });
 
 Object.defineProperty(Tilelayer.prototype, 'heightInPixels', {
     get: function () {
-        return this.size.y * this.map.tileHeight;
+        return this.size.y * this._scaledTileSize.y;
     }
 });
 
