@@ -116,22 +116,24 @@ function Tilelayer(game, map, layer, width, height) {
      */
     this.layerType = layer.type || 'tilelayer';
 
-    //translate some tiled properties to our inherited properties
+    // translate some tiled properties to our inherited properties
     this.x = layer.x || 0;
     this.y = layer.y || 0;
     this.alpha = layer.opacity !== undefined ? layer.opacity : 1;
     this.visible = layer.visible !== undefined ? layer.visible : true;
 
-    //some private trackers
+    // some private trackers
     this._tilePool = [];
     this._buffered = { left: false, right: false, top: false, bottom: false };
     this._scroll = new Phaser.Point(); // the current scroll position
     this._scrollDelta = new Phaser.Point(); // the current delta of scroll since the last sprite move
     this._renderArea = new Phaser.Rectangle(); // the area to render in tiles
+    this._scaledTileSize = new Phaser.Point(); // tile size scaled by camera
 
-    this._scaledTileSize = new Phaser.Point();
+    // should we clear and rerender all the tiles
     this.dirty = true;
 
+    // if batch is true, store children in a spritebatch
     if (this.properties.batch) {
         this.container = this.addChild(new Phaser.SpriteBatch());
     } else {
