@@ -146,15 +146,18 @@ Tilelayer.prototype.constructor = Tilelayer;
 module.exports = Tilelayer;
 
 Tilelayer.prototype.setupRenderArea = function () {
+    // calculate the X/Y start of the render area as the tile location of the top-left of the camera view.
     this._renderArea.x = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.x / this.map.scaledTileWidth), 0);
     this._renderArea.y = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.y / this.map.scaledTileHeight), 0);
 
+    // the width of the render area is the camera view width in tiles
     this._renderArea.width = Phaser.Math.ceil(this.game.camera.view.width / this.map.scaledTileWidth);
 
     // ensure we don't go outside the map width
     this._renderArea.width = (this._renderArea.x + this._renderArea.width > this.map.size.x) ?
         (this.map.size.x - this._renderArea.x) : this._renderArea.width;
 
+    // the height of the render area is the camera view height in tiles
     this._renderArea.height = Phaser.Math.ceil(this.game.camera.view.height / this.map.scaledTileHeight);
 
     // ensure we don't go outside the map height
@@ -179,11 +182,13 @@ Tilelayer.prototype.resizeWorld = function () {
 Tilelayer.prototype.postUpdate = function () {
     Phaser.Group.prototype.postUpdate.call(this);
 
+    // TODO: Untested, does this really mean anything anymore?
     if (this.fixedToCamera) {
         this.position.x = (this.game.camera.view.x + this.cameraOffset.x) / this.game.camera.scale.x;
         this.position.y = (this.game.camera.view.y + this.cameraOffset.y) / this.game.camera.scale.y;
     }
 
+    // TODO: this seems to not work properly when scale changes on the fly. Look into that...
     if (this.dirty || this.map.dirty) {
         // no longer dirty
         this.dirty = false;
@@ -192,6 +197,8 @@ Tilelayer.prototype.postUpdate = function () {
         this.setupRenderArea();
 
         // resize the world to the new size
+        // TODO: Seems dangerous to do this here, may break if user wants to manually set bounds
+        // and this reset it each time scale changes.
         this.resizeWorld();
 
         // render the tiles on the screen
@@ -202,6 +209,7 @@ Tilelayer.prototype.postUpdate = function () {
 
     this.scrollX = this.game.camera.x * this.scrollFactor.x;
     this.scrollY = this.game.camera.y * this.scrollFactor.y;
+
     this.updatePan();
 };
 
@@ -225,7 +233,7 @@ Tilelayer.prototype.setupTiles = function () {
     // reset buffered status
     this._buffered.left = this._buffered.right = this._buffered.top = this._buffered.bottom = false;
 
-    // reset panDelta
+    // reset scroll delta
     this._scrollDelta.x = this._scroll.x % this.map.scaledTileWidth;
     this._scrollDelta.y = this._scroll.y % this.map.scaledTileHeight;
 
