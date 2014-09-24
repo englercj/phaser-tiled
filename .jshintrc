@@ -31,7 +31,7 @@
     "unused"        : true,     // Warn when varaibles are created but not used.
     "strict"        : false,    // Require `use strict` pragma in every file.
     "trailing"      : true,     // Prohibit trailing whitespaces.
-    "maxparams"     : 6,        // Prohibit having more than X number of params in a function.
+    "maxparams"     : 7,        // Prohibit having more than X number of params in a function.
     "maxdepth"      : 6,        // Prohibit nested blocks from going more than X levels deep.
     "maxstatements" : false,    // Restrict the number of statements in a function.
     "maxcomplexity" : false,    // Restrict the cyclomatic complexity of the code.

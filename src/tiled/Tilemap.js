@@ -203,12 +203,12 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height, group) {
 
         switch(ldata.type) {
             case 'tilelayer':
-                lyr = new Tilelayer(game, this, ldata, width, height);
+                lyr = new Tilelayer(game, this, ldata);
                 this.layers.push(lyr);
                 break;
 
             case 'objectgroup':
-                // lyr = new Objectlayer(game, this, ldata, width, height);
+                // lyr = new Objectlayer(game, this, ldata);
                 this.objects.push(lyr);
                 break;
 

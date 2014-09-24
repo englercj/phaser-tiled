@@ -10,7 +10,7 @@ var utils = require('../utils');
  * @param map {Tilemap} The tilemap instance that this belongs to
  * @param group {Object} All the settings for the layer
  */
-function Objectlayer(game, map, group, width, height) {
+function Objectlayer(game, map, group) {
     Phaser.Group.call(this, game, map);
 
     // Non-Tiled related properties
@@ -75,7 +75,7 @@ function Objectlayer(game, map, group, width, height) {
      * @default 'objectgroup'
      * @readOnly
      */
-    this.layerType = layer.type || 'objectgroup';
+    this.layerType = group.type || 'objectgroup';
 
     // translate some tiled properties to our inherited properties
     this.position.x = group.x || 0;
@@ -109,7 +109,7 @@ Objectlayer.prototype.spawn = function () {
         var o = this.objects[i],
             props = utils.parseTiledProperties(o.properties),
             set,
-            interactive,
+            // interactive,
             obj;
 
         props.tileprops = {};

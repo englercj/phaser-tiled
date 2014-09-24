@@ -21,7 +21,7 @@ var Tile = require('./Tile'),
 // for discussions about this implementation:
 //   see: https://github.com/GoodBoyDigital/pixi.js/issues/48
 //   and: https://github.com/photonstorm/phaser/issues/1145
-function Tilelayer(game, map, layer, width, height) {
+function Tilelayer(game, map, layer) {
     Phaser.Group.call(this, game, map);
 
     // Non-Tiled related properties
@@ -33,14 +33,6 @@ function Tilelayer(game, map, layer, width, height) {
      * @type Tilemap
      */
     this.map = map;
-
-    /**
-     * The index of the layer in the map
-     *
-     * @property index
-     * @type Number
-     */
-    // this.index = index;
 
     /**
      * The const type of this object.

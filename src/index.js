@@ -1,3 +1,4 @@
+/* jshint -W106 */
 var utils = require('./utils');
 
 /**
@@ -163,3 +164,5 @@ function Loader_xmlLoadComplete(index) {
     this.nextFile(index, true);
 
 }
+
+/* jshint +W106 */
