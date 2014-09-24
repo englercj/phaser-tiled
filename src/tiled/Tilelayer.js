@@ -574,17 +574,3 @@ Object.defineProperty(Tilelayer.prototype, 'heightInPixels', {
         return this.size.y * this.map.scaledTileHeight;
     }
 });
-
-// Properties TODO:
-// - fixedToCamera
-// - cameraOffset
-// - tileColor
-// - debug stuff
-// - rayStepRate
-// - wrap
-
-// Method TODO:
-// - getRayCastTiles
-// - getTiles
-// -
-// -

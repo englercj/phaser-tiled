@@ -1,11 +1,39 @@
+// Layer Properties TODO:
+// - fixedToCamera
+// - cameraOffset
+// - tileColor
+// - rayStepRate
+// - wrap
+// - scrollFactor
+
+// Layer Methods TODO:
+// - getRayCastTiles
+// - getTiles
+
+// Map Methods TODO:
+// - Nearly all methods not related to rendering
+
+// Object Group TODO:
+// - object spritepool
+// - Test, only basically implemented right now
+
+// Image Layer TODO:
+// - Only image is shown, no metadata is used (pos, etc)
+
+// General TODO:
+// - Physics
+// - Rerender on resize/rescale
+// - Implement Tile object like in Phaser.Tile
+// - Tile render debug stuff
+// - Memory optimizations
+
+
 var Tilelayer = require('./Tilelayer'),
     Objectlayer = require('./Objectlayer'),
     Tile = require('./Tile'),
     Tileset = require('./Tileset'),
     TilemapParser = require('./TilemapParser'),
     utils = require('../utils');
-
-// TODO: object spritepool
 
 /**
  * Tiled map that represents an entire tile map with multiple layers or object groups.
