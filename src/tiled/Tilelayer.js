@@ -236,11 +236,6 @@ Tilelayer.prototype.setupTiles = function () {
     // reset scroll delta
     this._scrollDelta.x = this._scroll.x % this.map.scaledTileWidth;
     this._scrollDelta.y = this._scroll.y % this.map.scaledTileHeight;
-
-    if (this.name === 'ground') {
-        console.log('setup');
-        console.table(this.tiles);
-    }
 };
 
 /**
