@@ -56,12 +56,20 @@ function Tileset(texture, settings) {
     this.name = settings.name;
 
     /**
-     * The size of a tile in the tileset
+     * The width of a tile in the tileset
      *
-     * @property tileSize
-     * @type Phaser.Point
+     * @property tileWidth
+     * @type Number
      */
-    this.tileSize = new Phaser.Point(settings.tilewidth, settings.tileheight);
+    this.tileWidth = settings.tilewidth;
+
+    /**
+     * The height of a tile in the tileset
+     *
+     * @property tileHeight
+     * @type Number
+     */
+    this.tileHeight = settings.tileheight;
 
     /**
      * The spacing around a tile in the tileset

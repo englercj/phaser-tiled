@@ -342,7 +342,6 @@ Tilemap.prototype.destroy = function () {
 
     this.game = null;
     this.properties = null;
-    this.tileSize = null;
     this.size = null;
     this.orientation = null;
     this.version = null;
