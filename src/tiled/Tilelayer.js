@@ -44,14 +44,6 @@ function Tilelayer(game, map, layer) {
     this.type = Phaser.TILEMAPLAYER;
 
     /**
-     * The current map of all tiles on the screen
-     *
-     * @property screenTiles
-     * @type Object
-     */
-    this.screenTiles = {};
-
-    /**
      * All the tiles this layer has
      *
      * @property tiles
@@ -124,7 +116,6 @@ function Tilelayer(game, map, layer) {
     this.visible = layer.visible !== undefined ? layer.visible : true;
 
     // some private trackers
-    this._tilePool = [];
     this._buffered = { left: false, right: false, top: false, bottom: false };
     this._scroll = new Phaser.Point(); // the current scroll position
     this._scrollDelta = new Phaser.Point(); // the current delta of scroll since the last sprite move
@@ -261,38 +252,25 @@ Tilelayer.prototype.setupTiles = function () {
  * Clears all the tiles currently used to render the layer
  *
  * @method clearTiles
- * @param remove {Boolean} Should this tile be completely removed (never to bee seen again)
  * @return {Tilelayer} Returns itself.
  * @chainable
  */
-Tilelayer.prototype.clearTiles = function (remove) {
-    for (var c = this.children.length - 1; c > -1; --c) {
-        if (this.children[c].type === Phaser.TILESPRITE) {
-            this.clearTile(this.children[c], remove);
+Tilelayer.prototype.clearTiles = function () {
+    for (var c = this.container.children.length - 1; c > -1; --c) {
+        if (this.container.children[c].type === Phaser.TILESPRITE) {
+            this.clearTile(this.container.children[c]);
         }
     }
-
-    this.screenTiles = {};
 
     return this;
 };
 
-Tilelayer.prototype.clearTile = function (tile, remove) {
-    tile.visible = false;
+Tilelayer.prototype.clearTile = function (tile) {
+    if (!tile || tile.parent !== this.container) {
+        return;
+    }
 
-    if (remove) {
-        this.removeChild(tile);
-    }
-    else {
-        this._tilePool.push(tile);
-    }
-};
-
-Tilelayer.prototype._freeTile = function (x, y) {
-    if (this.screenTiles[y] && this.screenTiles[y][x]) {
-        this.clearTile(this.screenTiles[y][x]);
-        this.screenTiles[y][x] = undefined;
-    }
+    this.container.removeChild(tile);
 };
 
 /**
@@ -307,49 +285,13 @@ Tilelayer.prototype._freeTile = function (x, y) {
  * @return {Tile} The sprite to display
  */
 Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, toTileY) {
-    // free the tiles we are dealing with
-    this._freeTile(toTileX, toTileY);
-    this._freeTile(fromTileX, fromTileY);
+    // remove the old tile that is no longer needed to be shown
+    this.clearTile(this.tiles[fromTileY] && this.tiles[fromTileY][fromTileX]);
 
-    // if off the map, just ignore it
-    if (toTileX < 0 || toTileY < 0 || toTileX >= this.map.size.x || toTileY >= this.map.size.y) {
-        return;
+    // add the tile we need to show
+    if (this.tiles[toTileY] && this.tiles[toTileY][toTileX]) {
+        this.addChild(this.tiles[toTileY][toTileX]);
     }
-
-    var tile = this.tiles[toTileY] && this.tiles[toTileY][toTileX];
-
-    // if no tile, return
-    if (!tile) {
-        return;
-    }
-
-    // grab a new tile from the pool
-    var screenTile = this._tilePool.pop();
-
-    // if we couldn't find a tile from the pool, then create a new tile
-    if (!screenTile) {
-        screenTile = new Phaser.Sprite(this.game, tile.x, tile.y, tile.texture);
-
-        this.container.addChild(screenTile);
-    }
-    else {
-        screenTile.position.x = tile.x;
-        screenTile.position.y = tile.y;
-
-        screenTile.setTexture(tile.texture);
-    }
-
-    screenTile.blendMode = tile.blendMode;
-    screenTile.visible = true;
-
-    // update sprite reference in the map
-    if (!this.screenTiles[toTileY]) {
-        this.screenTiles[toTileY] = {};
-    }
-
-    this.screenTiles[toTileY][toTileX] = screenTile;
-
-    return screenTile;
 };
 
 /**
@@ -545,8 +487,6 @@ Tilelayer.prototype.destroy = function () {
     this.preRender = null;
     this.chunkSize = null;
 
-    this._preRendered = null;
-    this._tilePool = null;
     this._buffered = null;
     this._scroll = null;
     this._renderArea = null;
