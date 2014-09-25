@@ -213,21 +213,25 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height, group) {
     // should all layers do a full rerender?
     this.dirty = true;
 
-    this.tilesets = [];
+    // update the world bounds
+    this.game.world.setBounds(0, 0, this.widthInPixels, this.heightInPixels);
 
     // create each tileset
+    this.tilesets = [];
+
     for(var t = 0, tl = data.tilesets.length; t < tl; ++t) {
         var ts = data.tilesets[t];
         this.tilesets.push(new Tileset(ts.name, ts));
     }
 
+    // create each layer
     this.layers = [];
     this.objects = [];
     this.images = [];
 
-    // create each layer
     for(var i = 0, il = data.layers.length; i < il; ++i) {
-        var lyr, ldata = data.layers[i];
+        var lyr,
+            ldata = data.layers[i];
 
         switch(ldata.type) {
             case 'tilelayer':
@@ -237,20 +241,17 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height, group) {
 
             case 'objectgroup':
                 // lyr = new Objectlayer(game, this, ldata);
-                this.objects.push(lyr);
+                // this.objects.push(lyr);
                 break;
 
             case 'imagelayer':
                 //TODO: layer texture data
-                lyr = new Tile(game);
-                this.images.push(lyr);
-                this.addChild(lyr);
+                // lyr = new Tile(game);
+                // this.images.push(lyr);
+                // this.addChild(lyr);
                 break;
         }
     }
-
-    // update the world bounds
-    this.game.world.setBounds(0, 0, this.widthInPixels, this.heightInPixels);
 }
 
 Tilemap.prototype = Object.create(Phaser.Group.prototype);
