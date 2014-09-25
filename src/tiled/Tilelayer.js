@@ -46,6 +46,14 @@ function Tilelayer(game, map, layer) {
     /**
      * The current map of all tiles on the screen
      *
+     * @property screenTiles
+     * @type Object
+     */
+    this.screenTiles = {};
+
+    /**
+     * All the tiles this layer has
+     *
      * @property tiles
      * @type Object
      */
@@ -130,6 +138,24 @@ function Tilelayer(game, map, layer) {
         this.container = this.addChild(new Phaser.SpriteBatch());
     } else {
         this.container = this;
+    }
+
+    for (var i = 0; i < this.tileIds.length; ++i) {
+        var x = i % this.size.x,
+            y = (i - x) / this.size.x,
+            tileId = this.tileIds[id],
+            set = this.map.getTileset(tileId);
+
+        // if no tileset, return
+        if (!set) {
+            continue;
+        }
+
+        if (!this.tiles[y]) {
+            this.tiles[y] = {};
+        }
+
+        this.ties[y][x] = new Tile(this.game, x, y, tileId, set, this);
     }
 }
 
@@ -246,7 +272,7 @@ Tilelayer.prototype.clearTiles = function (remove) {
         }
     }
 
-    this.tiles = {};
+    this.screenTiles = {};
 
     return this;
 };
@@ -263,9 +289,9 @@ Tilelayer.prototype.clearTile = function (tile, remove) {
 };
 
 Tilelayer.prototype._freeTile = function (x, y) {
-    if (this.tiles[y] && this.tiles[y][x]) {
-        this.clearTile(this.tiles[y][x]);
-        this.tiles[y][x] = undefined;
+    if (this.screenTiles[y] && this.screenTiles[y][x]) {
+        this.clearTile(this.screenTiles[y][x]);
+        this.screenTiles[y][x] = undefined;
     }
 };
 
@@ -290,51 +316,44 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
         return;
     }
 
-    var tile,
-        id = (toTileX + (toTileY * this.size.x)),
-        tileId = this.tileIds[id],
-        set = this.map.getTileset(tileId);
+    var tile = this.tiles[toTileY][toTileX];
 
-    // if no tileset, return
-    if (!set) {
+    // if no tile, return
+    if (!tile) {
         return;
     }
 
     // calculate some values for the tile
-    var texture = set.getTileTexture(tileId),
-        props = set.getTileProperties(tileId),
-        posX = (toTileX * this.map.tileWidth) + set.tileoffset.x,
+    var posX = (toTileX * this.map.tileWidth) + set.tileoffset.x,
         posY = (toTileY * this.map.tileHeight) + set.tileoffset.y;
 
     // grab a new tile from the pool
-    tile = this._tilePool.pop();
+    var screenTile = this._tilePool.pop();
 
     // if we couldn't find a tile from the pool, then create a new tile
-    if (!tile) {
-        tile = new Tile(this.game, posX, posY, texture);
+    if (!screenTile) {
+        screenTile = new Phaser.Sprite(this.game, posX, posY, tile.texture);
 
-        this.container.addChild(tile);
+        this.container.addChild(screenTile);
     }
     else {
-        tile.position.x = posX;
-        tile.position.y = posY;
+        screenTile.position.x = posX;
+        screenTile.position.y = posY;
 
-        tile.setTexture(texture);
+        screenTile.setTexture(texture);
     }
 
-    tile.blendMode = (props.blendMode || this.properties.blendMode) ?
-        Phaser.blendModes[(props.blendMode || this.properties.blendMode)] : Phaser.blendModes.NORMAL;
-
-    tile.visible = true;
+    screenTile.blendMode = tile.blendMode;
+    screenTile.visible = true;
 
     // update sprite reference in the map
-    if (!this.tiles[toTileY]) {
-        this.tiles[toTileY] = {};
+    if (!this.screenTiles[toTileY]) {
+        this.screenTiles[toTileY] = {};
     }
 
-    this.tiles[toTileY][toTileX] = tile;
+    this.screenTiles[toTileY][toTileX] = screenTile;
 
-    return tile;
+    return screenTile;
 };
 
 /**

@@ -5,12 +5,26 @@
  * @extends Phaser.Sprite
  * @constructor
  */
-function Tile(game, x, y, key, frame) {
-    Phaser.Sprite.call(this, game, x, y, key, frame);
+function Tile(game, x, y, tileId, tileset, layer) {
+    Phaser.Sprite.call(this,
+        game,
+        (x * layer.map.tileWidth) + tileset.tileoffset.x,
+        (y * layer.map.tileHeight) + tileset.tileoffset.y,
+        set.getTileTexture(tileId)
+    );
 
     this.type = Phaser.TILESPRITE;
 
-    this.tilePosition = new Phaser.Point();
+    this.layer = layer;
+
+    this.tileset = tileset;
+
+    this.tilePosition = new Phaser.Point(x, y);
+
+    this.properties = set.getTileProperties(tileId);
+
+    this.blendMode = (this.properties.blendMode || layer.properties.blendMode) ?
+        Phaser.blendModes[(this.properties.blendMode || layer.properties.blendMode)] : Phaser.blendModes.NORMAL;
 }
 
 Tile.prototype = Object.create(Phaser.Sprite.prototype);
