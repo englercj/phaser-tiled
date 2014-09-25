@@ -143,7 +143,7 @@ function Tilelayer(game, map, layer) {
     for (var i = 0; i < this.tileIds.length; ++i) {
         var x = i % this.size.x,
             y = (i - x) / this.size.x,
-            tileId = this.tileIds[id],
+            tileId = this.tileIds[i],
             set = this.map.getTileset(tileId);
 
         // if no tileset, return
@@ -155,7 +155,7 @@ function Tilelayer(game, map, layer) {
             this.tiles[y] = {};
         }
 
-        this.ties[y][x] = new Tile(this.game, x, y, tileId, set, this);
+        this.tiles[y][x] = new Tile(this.game, x, y, tileId, set, this);
     }
 }
 
@@ -316,31 +316,27 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
         return;
     }
 
-    var tile = this.tiles[toTileY][toTileX];
+    var tile = this.tiles[toTileY] && this.tiles[toTileY][toTileX];
 
     // if no tile, return
     if (!tile) {
         return;
     }
 
-    // calculate some values for the tile
-    var posX = (toTileX * this.map.tileWidth) + set.tileoffset.x,
-        posY = (toTileY * this.map.tileHeight) + set.tileoffset.y;
-
     // grab a new tile from the pool
     var screenTile = this._tilePool.pop();
 
     // if we couldn't find a tile from the pool, then create a new tile
     if (!screenTile) {
-        screenTile = new Phaser.Sprite(this.game, posX, posY, tile.texture);
+        screenTile = new Phaser.Sprite(this.game, tile.x, tile.y, tile.texture);
 
         this.container.addChild(screenTile);
     }
     else {
-        screenTile.position.x = posX;
-        screenTile.position.y = posY;
+        screenTile.position.x = tile.x;
+        screenTile.position.y = tile.y;
 
-        screenTile.setTexture(texture);
+        screenTile.setTexture(tile.texture);
     }
 
     screenTile.blendMode = tile.blendMode;

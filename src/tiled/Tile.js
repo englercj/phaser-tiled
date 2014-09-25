@@ -10,7 +10,7 @@ function Tile(game, x, y, tileId, tileset, layer) {
         game,
         (x * layer.map.tileWidth) + tileset.tileoffset.x,
         (y * layer.map.tileHeight) + tileset.tileoffset.y,
-        set.getTileTexture(tileId)
+        tileset.getTileTexture(tileId)
     );
 
     this.type = Phaser.TILESPRITE;
@@ -21,7 +21,7 @@ function Tile(game, x, y, tileId, tileset, layer) {
 
     this.tilePosition = new Phaser.Point(x, y);
 
-    this.properties = set.getTileProperties(tileId);
+    this.properties = tileset.getTileProperties(tileId);
 
     this.blendMode = (this.properties.blendMode || layer.properties.blendMode) ?
         Phaser.blendModes[(this.properties.blendMode || layer.properties.blendMode)] : Phaser.blendModes.NORMAL;
