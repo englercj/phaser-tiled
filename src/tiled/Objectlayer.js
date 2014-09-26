@@ -217,7 +217,7 @@ Objectlayer.prototype.spawn = function () {
                 // from Tiled Editor:
                 // https://github.com/bjorn/tiled/blob/b059a13b2864ea029fb741a90780d31cf5b67043/src/libtiled/maprenderer.cpp#L135-L145
                 if (props.tileprops.flippedAD) {
-                    obj.rotation = Phaser.Math.degToRad(90);
+                    obj.rotation = this.game.math.degToRad(90);
                     obj.scale.x *= -1;
 
                     var sx = obj.scale.x;

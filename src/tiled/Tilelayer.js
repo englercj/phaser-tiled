@@ -109,6 +109,12 @@ function Tilelayer(game, map, layer) {
      */
     this.layerType = layer.type || 'tilelayer';
 
+    /**
+    * @property {number} rayStepRate - When ray-casting against tiles this is the number of steps it will jump. For larger tile sizes you can increase this to improve performance.
+    * @default
+    */
+    this.rayStepRate = 4;
+
     // translate some tiled properties to our inherited properties
     this.x = layer.x || 0;
     this.y = layer.y || 0;
@@ -120,6 +126,19 @@ function Tilelayer(game, map, layer) {
     this._scroll = new Phaser.Point(); // the current scroll position
     this._scrollDelta = new Phaser.Point(); // the current delta of scroll since the last sprite move
     this._renderArea = new Phaser.Rectangle(); // the area to render in tiles
+
+    /**
+    * @property {object} _mc - Local map data and calculation cache.
+    * @private
+    */
+    this._mc = {
+        cw: map.tileWidth,
+        ch: map.tileHeight,
+        tx: 0,
+        ty: 0,
+        tw: 0,
+        th: 0
+    };
 
     // should we clear and rerender all the tiles
     this.dirty = true;
@@ -157,18 +176,18 @@ module.exports = Tilelayer;
 
 Tilelayer.prototype.setupRenderArea = function () {
     // calculate the X/Y start of the render area as the tile location of the top-left of the camera view.
-    this._renderArea.x = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.x / this.map.scaledTileWidth), 0);
-    this._renderArea.y = Phaser.Math.clampBottom(Phaser.Math.floor(this._scroll.y / this.map.scaledTileHeight), 0);
+    this._renderArea.x = this.game.math.clampBottom(this.game.math.floor(this._scroll.x / this.map.scaledTileWidth), 0);
+    this._renderArea.y = this.game.math.clampBottom(this.game.math.floor(this._scroll.y / this.map.scaledTileHeight), 0);
 
     // the width of the render area is the camera view width in tiles
-    this._renderArea.width = Phaser.Math.ceil(this.game.camera.view.width / this.map.scaledTileWidth);
+    this._renderArea.width = this.game.math.ceil(this.game.camera.view.width / this.map.scaledTileWidth);
 
     // ensure we don't go outside the map width
     this._renderArea.width = (this._renderArea.x + this._renderArea.width > this.map.size.x) ?
         (this.map.size.x - this._renderArea.x) : this._renderArea.width;
 
     // the height of the render area is the camera view height in tiles
-    this._renderArea.height = Phaser.Math.ceil(this.game.camera.view.height / this.map.scaledTileHeight);
+    this._renderArea.height = this.game.math.ceil(this.game.camera.view.height / this.map.scaledTileHeight);
 
     // ensure we don't go outside the map height
     this._renderArea.height = (this._renderArea.y + this._renderArea.height > this.map.size.y) ?
@@ -363,6 +382,111 @@ Tilelayer.prototype.updatePan = function () {
 };
 
 /**
+* Gets all tiles that intersect with the given line.
+*
+* @method Phaser.TilemapLayer#getRayCastTiles
+* @memberof Phaser.TilemapLayer
+* @param {Phaser.Line} line - The line used to determine which tiles to return.
+* @param {number} [stepRate] - How many steps through the ray will we check? If undefined or null it uses TilemapLayer.rayStepRate.
+* @param {boolean} [collides=false] - If true only return tiles that collide on one or more faces.
+* @param {boolean} [interestingFace=false] - If true only return tiles that have interesting faces.
+* @return {array<Phaser.Tile>} An array of Phaser.Tiles.
+*/
+Tilelayer.prototype.getRayCastTiles = function (line, stepRate, collides, interestingFace) {
+
+    if (typeof stepRate === 'undefined' || stepRate === null) { stepRate = this.rayStepRate; }
+    if (typeof collides === 'undefined') { collides = false; }
+    if (typeof interestingFace === 'undefined') { interestingFace = false; }
+
+    //  First get all tiles that touch the bounds of the line
+    var tiles = this.getTiles(line.x, line.y, line.width, line.height, collides, interestingFace);
+
+    if (tiles.length === 0)
+    {
+        return [];
+    }
+
+    //  Now we only want the tiles that intersect with the points on this line
+    var coords = line.coordinatesOnLine(stepRate);
+    var total = coords.length;
+    var results = [];
+
+    for (var i = 0; i < tiles.length; i++)
+    {
+        for (var t = 0; t < total; t++)
+        {
+            if (tiles[i].containsPoint(coords[t][0], coords[t][1]))
+            {
+                results.push(tiles[i]);
+                break;
+            }
+        }
+    }
+
+    return results;
+
+};
+
+/**
+* Get all tiles that exist within the given area, defined by the top-left corner, width and height. Values given are in pixels, not tiles.
+* @method Phaser.TilemapLayer#getTiles
+* @memberof Phaser.TilemapLayer
+* @param {number} x - X position of the top left corner.
+* @param {number} y - Y position of the top left corner.
+* @param {number} width - Width of the area to get.
+* @param {number} height - Height of the area to get.
+* @param {boolean} [collides=false] - If true only return tiles that collide on one or more faces.
+* @param {boolean} [interestingFace=false] - If true only return tiles that have interesting faces.
+* @return {array<Phaser.Tile>} An array of Phaser.Tiles.
+*/
+Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interestingFace) {
+
+    //  Should we only get tiles that have at least one of their collision flags set? (true = yes, false = no just get them all)
+    if (typeof collides === 'undefined') { collides = false; }
+    if (typeof interestingFace === 'undefined') { interestingFace = false; }
+
+    // adjust the x,y coordinates for scrollFactor
+    // x = this._fixX(x);
+    // y = this._fixY(y);
+
+    if (width > this.layer.widthInPixels)
+    {
+        width = this.layer.widthInPixels;
+    }
+
+    if (height > this.layer.heightInPixels)
+    {
+        height = this.layer.heightInPixels;
+    }
+
+    //  Convert the pixel values into tile coordinates
+    this._mc.tx = this.game.math.snapToFloor(x, this._mc.cw) / this._mc.cw;
+    this._mc.ty = this.game.math.snapToFloor(y, this._mc.ch) / this._mc.ch;
+    this._mc.tw = (this.game.math.snapToCeil(width, this._mc.cw) + this._mc.cw) / this._mc.cw;
+    this._mc.th = (this.game.math.snapToCeil(height, this._mc.ch) + this._mc.ch) / this._mc.ch;
+
+    //  This should apply the layer x/y here
+    this._results.length = 0;
+
+    for (var wy = this._mc.ty; wy < this._mc.ty + this._mc.th; wy++)
+    {
+        for (var wx = this._mc.tx; wx < this._mc.tx + this._mc.tw; wx++)
+        {
+            if (this.tiles[wy] && this.tiles[wy][wx])
+            {
+                if ((!collides && !interestingFace) || this.tiles[wy][wx].isInteresting(collides, interestingFace))
+                {
+                    this._results.push(this.tiles[wy][wx]);
+                }
+            }
+        }
+    }
+
+    return this._results;
+
+};
+
+/**
  * Renders tiles to the left, pulling from the far right
  *
  * @method _renderLeft
@@ -528,4 +652,44 @@ Object.defineProperty(Tilelayer.prototype, 'heightInPixels', {
     get: function () {
         return this.size.y * this.map.scaledTileHeight;
     }
+});
+
+/**
+* @name Phaser.TilemapLayer#collisionWidth
+* @property {number} collisionWidth - The width of the collision tiles.
+*/
+Object.defineProperty(Tilelayer.prototype, 'collisionWidth', {
+
+    get: function () {
+        return this._mc.cw;
+    },
+
+    set: function (value) {
+
+        this._mc.cw = value;
+
+        // this.dirty = true;
+
+    }
+
+});
+
+/**
+* @name Phaser.TilemapLayer#collisionHeight
+* @property {number} collisionHeight - The height of the collision tiles.
+*/
+Object.defineProperty(Tilelayer.prototype, 'collisionHeight', {
+
+    get: function () {
+        return this._mc.ch;
+    },
+
+    set: function (value) {
+
+        this._mc.ch = value;
+
+        // this.dirty = true;
+
+    }
+
 });

@@ -2,13 +2,8 @@
 // - fixedToCamera
 // - cameraOffset
 // - tileColor
-// - rayStepRate
 // - wrap
 // - scrollFactor
-
-// Layer Methods TODO:
-// - getRayCastTiles
-// - getTiles
 
 // Map Methods TODO:
 // - Nearly all methods not related to rendering
