@@ -110,8 +110,8 @@ function Tileset(texture, settings) {
      * @type Vector
      */
     this.numTiles = this.multi ? texture.length : new Phaser.Point(
-        Phaser.Math.floor((this.baseTexture.source.width - this.margin) / (this.tileSize.x - this.spacing)),
-        Phaser.Math.floor((this.baseTexture.source.height - this.margin) / (this.tileSize.y - this.spacing))
+        Phaser.Math.floor((this.baseTexture.source.width - this.margin) / (this.tileWidth - this.spacing)),
+        Phaser.Math.floor((this.baseTexture.source.height - this.margin) / (this.tileHeight - this.spacing))
     );
 
     /**
@@ -174,13 +174,13 @@ function Tileset(texture, settings) {
                 x = (t - (y * this.numTiles.x));
 
             // get location in pixels
-            x = (x * this.tileSize.x) + (x * this.spacing) + this.margin;
-            y = (y * this.tileSize.y) + (y * this.spacing) + this.margin;
+            x = (x * this.tileWidth) + (x * this.spacing) + this.margin;
+            y = (y * this.tileHeight) + (y * this.spacing) + this.margin;
 
             this.textures.push(
                 new PIXI.Texture(
                     this.baseTexture,
-                    new Phaser.Rectangle(x, y, this.tileSize.x, this.tileSize.y)
+                    new Phaser.Rectangle(x, y, this.tileWidth, this.tileHeight)
                 )
             );
         }
