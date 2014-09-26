@@ -1,6 +1,4 @@
 // Layer Properties TODO:
-// - fixedToCamera
-// - cameraOffset
 // - tileColor
 // - wrap
 // - scrollFactor

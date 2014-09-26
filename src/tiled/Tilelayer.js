@@ -44,6 +44,18 @@ function Tilelayer(game, map, layer) {
     this.type = Phaser.TILEMAPLAYER;
 
     /**
+    * An object that is fixed to the camera ignores the position of any ancestors in the display list and uses its x/y coordinates as offsets from the top left of the camera.
+    * @property {boolean} fixedToCamera - Fixes this object to the Camera.
+    * @default
+    */
+    this.fixedToCamera = false;
+
+    /**
+    * @property {Phaser.Point} cameraOffset - If this object is fixed to the camera then use this Point to specify how far away from the Camera x/y it's rendered.
+    */
+    this.cameraOffset = new Phaser.Point(0, 0);
+
+    /**
      * All the tiles this layer has
      *
      * @property tiles
@@ -211,11 +223,10 @@ Tilelayer.prototype.resizeWorld = function () {
 Tilelayer.prototype.postUpdate = function () {
     Phaser.Group.prototype.postUpdate.call(this);
 
-    // TODO: Does this really mean anything anymore?
-    // if (this.fixedToCamera) {
-    //     this.position.x = (this.game.camera.view.x + this.cameraOffset.x) / this.game.camera.scale.x;
-    //     this.position.y = (this.game.camera.view.y + this.cameraOffset.y) / this.game.camera.scale.y;
-    // }
+    if (this.fixedToCamera) {
+        this.position.x = (this.game.camera.view.x + this.cameraOffset.x) / this.game.camera.scale.x;
+        this.position.y = (this.game.camera.view.y + this.cameraOffset.y) / this.game.camera.scale.y;
+    }
 
     // TODO: this seems to not work properly when scale changes on the fly. Look into that...
     if (this.dirty || this.map.dirty) {
