@@ -414,7 +414,7 @@ Tilelayer.prototype.getRayCastTiles = function (line, stepRate, collides, intere
 
     if (tiles.length === 0)
     {
-        return [];
+        return tiles;
     }
 
     //  Now we only want the tiles that intersect with the points on this line
@@ -477,7 +477,7 @@ Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interest
     this._mc.th = (this.game.math.snapToCeil(height, this._mc.ch) + this._mc.ch) / this._mc.ch;
 
     //  This should apply the layer x/y here
-    this._results.length = 0;
+    var results = [];
 
     for (var wy = this._mc.ty; wy < this._mc.ty + this._mc.th; wy++)
     {
@@ -487,13 +487,13 @@ Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interest
             {
                 if ((!collides && !interestingFace) || this.tiles[wy][wx].isInteresting(collides, interestingFace))
                 {
-                    this._results.push(this.tiles[wy][wx]);
+                    results.push(this.tiles[wy][wx]);
                 }
             }
         }
     }
 
-    return this._results;
+    return results;
 
 };
 
