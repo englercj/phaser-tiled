@@ -23,13 +23,11 @@ var utils = require('../utils');
  * @param [settings.imagewidth] {Number} An override for the image width
  * @param [settings.imageheight] {Number} An override for the image height
  */
-//TODO: Complete multi-image tileset support
+//TODO: Implement multi-image tileset support
 //TODO: Support external tilesets (TSX files) via the "source" attribute
 //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
 function Tileset(textureKey, settings) {
     PIXI.Texture.call(this, PIXI.BaseTextureCache[textureKey]);
-
-    this.multi = false;
 
     //Tiled Editor properties
 
@@ -103,7 +101,7 @@ function Tileset(textureKey, settings) {
      * @property numTiles
      * @type Vector
      */
-    this.numTiles = this.multi ? texture.length : new Phaser.Point(
+    this.numTiles = new Phaser.Point(
         Phaser.Math.floor((this.baseTexture.source.width - this.margin) / (this.tileWidth - this.spacing)),
         Phaser.Math.floor((this.baseTexture.source.height - this.margin) / (this.tileHeight - this.spacing))
     );
@@ -114,7 +112,7 @@ function Tileset(textureKey, settings) {
      * @property lastgid
      * @type Number
      */
-    this.lastgid = this.firstgid + (this.multi ? texture.length : ((this.numTiles.x * this.numTiles.y) || 1)) - 1;
+    this.lastgid = this.firstgid + ((this.numTiles.x * this.numTiles.y) || 1) - 1;
 
     /**
      * The properties of the tileset
@@ -138,7 +136,7 @@ function Tileset(textureKey, settings) {
      * @property size
      * @type Vector
      */
-    this.size = this.multi ? new Phaser.Point() : new Phaser.Point(
+    this.size = new Phaser.Point(
         settings.imagewidth || this.baseTexture.source.width,
         settings.imageheight || this.baseTexture.source.height
     );
@@ -149,7 +147,7 @@ function Tileset(textureKey, settings) {
      * @property textures
      * @type Array
      */
-    this.textures = this.multi ? texture : [];
+    this.textures = [];
 
     // massages strings into the values they should be
     // i.e. "true" becomes the value: true
@@ -160,24 +158,22 @@ function Tileset(textureKey, settings) {
         this.tileproperties[k] = utils.parseTiledProperties(this.tileproperties[k]);
     }
 
-    // generate tile textures for a non-multi texture tileset
-    if (!this.multi) {
-        for(var t = 0, tl = this.lastgid - this.firstgid + 1; t < tl; ++t) {
-            // convert the tileId to x,y coords of the tile in the Texture
-            var y = Phaser.Math.floor(t / this.numTiles.x),
-                x = (t - (y * this.numTiles.x));
+    // generate tile textures
+    for(var t = 0, tl = this.lastgid - this.firstgid + 1; t < tl; ++t) {
+        // convert the tileId to x,y coords of the tile in the Texture
+        var y = Phaser.Math.floor(t / this.numTiles.x),
+            x = (t - (y * this.numTiles.x));
 
-            // get location in pixels
-            x = (x * this.tileWidth) + (x * this.spacing) + this.margin;
-            y = (y * this.tileHeight) + (y * this.spacing) + this.margin;
+        // get location in pixels
+        x = (x * this.tileWidth) + (x * this.spacing) + this.margin;
+        y = (y * this.tileHeight) + (y * this.spacing) + this.margin;
 
-            this.textures.push(
-                new PIXI.Texture(
-                    this.baseTexture,
-                    new Phaser.Rectangle(x, y, this.tileWidth, this.tileHeight)
-                )
-            );
-        }
+        this.textures.push(
+            new PIXI.Texture(
+                this.baseTexture,
+                new Phaser.Rectangle(x, y, this.tileWidth, this.tileHeight)
+            )
+        );
     }
 
     // this.tileanimations = {};
