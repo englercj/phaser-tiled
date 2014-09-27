@@ -46,14 +46,6 @@ function Tilemap(game, key, tilesetKeyMap, group) {
     this.type = Phaser.TILEMAP;
 
     /**
-     * The game instance this tilemap belongs to
-     *
-     * @property game
-     * @type Game
-     */
-    // this.game = game;
-
-    /**
      * The key of this map data in the Phaser.Cache.
      *
      * @property key

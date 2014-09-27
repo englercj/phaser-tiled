@@ -179,6 +179,23 @@ function Tileset(textureKey, settings) {
             );
         }
     }
+
+    // this.tileanimations = {};
+
+    // // parse extra information about the tiles
+    // for (var p in settings.tiles) {
+    //     if (settings.tiles[p].animation) {
+    //         this.tileanimations[p] = settings.tiles[p].animation;
+    //     }
+
+    //     for (var a = 0; a < settings.tiles[p].animation.length; ++a) {
+    //         this.tileanimations[p].push(this.textures[settings.tiles[p].animation[a].tileid]);
+    //     }
+
+    //     // image - url
+    //     // animation - array
+    //     // objectgroup - collision data
+    // }
 }
 
 Tileset.prototype = Object.create(PIXI.Texture.prototype);
