@@ -635,7 +635,6 @@ Object.defineProperty(Tilelayer.prototype, 'scrollX', {
         if (value !== this._scroll.x) {
             this._scrollDelta.x -= value - this._scroll.x;
             this._scroll.x = value;
-            // this.updateRenderArea(this._renderArea.width, this._renderArea.height);
         }
     }
 });
@@ -648,7 +647,6 @@ Object.defineProperty(Tilelayer.prototype, 'scrollY', {
         if (value !== this._scroll.y) {
             this._scrollDelta.y -= value - this._scroll.y;
             this._scroll.y = value;
-            // this.updateRenderArea(this._renderArea.width, this._renderArea.height);
         }
     }
 });

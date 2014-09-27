@@ -54,8 +54,8 @@ Tiled.prototype.destroy = function () {
     Phaser.Loader.prototype.xmlLoadComplete = originals.loader.xmlLoadComplete;
 };
 
-function GameObjectFactory_tiledmap(key, tileWidth, tileHeight, width, height, group) {
-    return new Tiled.Tilemap(this.game, key, tileWidth, tileHeight, width, height, group);
+function GameObjectFactory_tiledmap(key, tilesetKeyMap, group) {
+    return new Tiled.Tilemap(this.game, key, tilesetKeyMap, group);
 }
 
 /**

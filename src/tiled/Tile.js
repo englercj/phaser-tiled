@@ -45,9 +45,6 @@ function Tile(game, x, y, tileId, tileset, layer) {
     */
     this.properties = tileset.getTileProperties(tileId);
 
-    this.blendMode = (this.properties.blendMode || layer.properties.blendMode) ?
-        Phaser.blendModes[(this.properties.blendMode || layer.properties.blendMode)] : Phaser.blendModes.NORMAL;
-
     /**
     * @property {boolean} scanned - Has this tile been walked / turned into a poly?
     */
@@ -77,25 +74,29 @@ function Tile(game, x, y, tileId, tileset, layer) {
     * @property {boolean} collideLeft - Indicating collide with any object on the left.
     * @default
     */
-    this.collideLeft = false;
+    this.collideLeft = this.properties.collideLeft !== undefined ?
+        this.properties.collideLeft : (this.properties.collides || false);
 
     /**
     * @property {boolean} collideRight - Indicating collide with any object on the right.
     * @default
     */
-    this.collideRight = false;
+    this.collideRight = this.properties.collideRight !== undefined ?
+        this.properties.collideRight : (this.properties.collides || false);
 
     /**
     * @property {boolean} collideUp - Indicating collide with any object on the top.
     * @default
     */
-    this.collideUp = false;
+    this.collideUp = this.properties.collideUp !== undefined ?
+        this.properties.collideUp : (this.properties.collides || false);
 
     /**
     * @property {boolean} collideDown - Indicating collide with any object on the bottom.
     * @default
     */
-    this.collideDown = false;
+    this.collideDown = this.properties.collideDown !== undefined ?
+        this.properties.collideDown : (this.properties.collides || false);
 
     /**
     * @property {function} collisionCallback - Tile collision callback.
@@ -108,6 +109,9 @@ function Tile(game, x, y, tileId, tileset, layer) {
     * @default
     */
     this.collisionCallbackContext = this;
+
+    this.blendMode = (this.properties.blendMode || layer.properties.blendMode) ?
+        Phaser.blendModes[(this.properties.blendMode || layer.properties.blendMode)] : Phaser.blendModes.NORMAL;
 }
 
 Tile.prototype = Object.create(Phaser.Sprite.prototype);
@@ -227,10 +231,10 @@ Tile.prototype.resetCollision = function () {
     this.collideUp = false;
     this.collideDown = false;
 
-    this.faceTop = false;
-    this.faceBottom = false;
     this.faceLeft = false;
     this.faceRight = false;
+    this.faceTop = false;
+    this.faceBottom = false;
 
 };
 

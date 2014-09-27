@@ -16,7 +16,6 @@
 // General TODO:
 // - Physics
 // - Rerender on resize/rescale
-// - Implement Tile object like in Phaser.Tile
 // - Tile render debug stuff
 // - Memory optimizations
 
@@ -38,17 +37,9 @@ var Tilelayer = require('./Tilelayer'),
  * @param {Phaser.Game} game - Game reference to the currently running game.
  * @param {string} [key] - The key of the tilemap data as stored in the Cache. If you're creating a
  *      blank map either leave this parameter out or pass `null`.
- * @param {number} [tileWidth=32] - The pixel width of a single map tile. If using CSV data you must
- *      specify this. Not required if using Tiled map data.
- * @param {number} [tileHeight=32] - The pixel height of a single map tile. If using CSV data you must
- *      specify this. Not required if using Tiled map data.
- * @param {number} [width=10] - The width of the map in tiles. If this map is created from Tiled or
- *      CSV data you don't need to specify this.
- * @param {number} [height=10] - The height of the map in tiles. If this map is created from Tiled or
- *      CSV data you don't need to specify this.
  */
-function Tilemap(game, key, tileWidth, tileHeight, width, height, group) {
-    var data = TilemapParser.parse(game, key, tileWidth, tileHeight, width, height);
+function Tilemap(game, key, tilesetKeyMap, group) {
+    var data = TilemapParser.parse(game, key);
 
     Phaser.Group.call(this, game, group, key);
 
@@ -214,7 +205,7 @@ function Tilemap(game, key, tileWidth, tileHeight, width, height, group) {
 
     for(var t = 0, tl = data.tilesets.length; t < tl; ++t) {
         var ts = data.tilesets[t];
-        this.tilesets.push(new Tileset(ts.name, ts));
+        this.tilesets.push(new Tileset(tilesetKeyMap[ts.name].key, ts));
     }
 
     // create each layer

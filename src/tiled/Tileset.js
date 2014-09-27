@@ -7,7 +7,6 @@ var utils = require('../utils');
  * @class Tileset
  * @extends Texture
  * @constructor
- * @param texture {Texture} The texture to use for the tileset
  * @param settings {Object} All the settings for the tileset
  * @param settings.tilewidth {Number} The width of a single tile in the set
  * @param settings.tileheight {Number} The height of a single tile in the set
@@ -20,22 +19,17 @@ var utils = require('../utils');
  * @param [settings.properties] {Object} User-defined, custom properties that apply to the tileset
  * @param [settings.tileproperties] {Object} User-defined, custom properties that apply to tiles in the tileset.
  *          The keys of this object should the tile id of the properties
+ * @param [settings.tiles] {Object} Extra metadata about specific tiles
  * @param [settings.imagewidth] {Number} An override for the image width
  * @param [settings.imageheight] {Number} An override for the image height
  */
+//TODO: Complete multi-image tileset support
 //TODO: Support external tilesets (TSX files) via the "source" attribute
 //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
-function Tileset(texture, settings) {
-    if (typeof texture === 'string') {
-        PIXI.Texture.call(this, PIXI.BaseTextureCache[texture]);
-    }
-    else if (Array.isArray(texture)) {
-        this.multi = true;
-        PIXI.Texture.call(this, texture[0].baseTexture);
-    }
-    else {
-        PIXI.Texture.call(this, texture.baseTexture || texture);
-    }
+function Tileset(textureKey, settings) {
+    PIXI.Texture.call(this, PIXI.BaseTextureCache[textureKey]);
+
+    this.multi = false;
 
     //Tiled Editor properties
 
@@ -162,7 +156,7 @@ function Tileset(texture, settings) {
     this.properties = utils.parseTiledProperties(this.properties);
 
     // massage tile properties
-    for(var k in this.tileproperties) {
+    for (var k in this.tileproperties) {
         this.tileproperties[k] = utils.parseTiledProperties(this.tileproperties[k]);
     }
 

@@ -24,3 +24,8 @@ After adding the script to the page you can activate it by enabling the plugin:
 ```js
 game.add.plugin(Phaser.Plugin.Tiled);
 ```
+
+## Unsupported Tiled features:
+
+1) Multi-image tilesets
+2) Animated tile
