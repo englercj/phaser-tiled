@@ -51,22 +51,36 @@ game.add.tiledmap('tilemap-key', { tileset1: 'tileset1-key', tileset2: 'tileset2
 ## Phaser Tilemap API features still needed:
 
 Layer Properties:
-- tileColor
-- wrap
-- scrollFactor
+ - tileColor
+ - wrap
+ - scrollFactor
 
 Map Methods:
-- Nearly all methods not related to rendering
+ - setTileIndexCallback
+ - setTileLocationCallback
+ - setCollision
+ - setCollisionBetween
+ - setCollisionByExclusion
+ - setCollisionByIndex
+ - copy
+ - paste
+ - swap
+ - swapHandler
+ - forEach
+ - replace
+ - random
+ - shuffle
+ - fill
 
 Object Layer:
-- object spritepool to pull custom object from
-- Test, only minimally implemented right now
+ - object spritepool to pull custom object from
+ - Test, only minimally implemented right now
 
 Image Layer:
-- Completely unimplemented
+ - Completely unimplemented
 
 General:
-- Physics
-- Rerender on resize/rescale seems off
-- Tile render debug stuff
-- Memory optimizations
+ - Physics
+ - Rerender on resize/rescale seems off
+ - Tile render debug stuff
+ - Memory optimizations

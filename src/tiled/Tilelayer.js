@@ -21,8 +21,10 @@ var Tile = require('./Tile'),
 // for discussions about this implementation:
 //   see: https://github.com/GoodBoyDigital/pixi.js/issues/48
 //   and: https://github.com/photonstorm/phaser/issues/1145
-function Tilelayer(game, map, layer) {
+function Tilelayer(game, map, layer, index) {
     Phaser.Group.call(this, game, map);
+
+    this.index = index;
 
     // Non-Tiled related properties
 
@@ -132,6 +134,8 @@ function Tilelayer(game, map, layer) {
     this.y = layer.y || 0;
     this.alpha = layer.opacity !== undefined ? layer.opacity : 1;
     this.visible = layer.visible !== undefined ? layer.visible : true;
+
+    this.bodies = [];
 
     // some private trackers
     this._buffered = { left: false, right: false, top: false, bottom: false };
