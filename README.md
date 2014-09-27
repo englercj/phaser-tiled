@@ -28,13 +28,15 @@ game.add.plugin(Phaser.Plugin.Tiled);
 Then you can add a Tiled map to your game like this:
 
 ```js
+// load the images for your tilesets
 game.load.image('tileset1-key', 'assets/levels/tileset1.png');
 game.load.image('tileset2-key', 'assets/levels/tileset2.png');
 
-// notice it is "tiledmap" and not "tilemap"
+// load the tiled map, notice it is "tiledmap" and not "tilemap"
 game.load.tiledmap('tilemap-key', 'assets/levels/tilemap.json', null, Phaser.Tilemap.TILED_JSON);
 
-// this takes the cache key for the tiledmap, a map of tileset
+// add the tiledmap to the game
+// this method takes the cache key for the tiledmap, a map of tileset
 // names to cache-keys, and an optional group to add the tiledmap to
 game.add.tiledmap('tilemap-key', { tileset1: 'tileset1-key', tileset2: 'tileset2-key' });
 ```
