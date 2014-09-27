@@ -45,8 +45,7 @@ game.add.tiledmap('tilemap-key', { tileset1: 'tileset1-key', tileset2: 'tileset2
 
 1. Object layers
 2. Image layers
-3. Animated tiles
-4. Multi-image tilesets
+3. Multi-image tilesets
 
 ## Phaser Tilemap API features still needed:
 

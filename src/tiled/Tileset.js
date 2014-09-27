@@ -26,8 +26,10 @@ var utils = require('../utils');
 //TODO: Implement multi-image tileset support
 //TODO: Support external tilesets (TSX files) via the "source" attribute
 //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
-function Tileset(textureKey, settings) {
+function Tileset(game, textureKey, settings) {
     PIXI.Texture.call(this, PIXI.BaseTextureCache[textureKey]);
+
+    this.game = game;
 
     //Tiled Editor properties
 
@@ -176,22 +178,28 @@ function Tileset(textureKey, settings) {
         );
     }
 
-    // this.tileanimations = {};
+    this.tileanimations = {};
 
-    // // parse extra information about the tiles
-    // for (var p in settings.tiles) {
-    //     if (settings.tiles[p].animation) {
-    //         this.tileanimations[p] = settings.tiles[p].animation;
-    //     }
+    // parse extra information about the tiles
+    for (var p in settings.tiles) {
+        if (settings.tiles[p].animation) {
+            this.tileanimations[p] = {
+                rate: 1000 / settings.tiles[p].animation[0].duration,
+                data: new Phaser.FrameData()
+            };
 
-    //     for (var a = 0; a < settings.tiles[p].animation.length; ++a) {
-    //         this.tileanimations[p].push(this.textures[settings.tiles[p].animation[a].tileid]);
-    //     }
+            for (var a = 0; a < settings.tiles[p].animation.length; ++a) {
+                var frame = this.textures[settings.tiles[p].animation[a].tileid].frame;
 
-    //     // image - url
-    //     // animation - array
-    //     // objectgroup - collision data
-    // }
+                this.tileanimations[p].data.addFrame(
+                    new Phaser.Frame(a, frame.x, frame.y, frame.width, frame.height)
+                );
+            }
+        }
+
+        // image - url
+        // objectgroup - collision data
+    }
 }
 
 Tileset.prototype = Object.create(PIXI.Texture.prototype);
@@ -228,8 +236,7 @@ Tileset.prototype.getTileProperties = function (tileId) {
         this.tileproperties[tileId] :
         //set this id to default values and cache
         this.tileproperties[tileId] = {
-            collidable: false,
-            breakable: false
+            collides: false
         };
 
     props.flippedX = flippedX;
@@ -237,6 +244,33 @@ Tileset.prototype.getTileProperties = function (tileId) {
     props.flippedAD = flippedAD;
 
     return props;
+};
+
+/**
+ * Gets the tile animations for a tile based on it's ID
+ *
+ * @method getTileProperties
+ * @param tileId {Number} The id of the tile to get the animation frames for
+ * @return {Phaser.FrameData} The frame data of the tile
+ */
+Tileset.prototype.getTileAnimations = function (tileId) {
+    if (!tileId) {
+        return null;
+    }
+
+    var flags = Tileset.FLAGS,
+        flippedX = tileId & flags.FLIPPED_HORZ,
+        flippedY = tileId & flags.FLIPPED_VERT,
+        flippedAD = tileId & flags.FLIPPED_ANTI_DIAG;
+
+    tileId = (tileId & ~Tileset.FLAGS.ALL) - this.firstgid;
+
+    // if less than 0, then this id isn't in this tileset
+    if (tileId < 0) {
+        return null;
+    }
+
+    return this.tileanimations[tileId];
 };
 
 /**

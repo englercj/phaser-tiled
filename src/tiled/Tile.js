@@ -110,6 +110,13 @@ function Tile(game, x, y, tileId, tileset, layer) {
     */
     this.collisionCallbackContext = this;
 
+    // load animation data
+    var animData = tileset.getTileAnimations(tileId);
+    if (animData) {
+        this.animations.copyFrameData(animData.data, 0);
+        this.animations.add('tile', null, animData.rate, true).play();
+    }
+
     this.blendMode = (this.properties.blendMode || layer.properties.blendMode) ?
         Phaser.blendModes[(this.properties.blendMode || layer.properties.blendMode)] : Phaser.blendModes.NORMAL;
 }
