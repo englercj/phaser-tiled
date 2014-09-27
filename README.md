@@ -25,6 +25,42 @@ After adding the script to the page you can activate it by enabling the plugin:
 game.add.plugin(Phaser.Plugin.Tiled);
 ```
 
+Then you can add a Tiled map to your game like this:
+
+```js
+game.load.image('tileset1-key', 'assets/levels/tileset1.png');
+game.load.image('tileset2-key', 'assets/levels/tileset2.png');
+
+// notice it is "tiledmap" and not "tilemap"
+game.load.tiledmap('tilemap-key', 'assets/levels/tilemap.json', null, Phaser.Tilemap.TILED_JSON);
+{
+            "type": "image",
+            "subtype": "tileset",
+            "key": "darkworld_tileset_darkworld-tileset",
+            "name": "darkworld-tileset",
+            "url": "assets/levels/darkworld/tiles/darkworld-tileset.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "darkworld_tileset_colliders",
+            "name": "colliders",
+            "url": "assets/levels/shared_tiles/colliders.png",
+            "overwrite": false
+        },
+        {
+            "type": "tilemap",
+            "key": "tilemap_darkworld",
+            "url": "assets/levels/darkworld/darkworld.json",
+            "format": "TILED_JSON"
+        }
+
+// this takes the cache key for the tiledmap, a map of tileset
+// names to cache-keys, and an optional group to add the tiledmap to
+game.add.tiledmap('tilemap-key', { tileset1: 'tileset1-key', tileset2: 'tileset2-key' });
+```
+
 ## Tiled features not yet implemented:
 
 1. Object layers
