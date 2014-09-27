@@ -27,10 +27,10 @@ game.add.plugin(Phaser.Plugin.Tiled);
 
 ## Tiled features not yet implemented:
 
-1) Object layers
-2) Image layers
-3) Animated tiles
-4) Multi-image tilesets
+1. Object layers
+2. Image layers
+3. Animated tiles
+4. Multi-image tilesets
 
 ## Phaser Tilemap API features still needed:
 
