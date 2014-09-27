@@ -1,25 +1,3 @@
-// Layer Properties TODO:
-// - tileColor
-// - wrap
-// - scrollFactor
-
-// Map Methods TODO:
-// - Nearly all methods not related to rendering
-
-// Object Group TODO:
-// - object spritepool
-// - Test, only basically implemented right now
-
-// Image Layer TODO:
-// - Only image is shown, no metadata is used (pos, etc)
-
-// General TODO:
-// - Physics
-// - Rerender on resize/rescale
-// - Tile render debug stuff
-// - Memory optimizations
-
-
 var Tilelayer = require('./Tilelayer'),
     Objectlayer = require('./Objectlayer'),
     Tile = require('./Tile'),

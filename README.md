@@ -25,7 +25,32 @@ After adding the script to the page you can activate it by enabling the plugin:
 game.add.plugin(Phaser.Plugin.Tiled);
 ```
 
-## Unsupported Tiled features:
+## Tiled features not yet implemented:
 
-1) Multi-image tilesets
-2) Animated tile
+1) Object layers
+2) Image layers
+3) Animated tiles
+4) Multi-image tilesets
+
+## Phaser Tilemap API features still needed:
+
+Layer Properties:
+- tileColor
+- wrap
+- scrollFactor
+
+Map Methods:
+- Nearly all methods not related to rendering
+
+Object Layer:
+- object spritepool to pull custom object from
+- Test, only minimally implemented right now
+
+Image Layer:
+- Completely unimplemented
+
+General:
+- Physics
+- Rerender on resize/rescale seems off
+- Tile render debug stuff
+- Memory optimizations
