@@ -258,11 +258,6 @@ Tileset.prototype.getTileAnimations = function (tileId) {
         return null;
     }
 
-    var flags = Tileset.FLAGS,
-        flippedX = tileId & flags.FLIPPED_HORZ,
-        flippedY = tileId & flags.FLIPPED_VERT,
-        flippedAD = tileId & flags.FLIPPED_ANTI_DIAG;
-
     tileId = (tileId & ~Tileset.FLAGS.ALL) - this.firstgid;
 
     // if less than 0, then this id isn't in this tileset

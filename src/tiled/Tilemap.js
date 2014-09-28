@@ -1,5 +1,5 @@
 var Tilelayer = require('./Tilelayer'),
-    Objectlayer = require('./Objectlayer'),
+    // Objectlayer = require('./Objectlayer'),
     Tile = require('./Tile'),
     Tileset = require('./Tileset'),
     TilemapParser = require('./TilemapParser'),
@@ -272,7 +272,7 @@ Tilemap.prototype.getObjectIndex = function (name) {
 *
 * @method Phaser.Tilemap#getLayer
 * @protected
-* @param {number|string|Phaser.TilemapLayer} layer - The layer to operate on. If not given will default to this.currentLayer.
+* @param {number|string|Phaser.TilemapLayer} layer - The layer to operate on, defaults to this.currentLayer.
 * @return {number} The TilemapLayer index.
 */
 Tilemap.prototype.getLayer = function (layer) {
@@ -364,25 +364,29 @@ Tilemap.prototype.calculateFaces = function (layer) {
 
                 if (above && above.collides)
                 {
-                    //  There is a tile above this one that also collides, so the top of this tile is no longer interesting
+                    //  There is a tile above this one that also collides,
+                    // so the top of this tile is no longer interesting
                     tile.faceTop = false;
                 }
 
                 if (below && below.collides)
                 {
-                    //  There is a tile below this one that also collides, so the bottom of this tile is no longer interesting
+                    //  There is a tile below this one that also collides,
+                    // so the bottom of this tile is no longer interesting
                     tile.faceBottom = false;
                 }
 
                 if (left && left.collides)
                 {
-                    //  There is a tile left this one that also collides, so the left of this tile is no longer interesting
+                    //  There is a tile left this one that also collides,
+                    // so the left of this tile is no longer interesting
                     tile.faceLeft = false;
                 }
 
                 if (right && right.collides)
                 {
-                    //  There is a tile right this one that also collides, so the right of this tile is no longer interesting
+                    //  There is a tile right this one that also collides,
+                    // so the right of this tile is no longer interesting
                     tile.faceRight = false;
                 }
             }
@@ -536,7 +540,8 @@ Tilemap.prototype.removeTile = function (x, y, layer) {
 };
 
 /**
-* Removes the tile located at the given coordinates and updates the collision data. The coordinates are given in pixel values.
+* Removes the tile located at the given coordinates and updates the collision data.
+* The coordinates are given in pixel values.
 *
 * @method Phaser.Tilemap#removeTileWorldXY
 * @param {number} x - X position to remove the tile (given in pixels)
@@ -562,7 +567,8 @@ Tilemap.prototype.removeTileWorldXY = function (x, y, tileWidth, tileHeight, lay
 * If you pass `null` as the tile it will pass your call over to Tilemap.removeTile instead.
 *
 * @method Phaser.Tilemap#putTile
-* @param {Phaser.Tile|number|null} tile - The index of this tile to set or a Phaser.Tile object. If null the tile is removed from the map.
+* @param {Phaser.Tile|number|null} tile - The index of this tile to set or a Phaser.Tile object,
+*       null means to remove the tile.
 * @param {number} x - X position to place the tile (given in tile units, not pixels)
 * @param {number} y - Y position to place the tile (given in tile units, not pixels)
 * @param {number|string|Phaser.TilemapLayer} [layer] - The layer to modify.
@@ -577,13 +583,17 @@ Tilemap.prototype.putTile = function (tile, x, y, layer) {
 
     layer = this.getLayer(layer);
 
+    var tileId,
+        tileset;
+
     if (x >= 0 && x < this.layers[layer].size.x && y >= 0 && y < this.layers[layer].size.y)
     {
         if (tile instanceof Phaser.Tile)
         {
-            var idx = (y * this.layers[layer].size.x) + x,
-                tileId = this.layers[layer].tileIds[idx],
-                tileset = this.getTileset(tileId);
+            var idx = (y * this.layers[layer].size.x) + x;
+
+            tileId = this.layers[layer].tileIds[idx];
+            tileset = this.getTileset(tileId);
 
             if (this.hasTile(x, y, layer))
             {
@@ -596,21 +606,21 @@ Tilemap.prototype.putTile = function (tile, x, y, layer) {
         }
         else
         {
-            var tileId = this.layers[layer].tileIds[tile],
-                tileset = this.getTileset(tileId);
+            tileId = this.layers[layer].tileIds[tile];
+            tileset = this.getTileset(tileId);
 
             this.layers[layer].tiles[y][x] = null;
             this.layers[layer].tiles[y][x] = new Tile(this.game, x, y, tileId, tileset, this.layers[layer]);
         }
 
-        if (this.collideIndexes.indexOf(index) > -1)
-        {
-            this.layers[layer].tiles[y][x].setCollision(true, true, true, true);
-        }
-        else
-        {
-            this.layers[layer].tiles[y][x].resetCollision();
-        }
+        // if (this.collideIndexes.indexOf(index) > -1)
+        // {
+        //     this.layers[layer].tiles[y][x].setCollision(true, true, true, true);
+        // }
+        // else
+        // {
+        //     this.layers[layer].tiles[y][x].resetCollision();
+        // }
 
         this.layers[layer].dirty = true;
 
@@ -653,7 +663,8 @@ Tilemap.prototype.putTileWorldXY = function (tile, x, y, tileWidth, tileHeight, 
 * @param {number} x - X position to get the tile from (given in tile units, not pixels)
 * @param {number} y - Y position to get the tile from (given in tile units, not pixels)
 * @param {number|string|Phaser.TilemapLayer} [layer] - The layer to get the tile from.
-* @param {boolean} [nonNull=false] - If true getTile won't return null for empty tiles, but a Tile object with an index of -1.
+* @param {boolean} [nonNull=false] - If true getTile won't return null for empty tiles,
+*       but a Tile object with an index of -1.
 * @return {Phaser.Tile} The tile at the given coordinates or null if no tile was found or the coordinates were invalid.
 */
 Tilemap.prototype.getTile = function (x, y, layer, nonNull) {
@@ -724,26 +735,26 @@ Tilemap.prototype.dump = function () {
     {
         for (var x = 0; x < this.layers[this.currentLayer].size.x; x++)
         {
-            txt += "%c  ";
+            txt += '%c  ';
 
             if (this.layers[this.currentLayer].tiles[y][x])
             {
                 if (this.debugMap[this.layers[this.currentLayer].tiles[y][x]])
                 {
-                    args.push("background: " + this.debugMap[this.layers[this.currentLayer].tiles[y][x]]);
+                    args.push('background: ' + this.debugMap[this.layers[this.currentLayer].tiles[y][x]]);
                 }
                 else
                 {
-                    args.push("background: #ffffff");
+                    args.push('background: #ffffff');
                 }
             }
             else
             {
-                args.push("background: rgb(0, 0, 0)");
+                args.push('background: rgb(0, 0, 0)');
             }
         }
 
-        txt += "\n";
+        txt += '\n';
     }
 
     args[0] = txt;

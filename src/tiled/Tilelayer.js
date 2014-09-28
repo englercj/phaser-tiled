@@ -46,14 +46,17 @@ function Tilelayer(game, map, layer, index) {
     this.type = Phaser.TILEMAPLAYER;
 
     /**
-    * An object that is fixed to the camera ignores the position of any ancestors in the display list and uses its x/y coordinates as offsets from the top left of the camera.
+    * An object that is fixed to the camera ignores the position of any ancestors in the display list
+    * and uses its x/y coordinates as offsets from the top left of the camera.
+    *
     * @property {boolean} fixedToCamera - Fixes this object to the Camera.
     * @default
     */
     this.fixedToCamera = false;
 
     /**
-    * @property {Phaser.Point} cameraOffset - If this object is fixed to the camera then use this Point to specify how far away from the Camera x/y it's rendered.
+    * @property {Phaser.Point} cameraOffset - If this object is fixed to the camera then use this Point
+    * to specify how far away from the Camera x/y it's rendered.
     */
     this.cameraOffset = new Phaser.Point(0, 0);
 
@@ -124,7 +127,8 @@ function Tilelayer(game, map, layer, index) {
     this.layerType = layer.type || 'tilelayer';
 
     /**
-    * @property {number} rayStepRate - When ray-casting against tiles this is the number of steps it will jump. For larger tile sizes you can increase this to improve performance.
+    * @property {number} rayStepRate - When ray-casting against tiles this is the number of steps it will jump.
+    * For larger tile sizes you can increase this to improve performance.
     * @default
     */
     this.rayStepRate = 4;
@@ -402,7 +406,8 @@ Tilelayer.prototype.updatePan = function () {
 * @method Phaser.TilemapLayer#getRayCastTiles
 * @memberof Phaser.TilemapLayer
 * @param {Phaser.Line} line - The line used to determine which tiles to return.
-* @param {number} [stepRate] - How many steps through the ray will we check? If undefined or null it uses TilemapLayer.rayStepRate.
+* @param {number} [stepRate] - How many steps through the ray will we check? If undefined or
+*       null it uses TilemapLayer.rayStepRate.
 * @param {boolean} [collides=false] - If true only return tiles that collide on one or more faces.
 * @param {boolean} [interestingFace=false] - If true only return tiles that have interesting faces.
 * @return {array<Phaser.Tile>} An array of Phaser.Tiles.
@@ -443,7 +448,8 @@ Tilelayer.prototype.getRayCastTiles = function (line, stepRate, collides, intere
 };
 
 /**
-* Get all tiles that exist within the given area, defined by the top-left corner, width and height. Values given are in pixels, not tiles.
+* Get all tiles that exist within the given area, defined by the top-left corner, width and height.
+* Values given are in pixels, not tiles.
 * @method Phaser.TilemapLayer#getTiles
 * @memberof Phaser.TilemapLayer
 * @param {number} x - X position of the top left corner.
@@ -456,7 +462,8 @@ Tilelayer.prototype.getRayCastTiles = function (line, stepRate, collides, intere
 */
 Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interestingFace) {
 
-    //  Should we only get tiles that have at least one of their collision flags set? (true = yes, false = no just get them all)
+    //  Should we only get tiles that have at least one of their collision flags set?
+    // (true = yes, false = no just get them all)
     if (typeof collides === 'undefined') { collides = false; }
     if (typeof interestingFace === 'undefined') { interestingFace = false; }
 

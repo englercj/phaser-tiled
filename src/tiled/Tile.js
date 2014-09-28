@@ -283,7 +283,8 @@ Tile.prototype.isInteresting = function (collides, faces) {
     if (collides && faces)
     {
         //  Does this tile have any collide flags OR interesting face?
-        return (this.collideLeft || this.collideRight || this.collideUp || this.collideDown || this.faceTop || this.faceBottom || this.faceLeft || this.faceRight || this.collisionCallback);
+        return (this.collideLeft || this.collideRight || this.collideUp || this.collideDown ||
+            this.faceTop || this.faceBottom || this.faceLeft || this.faceRight || this.collisionCallback);
     }
     else if (collides)
     {
