@@ -5,10 +5,12 @@ The purpose of this plugin is to optimize the tilemaps for large complex maps bu
 the [Tiled Map Editor][1].
 
 This plugin optimizes the rendering of large scrolling tilemaps. It also adds support for
-many more Tiled features and lots of advanced functionality.
+many more Tiled features and lots of advanced functionality. You can read [Why use this plugin?][2]
+below for more details
 
 [0]: https://github.com/photonstorm/phaser
 [1]: http://www.mapeditor.org/
+[2]: #why-use-this-plugin
 
 ## Usage
 
@@ -40,6 +42,18 @@ game.load.tiledmap('tilemap-key', 'assets/levels/tilemap.json', null, Phaser.Til
 // names to cache-keys, and an optional group to add the tiledmap to
 game.add.tiledmap('tilemap-key', { tileset1: 'tileset1-key', tileset2: 'tileset2-key' });
 ```
+
+## Why use this plugin?
+
+Here are some features this plugin has that Phaser doesn't, or that this plugin
+tries to do better:
+
+1. Faster render times
+2. Support for Tiled XML format
+3. Support for tile flipping
+4. Support for animated tiles (added in Tiled v0.10.0)
+5. Automatic layer creation from tiled data
+6. Automatic tileset creation from tiled data
 
 ## Tiled features not yet implemented:
 
