@@ -117,8 +117,33 @@ function Tile(game, x, y, tileId, tileset, layer) {
         this.animations.add('tile', null, animData.rate, true).play();
     }
 
+    // set the blend mode
     this.blendMode = (this.properties.blendMode || layer.properties.blendMode) ?
         Phaser.blendModes[(this.properties.blendMode || layer.properties.blendMode)] : Phaser.blendModes.NORMAL;
+
+    // setup the flipped states
+    if (this.properties.flippedX) {
+        this.scale.x = -1;
+    }
+
+    if (this.properties.flippedY) {
+        this.scale.y = -1;
+    }
+
+    // from Tiled Editor:
+    // https://github.com/bjorn/tiled/blob/b059a13b2864ea029fb741a90780d31cf5b67043/src/libtiled/maprenderer.cpp#L135-L145
+    if (this.properties.flippedAD) {
+        this.rotation = this.game.math.degToRad(90);
+        this.scale.x *= -1;
+
+        var sx = this.scale.x;
+        this.scale.x = this.scale.y;
+        this.scale.y = sx;
+
+        var halfDiff = (this.height / 2) - (this.width / 2);
+        this.position.y += halfDiff;
+        this.position.x += halfDiff;
+    }
 }
 
 Tile.prototype = Object.create(Phaser.Sprite.prototype);
