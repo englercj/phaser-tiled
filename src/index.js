@@ -1,5 +1,6 @@
 /* jshint -W106 */
-var utils = require('./utils');
+var utils = require('./utils'),
+    physics = require('./physics');
 
 /**
  * @class Phaser.Plugin.Tiled
@@ -37,6 +38,11 @@ var originals = {
         jsonLoadComplete: Phaser.Loader.prototype.jsonLoadComplete,
         xmlLoadComplete: Phaser.Loader.prototype.xmlLoadComplete,
         packLoadComplete: Phaser.Loader.prototype.packLoadComplete
+    },
+    physics: {
+        p2: {
+            convertTilemap: Phaser.Physics.P2.prototype.convertTilemap
+        }
     }
 };
 
@@ -47,6 +53,7 @@ Tiled.prototype.init = function () {
     Phaser.Loader.prototype.jsonLoadComplete = Loader_jsonLoadComplete;
     Phaser.Loader.prototype.xmlLoadComplete = Loader_xmlLoadComplete;
     Phaser.Loader.prototype.packLoadComplete = Loader_packLoadComplete;
+    Phaser.Physics.P2.prototype.convertTilemap = physics.convertTilemapForP2;
 };
 
 Tiled.prototype.destroy = function () {
@@ -58,6 +65,7 @@ Tiled.prototype.destroy = function () {
     Phaser.Loader.prototype.jsonLoadComplete = originals.loader.jsonLoadComplete;
     Phaser.Loader.prototype.xmlLoadComplete = originals.loader.xmlLoadComplete;
     Phaser.Loader.prototype.packLoadComplete = originals.loader.packLoadComplete;
+    Phaser.Physics.P2.prototype.convertTilemap = originals.physics.p2.convertTilemap;
 };
 
 function GameObjectFactory_tiledmap(key, tilesetKeyMap, group) {
