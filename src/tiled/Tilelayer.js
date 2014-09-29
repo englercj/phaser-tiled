@@ -328,7 +328,7 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
 
     // add the tile we need to show
     if (this.tiles[toTileY] && this.tiles[toTileY][toTileX]) {
-        this.addChild(this.tiles[toTileY][toTileX]);
+        this.container.addChild(this.tiles[toTileY][toTileX]);
     }
 };
 
