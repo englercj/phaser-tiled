@@ -1,5 +1,5 @@
 var Tilelayer = require('./Tilelayer'),
-    // Objectlayer = require('./Objectlayer'),
+    Objectlayer = require('./Objectlayer'),
     Tile = require('./Tile'),
     Tileset = require('./Tileset'),
     TilemapParser = require('./TilemapParser'),
@@ -160,8 +160,8 @@ function Tilemap(game, key, tilesetKeyMap, group) {
                 break;
 
             case 'objectgroup':
-                // lyr = new Objectlayer(game, this, ldata, this.objects.length);
-                // this.objects.push(lyr);
+                lyr = new Objectlayer(game, this, ldata, this.objects.length);
+                this.objects.push(lyr);
                 break;
 
             case 'imagelayer':

@@ -2,7 +2,6 @@ var utils = require('../utils');
 
 /**
  * Tiled object group is a special layer that contains entities
- * TODO: This is all trash
  *
  * @class Objectlayer
  * @extends Phaser.Group
@@ -10,8 +9,10 @@ var utils = require('../utils');
  * @param map {Tilemap} The tilemap instance that this belongs to
  * @param group {Object} All the settings for the layer
  */
-function Objectlayer(game, map, group) {
+function Objectlayer(game, map, layer, index) {
     Phaser.Group.call(this, game, map);
+
+    this.index = index;
 
     // Non-Tiled related properties
 
@@ -39,17 +40,17 @@ function Objectlayer(game, map, group) {
      * @type String
      * @default ''
      */
-    this.name = group.name || '';
+    this.name = layer.name || '';
 
     // Tiled related properties
 
     /**
-     * The color to display objects in this group
+     * The color of this group in the Tiled Editor,
      *
      * @property color
      * @type
      */
-    this.color = group.color;
+    this.color = layer.color;
 
     /**
      * The user-defined properties of this group. Usually defined in the TiledEditor
@@ -57,7 +58,7 @@ function Objectlayer(game, map, group) {
      * @property properties
      * @type Object
      */
-    this.properties = utils.parseTiledProperties(group.properties);
+    this.properties = utils.parseTiledProperties(layer.properties);
 
     /**
      * The objects in this group that can be spawned
@@ -65,7 +66,7 @@ function Objectlayer(game, map, group) {
      * @property objects
      * @type Array
      */
-    this.objects = group.objects;
+    this.objects = layer.objects;
 
     /**
      * The Tiled type of tile layer, should always be 'objectgroup'
@@ -75,13 +76,13 @@ function Objectlayer(game, map, group) {
      * @default 'objectgroup'
      * @readOnly
      */
-    this.layerType = group.type || 'objectgroup';
+    this.layerType = layer.type || 'objectgroup';
 
     // translate some tiled properties to our inherited properties
-    this.position.x = group.x || 0;
-    this.position.y = group.y || 0;
-    this.alpha = group.opacity !== undefined ? group.opacity : 1;
-    this.visible = group.visible !== undefined ? group.visible : true;
+    this.position.x = layer.x || 0;
+    this.position.y = layer.y || 0;
+    this.alpha = layer.opacity !== undefined ? layer.opacity : 1;
+    this.visible = layer.visible !== undefined ? layer.visible : true;
 
     if (this.properties.batch) {
         this.container = this.addChild(new Phaser.SpriteBatch());
