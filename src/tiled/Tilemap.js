@@ -15,11 +15,13 @@ var Tilelayer = require('./Tilelayer'),
  * @param {Phaser.Game} game - Game reference to the currently running game.
  * @param {string} [key] - The key of the tilemap data as stored in the Cache. If you're creating a
  *      blank map either leave this parameter out or pass `null`.
+ * @param {object} [tilesetKeyMap] - Map of tileset names to cache keys.
+ * @param {Phaser.Group|Phaser.SpriteBatch} [group] - Group to add the tilemap to.
  */
 function Tilemap(game, key, tilesetKeyMap, group) {
-    var data = TilemapParser.parse(game, key);
-
     Phaser.Group.call(this, game, group, key);
+
+    var data = TilemapParser.parse(game, key);
 
     this.type = Phaser.TILEMAP;
 
