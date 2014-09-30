@@ -64,4 +64,4 @@ gulp.task('jshint', function () {
 /*****
  * Base task
  *****/
-gulp.task('default', ['build']);
+gulp.task('default', ['jshint', 'build']);
