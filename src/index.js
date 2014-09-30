@@ -41,7 +41,7 @@ var originals = {
     },
     physics: {
         p2: {
-            convertTilemap: Phaser.Physics.P2.prototype.convertTilemap
+            convertTilemap: Phaser.Physics.P2.prototype.convertTiledmap
         }
     }
 };
@@ -53,7 +53,7 @@ Tiled.prototype.init = function () {
     Phaser.Loader.prototype.jsonLoadComplete = Loader_jsonLoadComplete;
     Phaser.Loader.prototype.xmlLoadComplete = Loader_xmlLoadComplete;
     Phaser.Loader.prototype.packLoadComplete = Loader_packLoadComplete;
-    Phaser.Physics.P2.prototype.convertTilemap = physics.convertTilemapForP2;
+    Phaser.Physics.P2.prototype.convertTiledmap = physics.convertTiledmapForP2;
 };
 
 Tiled.prototype.destroy = function () {
@@ -65,7 +65,7 @@ Tiled.prototype.destroy = function () {
     Phaser.Loader.prototype.jsonLoadComplete = originals.loader.jsonLoadComplete;
     Phaser.Loader.prototype.xmlLoadComplete = originals.loader.xmlLoadComplete;
     Phaser.Loader.prototype.packLoadComplete = originals.loader.packLoadComplete;
-    Phaser.Physics.P2.prototype.convertTilemap = originals.physics.p2.convertTilemap;
+    Phaser.Physics.P2.prototype.convertTiledmap = originals.physics.p2.convertTiledmap;
 };
 
 function GameObjectFactory_tiledmap(key, tilesetKeyMap, group) {

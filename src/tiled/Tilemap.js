@@ -157,6 +157,9 @@ function Tilemap(game, key, tilesetKeyMap, group) {
             case 'tilelayer':
                 lyr = new Tilelayer(game, this, ldata, this.layers.length);
                 this.layers.push(lyr);
+
+                // calculate the tile faces
+                this.calculateFaces(this.layers.length - 1);
                 break;
 
             case 'objectgroup':
