@@ -64,22 +64,22 @@ None, yet.
 None, yet.
 
 #### Tileset Tile (specific tile in the tileset)
- - collideLeft - if true will make this tile collide on the left
- - collideRight - if true will make this tile collide on the right
- - collideUp - if true will make this tile collide on the top
- - collideDown - if true will make this tile collide on the bottom
- - collides - sets all collision sides to true, if that collision side doesn't have a specific override
- - blendMode - string of the blendMode constant to use for this tile (e.g. 'NORMAL')
+ - `collideLeft` - true will make this tile collide on the left
+ - `collideRight` - true will make this tile collide on the right
+ - `collideUp` - true will make this tile collide on the top
+ - `collideDown` - true will make this tile collide on the bottom
+ - `collides` - true will set all collision sides to true, if that collision side doesn't have a specific override
+ - `blendMode` - string of the blendMode constant to use for this tile (e.g. 'NORMAL')
 
 #### Tile Layer
- - batch - if true will place tile sprites into a SpriteBatch container.
+ - `batch` - true will place tile sprites into a SpriteBatch container.
 
 #### Object Layer
- - batch - if true will place tile sprites into a SpriteBatch container.
- - blendMode - string of the blendMode constant to use for all objects in this layer (e.g. 'NORMAL').
+ - `batch` - true will place object sprites into a SpriteBatch container.
+ - `blendMode` - string of the blendMode constant to use for all objects in this layer (e.g. 'NORMAL').
 
 #### Object Layer Object (specific object in the layer)
- - blendMode - string of the blendMode constant to use for this object (e.g. 'NORMAL')
+ - `blendMode` - string of the blendMode constant to use for this object (e.g. 'NORMAL')
 
 #### Image Layer
 None, yet.
