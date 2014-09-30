@@ -55,6 +55,35 @@ tries to do better:
 5. Automatic layer creation from tiled data
 6. Automatic tileset creation from tiled data
 
+## Supported custom properties
+
+#### Tilemap
+None, yet.
+
+#### Tileset
+None, yet.
+
+#### Tileset Tile (specific tile in the tileset)
+ - collideLeft - if true will make this tile collide on the left
+ - collideRight - if true will make this tile collide on the right
+ - collideUp - if true will make this tile collide on the top
+ - collideDown - if true will make this tile collide on the bottom
+ - collides - sets all collision sides to true, if that collision side doesn't have a specific override
+ - blendMode - string of the blendMode constant to use for this tile (e.g. 'NORMAL')
+
+#### Tile Layer
+ - batch - if true will place tile sprites into a SpriteBatch container.
+
+#### Object Layer
+ - batch - if true will place tile sprites into a SpriteBatch container.
+ - blendMode - string of the blendMode constant to use for all objects in this layer (e.g. 'NORMAL').
+
+#### Object Layer Object (specific object in the layer)
+ - blendMode - string of the blendMode constant to use for this object (e.g. 'NORMAL')
+
+#### Image Layer
+None, yet.
+
 ## Tiled features not yet implemented:
 
 1. Object layers
