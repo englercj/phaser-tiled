@@ -91,5 +91,63 @@ module.exports = {
 
         return map.layers[layer].bodies;
 
-    }
+    },
+
+    /**
+    * Goes through all tiles in the given Tilemap and TilemapLayer and converts those set to collide into physics
+    * bodies. Only call this *after* you have specified all of the tiles you wish to collide with calls like
+    * Tilemap.setCollisionBetween, etc. Every time you call this method it will destroy any previously created
+    * bodies and remove them from the world. Therefore understand it's a very expensive operation and not to be
+    * done in a core game update loop.
+    *
+    * In Ninja the Tiles have an ID from 0 to 33, where 0 is 'empty', 1 is a full tile, 2 is a 45-degree slope,
+    * etc. You can find the ID list either at the very bottom of `Tile.js`, or in a handy visual reference in the
+    * `resources/Ninja Physics Debug Tiles` folder in the repository. The slopeMap parameter is an array that controls
+    * how the indexes of the tiles in your tilemap data will map to the Ninja Tile IDs. For example if you had 6
+    * tiles in your tileset: Imagine the first 4 should be converted into fully solid Tiles and the other 2 are 45-degree
+    * slopes. Your slopeMap array would look like this: `[ 1, 1, 1, 1, 2, 3 ]`. Where each element of the array is
+    * a tile in your tilemap and the resulting Ninja Tile it should create.
+    *
+    * @method Phaser.Physics.Ninja#convertTilemap
+    * @param {Phaser.Tilemap} map - The Tilemap to get the map data from.
+    * @param {number|string|Phaser.TilemapLayer} [layer] - The layer to operate on. Defaults to map.currentLayer.
+    * @param {object} [slopeMap] - The tilemap index to Tile ID map.
+    * @return {array} An array of the Phaser.Physics.Ninja.Tile objects that were created.
+    */
+    convertTiledmapForNinja: function (map, layer, slopeMap) {
+
+        layer = map.getLayer(layer);
+
+        //  If the bodies array is already populated we need to nuke it
+        this.clearTilemapLayerBodies(map, layer);
+
+        for (var y = 0, h = map.layers[layer].size.y; y < h; y++)
+        {
+            for (var x = 0, w = map.layers[layer].size.x; x < w; x++)
+            {
+                var tile = map.layers[layer].tiles[y][x],
+                    index = (y * map.layers[layer].size.x) + x;
+
+                if (tile && slopeMap.hasOwnProperty(index))
+                {
+                    var body = new Phaser.Physics.Ninja.Body(
+                        this,
+                        null,
+                        3,
+                        slopeMap[index],
+                        0,
+                        tile.worldX + tile.centerX,
+                        tile.worldY + tile.centerY,
+                        tile.width,
+                        tile.height
+                    );
+
+                    map.layers[layer].bodies.push(body);
+                }
+            }
+        }
+
+        return map.layers[layer].bodies;
+
+    },
 };
