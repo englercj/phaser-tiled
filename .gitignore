@@ -18,5 +18,5 @@ npm-debug.log
 # project ignores
 !.gitkeep
 *__temp
-node_modules/*
-build/*
+node_modules
+build

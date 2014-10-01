@@ -1,10 +1,10 @@
 {
-  "name": "phaser-tiled",
+  "name": "gulp-tiled-pack",
   "version": "1.0.0",
-  "description": "A tilemap implementation for phaser focusing on large complex maps",
+  "description": "Creates a phaser asset pack file based on tiled maps",
   "author": "Chad Engler <chad@pantherdev.com>",
   "license": "MIT",
-  "main": "./src/index.js",
+  "main": "index.js",
   "homepage": "https://github.com/englercj/phaser-tiled",
   "repository": {
     "type": "git",
@@ -15,23 +15,15 @@
   },
   "keywords": [
     "phaser",
-    "html5",
-    "tilemap",
-    "tile",
-    "map"
+    "tiled",
+    "asset",
+    "pack"
   ],
   "dependencies": {
-    "Base64": "^0.3.0",
-    "zlibjs": "^0.2.0"
-  },
-  "devDependencies": {
-    "browserify": "^5.11.1",
-    "gulp": "^3.8.8",
-    "gulp-jshint": "^1.8.4",
     "gulp-util": "^3.0.1",
-    "jshint-summary": "^0.4.0",
-    "vinyl-source-stream": "^0.1.1",
-    "watchify": "^1.0.2"
+    "through2": "^0.6.2",
+    "vinyl": "^0.4.3",
+    "xml2js": "^0.4.4"
   },
   "engines": {
     "node": "^0.10.30",
