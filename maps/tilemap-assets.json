@@ -1,0 +1,504 @@
+{
+    "meta": {
+        "generated": "1412178952628",
+        "version": "1.0",
+        "app": "gulp-tiled-pack",
+        "url": "https://github.com/englercj/phaser-tiled"
+    },
+    "Ortho_1_16__16_large.json": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Ortho_1_16__16_large.json_tileset_darkworld-tileset",
+            "name": "darkworld-tileset",
+            "url": "maps/gfx/png/darkworld-tileset.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Ortho_1_16__16_large.json",
+            "url": "maps/ortho/Ortho_1_16__16_large.json",
+            "format": "TILED_JSON"
+        }
+    ],
+    "Isometric_32x16_nooffset.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_nooffset.tmx_tileset_white_grey_xoffset_0__yoffset_0",
+            "name": "white_grey_xoffset_0__yoffset_0",
+            "url": "maps/gfx/png/32x16/white_grey_xoffset_0__yoffset_0.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Isometric_32x16_nooffset.tmx",
+            "url": "maps/iso/Isometric_32x16_nooffset.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Isometric_32x16_with_offset_x.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x.tmx_tileset_green_xoffset_16__yoffset_0",
+            "name": "green_xoffset_16__yoffset_0",
+            "url": "maps/gfx/png/32x16/green_xoffset_16__yoffset_0.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x.tmx_tileset_red_xoffset_0__yoffset_0",
+            "name": "red_xoffset_0__yoffset_0",
+            "url": "maps/gfx/png/32x16/red_xoffset_0__yoffset_0.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x.tmx_tileset_salmon_xoffset_13__yoffset0",
+            "name": "salmon_xoffset_13__yoffset0",
+            "url": "maps/gfx/png/32x16/salmon_xoffset_13__yoffset0.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Isometric_32x16_with_offset_x.tmx",
+            "url": "maps/iso/Isometric_32x16_with_offset_x.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Isometric_32x16_with_offset_x_y_even.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x_y_even.tmx_tileset_aqua_xoffset_5__yoffset_1",
+            "name": "aqua_xoffset_5__yoffset_1",
+            "url": "maps/gfx/png/32x16_XY_offset/aqua_xoffset_5__yoffset_1.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x_y_even.tmx_tileset_black_xoffset_32__yoffset_32",
+            "name": "black_xoffset_32__yoffset_32",
+            "url": "maps/gfx/png/32x16_XY_offset/black_xoffset_32__yoffset_32.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x_y_even.tmx_tileset_blue_xoffset_17__yoffset_5",
+            "name": "blue_xoffset_17__yoffset_5",
+            "url": "maps/gfx/png/32x16_XY_offset/blue_xoffset_17__yoffset_5.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x_y_even.tmx_tileset_red_xoffset_5__yoffset_45",
+            "name": "red_xoffset_5__yoffset_45",
+            "url": "maps/gfx/png/32x16_XY_offset/red_xoffset_5__yoffset_45.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x_y_even.tmx_tileset_yellow_xoffset_0__yoffset_0",
+            "name": "yellow_xoffset_0__yoffset_0",
+            "url": "maps/gfx/png/32x16_XY_offset/yellow_xoffset_0__yoffset_0.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Isometric_32x16_with_offset_x_y_even.tmx",
+            "url": "maps/iso/Isometric_32x16_with_offset_x_y_even.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Isometric_32x16_with_offset_x_y_odd.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x_y_odd.tmx_tileset_aqua_xoffset_5__yoffset_1",
+            "name": "aqua_xoffset_5__yoffset_1",
+            "url": "maps/gfx/png/32x16_XY_offset/aqua_xoffset_5__yoffset_1.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x_y_odd.tmx_tileset_black_xoffset_32__yoffset_32",
+            "name": "black_xoffset_32__yoffset_32",
+            "url": "maps/gfx/png/32x16_XY_offset/black_xoffset_32__yoffset_32.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x_y_odd.tmx_tileset_blue_xoffset_17__yoffset_5",
+            "name": "blue_xoffset_17__yoffset_5",
+            "url": "maps/gfx/png/32x16_XY_offset/blue_xoffset_17__yoffset_5.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x_y_odd.tmx_tileset_red_xoffset_5__yoffset_45",
+            "name": "red_xoffset_5__yoffset_45",
+            "url": "maps/gfx/png/32x16_XY_offset/red_xoffset_5__yoffset_45.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_32x16_with_offset_x_y_odd.tmx_tileset_yellow_xoffset_0__yoffset_0",
+            "name": "yellow_xoffset_0__yoffset_0",
+            "url": "maps/gfx/png/32x16_XY_offset/yellow_xoffset_0__yoffset_0.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Isometric_32x16_with_offset_x_y_odd.tmx",
+            "url": "maps/iso/Isometric_32x16_with_offset_x_y_odd.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Isometric_64_32_with_offset_y.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_64_32_with_offset_y.tmx_tileset_aqua_xoffset_0__yoffset_17",
+            "name": "aqua_xoffset_0__yoffset_17",
+            "url": "maps/gfx/png/64x32/aqua_xoffset_0__yoffset_17.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_64_32_with_offset_y.tmx_tileset_blue_xoffset_0__yoffset_0",
+            "name": "blue_xoffset_0__yoffset_0",
+            "url": "maps/gfx/png/64x32/blue_xoffset_0__yoffset_0.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_64_32_with_offset_y.tmx_tileset_green_xoffset_0__yoffset_16",
+            "name": "green_xoffset_0__yoffset_16",
+            "url": "maps/gfx/png/64x32/green_xoffset_0__yoffset_16.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_64_32_with_offset_y.tmx_tileset_pink_xoffset_0__yoffset_20",
+            "name": "pink_xoffset_0__yoffset_20",
+            "url": "maps/gfx/png/64x32/pink_xoffset_0__yoffset_20.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_64_32_with_offset_y.tmx_tileset_salmon_xoffset_0__yoffset_15",
+            "name": "salmon_xoffset_0__yoffset_15",
+            "url": "maps/gfx/png/64x32/salmon_xoffset_0__yoffset_15.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Isometric_64_32_with_offset_y.tmx",
+            "url": "maps/iso/Isometric_64_32_with_offset_y.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Isometric_64_32_with_offset_y_evensize.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_64_32_with_offset_y_evensize.tmx_tileset_isometric_grass_and_water",
+            "name": "isometric_grass_and_water",
+            "url": "maps/gfx/png/isometric_grass_and_water.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_64_32_with_offset_y_evensize.tmx_tileset_green_xoffset_0__yoffset_16",
+            "name": "green_xoffset_0__yoffset_16",
+            "url": "maps/gfx/png/64x32/green_xoffset_0__yoffset_16.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_64_32_with_offset_y_evensize.tmx_tileset_blue_xoffset_0__yoffset_0",
+            "name": "blue_xoffset_0__yoffset_0",
+            "url": "maps/gfx/png/64x32/blue_xoffset_0__yoffset_0.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_64_32_with_offset_y_evensize.tmx_tileset_salmon_xoffset_0__yoffset_15",
+            "name": "salmon_xoffset_0__yoffset_15",
+            "url": "maps/gfx/png/64x32/salmon_xoffset_0__yoffset_15.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Isometric_64_32_with_offset_y_evensize.tmx",
+            "url": "maps/iso/Isometric_64_32_with_offset_y_evensize.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Isometric_cubes.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_cubes.tmx_tileset_greyBlack",
+            "name": "greyBlack",
+            "url": "maps/gfx/png/greyBlack.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Isometric_cubes.tmx",
+            "url": "maps/iso/Isometric_cubes.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Isometric_cubes_large.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_cubes_large.tmx_tileset_greyBlack",
+            "name": "greyBlack",
+            "url": "maps/gfx/png/greyBlack.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Isometric_cubes_large.tmx",
+            "url": "maps/iso/Isometric_cubes_large.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Isometric_cubes_with_objects.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_cubes_with_objects.tmx_tileset_greyBlack",
+            "name": "greyBlack",
+            "url": "maps/gfx/png/greyBlack.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_cubes_with_objects.tmx_tileset_greenBlue_x0_y32",
+            "name": "greenBlue_x0_y32",
+            "url": "maps/gfx/png/greenBlue_x0_y32.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_cubes_with_objects.tmx_tileset_miniGreen",
+            "name": "miniGreen",
+            "url": "maps/gfx/png/miniGreen.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_cubes_with_objects.tmx_tileset_singleTallBall",
+            "name": "singleTallBall",
+            "url": "maps/gfx/png/singleTallBall.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_cubes_with_objects.tmx_tileset_blue_x10",
+            "name": "blue_x10",
+            "url": "maps/gfx/png/blue_x10.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Isometric_cubes_with_objects.tmx",
+            "url": "maps/iso/Isometric_cubes_with_objects.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Isometric_cubes_with_objects_large.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_cubes_with_objects_large.tmx_tileset_greyBlack",
+            "name": "greyBlack",
+            "url": "maps/gfx/png/greyBlack.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_cubes_with_objects_large.tmx_tileset_singleTallBall",
+            "name": "singleTallBall",
+            "url": "maps/gfx/png/singleTallBall.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_cubes_with_objects_large.tmx_tileset_miniGreen",
+            "name": "miniGreen",
+            "url": "maps/gfx/png/miniGreen.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Isometric_cubes_with_objects_large.tmx",
+            "url": "maps/iso/Isometric_cubes_with_objects_large.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Isometric_land.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Isometric_land.tmx_tileset_isometric_grass_and_water",
+            "name": "isometric_grass_and_water",
+            "url": "maps/gfx/png/isometric_grass_and_water.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Isometric_land.tmx",
+            "url": "maps/iso/Isometric_land.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Ortho_1_16__16_large.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Ortho_1_16__16_large.tmx_tileset_darkworld-tileset",
+            "name": "darkworld-tileset",
+            "url": "maps/gfx/png/darkworld-tileset.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Ortho_1_16__16_large.tmx",
+            "url": "maps/ortho/Ortho_1_16__16_large.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Ortho_1_32__32.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Ortho_1_32__32.tmx_tileset_32_3_tiles",
+            "name": "32_3_tiles",
+            "url": "maps/gfx/png/32_3_tiles.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Ortho_1_32__32.tmx",
+            "url": "maps/ortho/Ortho_1_32__32.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "Ortho_1_32__32_objects.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Ortho_1_32__32_objects.tmx_tileset_32_3_tiles",
+            "name": "32_3_tiles",
+            "url": "maps/gfx/png/32_3_tiles.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Ortho_1_32__32_objects.tmx_tileset_yellowCircle",
+            "name": "yellowCircle",
+            "url": "maps/gfx/png/ortho/yellowCircle.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Ortho_1_32__32_objects.tmx_tileset_miniGreenOrtho",
+            "name": "miniGreenOrtho",
+            "url": "maps/gfx/png/ortho/miniGreenOrtho.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "Ortho_1_32__32_objects.tmx_tileset_miniBlueOrthoTall",
+            "name": "miniBlueOrthoTall",
+            "url": "maps/gfx/png/ortho/miniBlueOrthoTall.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_Ortho_1_32__32_objects.tmx",
+            "url": "maps/ortho/Ortho_1_32__32_objects.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "formosa_gzip.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "formosa_gzip.tmx_tileset_16x16-overworld",
+            "name": "16x16-overworld",
+            "url": "maps/gfx/png/formosa/16x16-overworld.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "formosa_gzip.tmx_tileset_tiles",
+            "name": "tiles",
+            "url": "maps/gfx/png/formosa/tiles.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_formosa_gzip.tmx",
+            "url": "maps/ortho/formosa_gzip.tmx",
+            "format": "TILED_XML"
+        }
+    ],
+    "formosa_zlib.tmx": [
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "formosa_zlib.tmx_tileset_16x16-overworld",
+            "name": "16x16-overworld",
+            "url": "maps/gfx/png/formosa/16x16-overworld.png",
+            "overwrite": false
+        },
+        {
+            "type": "image",
+            "subtype": "tileset",
+            "key": "formosa_zlib.tmx_tileset_tiles",
+            "name": "tiles",
+            "url": "maps/gfx/png/formosa/tiles.png",
+            "overwrite": false
+        },
+        {
+            "type": "tiledmap",
+            "key": "tiledmap_formosa_zlib.tmx",
+            "url": "maps/ortho/formosa_zlib.tmx",
+            "format": "TILED_XML"
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+html,body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#viewporter,
+#game {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    cursor: move;
+}
+
+#switch,
+#dirty,
+#fullscreen {
+    position: absolute;
+}
+
+#switch {
+    top: 5px;
+    right: 5px;
+}
+
+#fullscreen {
+    top: 30px;
+    right: 5px;
+}
