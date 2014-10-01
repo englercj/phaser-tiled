@@ -35,13 +35,13 @@ var TilemapParser = {
         var map = game.cache.getTilemapData(key);
 
         if (map) {
-            if (map.format === Phaser.Tilemap.CSV) {
+            if (map.format === Phaser.Plugin.Tiled.Tilemap.CSV) {
                 return this.parseCSV(key, map.data, tileWidth, tileHeight);
             }
-            else if (map.format === Phaser.Tilemap.TILED_XML) {
+            else if (map.format === Phaser.Plugin.Tiled.Tilemap.TILED_XML) {
                 return this.parseTiledXML(map.data);
             }
-            else if (!map.format || map.format === Phaser.Tilemap.TILED_JSON) {
+            else if (!map.format || map.format === Phaser.Plugin.Tiled.Tilemap.TILED_JSON) {
                 return this.parseTiledJSON(map.data);
             }
         }
