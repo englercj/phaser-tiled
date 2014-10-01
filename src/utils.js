@@ -10,7 +10,7 @@ utils.stringToBuffer = function (str) {
     var len = str.length,
         buf = new Buffer(len);
 
-    for(i = 0; i < len; i++) {
+    for(var i = 0; i < len; i++) {
         buf[i] = str.charCodeAt(i);
     }
 

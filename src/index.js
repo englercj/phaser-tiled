@@ -145,15 +145,16 @@ function Loader_jsonLoadComplete(index) {
         return;
     }
 
-    var file = this._fileList[index];
+    var file = this._fileList[index],
+        data;
 
     if (this._ajax && this._ajax.responseText)
     {
-        var data = JSON.parse(this._ajax.responseText);
+        data = JSON.parse(this._ajax.responseText);
     }
     else
     {
-        var data = JSON.parse(this._xhr.responseText);
+        data = JSON.parse(this._xhr.responseText);
     }
 
     file.loaded = true;
@@ -206,7 +207,7 @@ function Loader_xmlLoadComplete(index) {
 
 }
 
-// the same as the core one, but we add "tiledmap"
+// the same as the core one, but we add 'tiledmap'
 function Loader_packLoadComplete(index, parse) {
 
     if (typeof parse === 'undefined') { parse = true; }
@@ -217,17 +218,18 @@ function Loader_packLoadComplete(index, parse) {
         return;
     }
 
-    var pack = this._packList[index];
+    var pack = this._packList[index],
+        data;
 
     pack.loaded = true;
 
     if (parse)
     {
-        var data = JSON.parse(this._xhr.responseText);
+        data = JSON.parse(this._xhr.responseText);
     }
     else
     {
-        var data = this._packList[index].data;
+        data = this._packList[index].data;
     }
 
     if (data[pack.key])
@@ -240,63 +242,64 @@ function Loader_packLoadComplete(index, parse) {
 
             switch (file.type)
             {
-                case "image":
+                case 'image':
                     this.image(file.key, file.url, file.overwrite);
                     break;
 
-                case "text":
+                case 'text':
                     this.text(file.key, file.url, file.overwrite);
                     break;
 
-                case "json":
+                case 'json':
                     this.json(file.key, file.url, file.overwrite);
                     break;
 
-                case "script":
+                case 'script':
                     this.script(file.key, file.url, file.callback, pack.callbackContext);
                     break;
 
-                case "binary":
+                case 'binary':
                     this.binary(file.key, file.url, file.callback, pack.callbackContext);
                     break;
 
-                case "spritesheet":
-                    this.spritesheet(file.key, file.url, file.frameWidth, file.frameHeight, file.frameMax, file.margin, file.spacing);
+                case 'spritesheet':
+                    this.spritesheet(file.key, file.url, file.frameWidth, file.frameHeight,
+                            file.frameMax, file.margin, file.spacing);
                     break;
 
-                case "audio":
+                case 'audio':
                     this.audio(file.key, file.urls, file.autoDecode);
                     break;
 
-                case "tilemap":
+                case 'tilemap':
                     this.tilemap(file.key, file.url, file.data, Phaser.Tilemap[file.format]);
                     break;
 
-                case "tiledmap":
+                case 'tiledmap':
                     this.tiledmap(file.key, file.url, file.data, Tiled.Tilemap[file.format]);
                     break;
 
-                case "physics":
+                case 'physics':
                     this.physics(file.key, file.url, file.data, Phaser.Loader[file.format]);
                     break;
 
-                case "bitmapFont":
+                case 'bitmapFont':
                     this.bitmapFont(file.key, file.textureURL, file.xmlURL, file.xmlData, file.xSpacing, file.ySpacing);
                     break;
 
-                case "atlasJSONArray":
+                case 'atlasJSONArray':
                     this.atlasJSONArray(file.key, file.textureURL, file.atlasURL, file.atlasData);
                     break;
 
-                case "atlasJSONHash":
+                case 'atlasJSONHash':
                     this.atlasJSONHash(file.key, file.textureURL, file.atlasURL, file.atlasData);
                     break;
 
-                case "atlasXML":
+                case 'atlasXML':
                     this.atlasXML(file.key, file.textureURL, file.atlasURL, file.atlasData);
                     break;
 
-                case "atlas":
+                case 'atlas':
                     this.atlas(file.key, file.textureURL, file.atlasURL, file.atlasData, Phaser.Loader[file.format]);
                     break;
             }
