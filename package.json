@@ -5,6 +5,9 @@
   "author": "Chad Engler <chad@pantherdev.com>",
   "license": "MIT",
   "homepage": "https://github.com/englercj/phaser-tiled-tests",
+  "scripts": {
+    "start": "gulp"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/englercj/phaser-tiled-tests.git"
