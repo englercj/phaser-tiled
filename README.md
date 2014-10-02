@@ -55,6 +55,22 @@ tries to do better:
 5. Automatic layer creation from tiled data
 6. Automatic tileset creation from tiled data
 
+## Show me the performance!
+
+Using a large test map with 256x256 tiles, each 16x16 pixels, and 3 layers of them. [phaser-debug][20]
+gives me this performance graph for the core phaser tilemap implementation:
+
+![Slow][21]
+
+The spikes you see there are when I pan around the map. Using the same map with this plugin I get this:
+
+![Fast][22]
+
+[20]: https://github.com/englercj/phaser-debug
+[21]: http://static.pantherdev.com/misc/slow_lttp_debug.png
+[22]: http://static.pantherdev.com/misc/fast_lttp_debug.png
+
+
 ## Supported custom properties
 
 #### Tilemap
