@@ -54,7 +54,12 @@ require([
                         }
                     }
 
-                    this.add.tiledmap(levelPackData.key, tilesetPackData);
+                    this.add.tiledmap(levelPackData.key, tilesetPackData).spawnObjects(function (obj) {
+                        if (obj.type !== Phaser.SPRITE) return;
+
+                        obj.inputEnabled = true;
+                        obj.input.enableDrag();
+                    });
                 },
                 update: function () {
                     if (game.input.mousePointer.active) {
