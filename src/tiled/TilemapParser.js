@@ -192,7 +192,7 @@ var TilemapParser = {
 
                     var props = obj.getElementsByTagName('properties');
                     if(props.length) {
-                        props = props.getElementsByTagName('property');
+                        props = props[0].getElementsByTagName('property');
                         for(var pr = 0; pr < props.length; ++pr) {
                             object.properties[props[pr].attributes.getNamedItem('name').value] = props[pr].attributes.getNamedItem('value').value;
                         }
@@ -240,7 +240,7 @@ var TilemapParser = {
             var tsetprops = tset.getElementsByTagName('properties');
             for(var tsp = 0; tsp < tsetprops.length; ++tsp) {
                 if(tsetprops[tsp].parentNode === tset) {
-                    tsetprops = tsetprops.getElementsByTagName('property');
+                    tsetprops = tsetprops[tsp].getElementsByTagName('property');
 
                     if(tsetprops.length) {
                         for(var p = 0; p < tsetprops.length; ++p) {
