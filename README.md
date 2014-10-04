@@ -140,5 +140,5 @@ Image Layer:
 General:
  - Physics
  - Rerender on resize/rescale seems off
- - Tile render debug stuff
+ - Tile render debug stuff (edges, physics, etc)
  - Memory optimizations
