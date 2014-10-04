@@ -122,7 +122,7 @@ function Tileset(game, textureKey, settings) {
      * @property properties
      * @type Object
      */
-    this.properties = settings.properties || {};
+    this.properties = utils.parseTiledProperties(settings.properties);
 
     /**
      * The properties of the tiles in the tileset
@@ -130,7 +130,12 @@ function Tileset(game, textureKey, settings) {
      * @property tileproperties
      * @type Object
      */
-    this.tileproperties = settings.tileproperties || {};
+    this.tileproperties = {};
+
+    // massage tile tileproperties
+    for (var k in settings.tileproperties) {
+        this.tileproperties[k] = utils.parseTiledProperties(settings.tileproperties[k]);
+    }
 
     /**
      * The size of the tileset
@@ -151,15 +156,6 @@ function Tileset(game, textureKey, settings) {
      */
     this.textures = [];
 
-    // massages strings into the values they should be
-    // i.e. "true" becomes the value: true
-    this.properties = utils.parseTiledProperties(this.properties);
-
-    // massage tile properties
-    for (var k in this.tileproperties) {
-        this.tileproperties[k] = utils.parseTiledProperties(this.tileproperties[k]);
-    }
-
     // generate tile textures
     for(var t = 0, tl = this.lastgid - this.firstgid + 1; t < tl; ++t) {
         // convert the tileId to x,y coords of the tile in the Texture
@@ -178,6 +174,12 @@ function Tileset(game, textureKey, settings) {
         );
     }
 
+    /**
+     * The animation data for tile animations in the set
+     *
+     * @property tileanimations
+     * @type Object
+     */
     this.tileanimations = {};
 
     // parse extra information about the tiles

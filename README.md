@@ -55,6 +55,51 @@ tries to do better:
 5. Automatic layer creation from tiled data
 6. Automatic tileset creation from tiled data
 
+## Show me the performance!
+
+Using a large test map with 256x256 tiles, each 16x16 pixels, and 3 layers of them. [phaser-debug][20]
+gives me this performance graph for the core phaser tilemap implementation:
+
+![Slow][21]
+
+The spikes you see there are when I pan around the map. Using the same map with this plugin I get this:
+
+![Fast][22]
+
+[20]: https://github.com/englercj/phaser-debug
+[21]: http://static.pantherdev.com/misc/slow_lttp_debug.png
+[22]: http://static.pantherdev.com/misc/fast_lttp_debug.png
+
+
+## Supported custom properties
+
+#### Tilemap
+None, yet.
+
+#### Tileset
+None, yet.
+
+#### Tileset Tile (specific tile in the tileset)
+ - `collideLeft` - true will make this tile collide on the left
+ - `collideRight` - true will make this tile collide on the right
+ - `collideUp` - true will make this tile collide on the top
+ - `collideDown` - true will make this tile collide on the bottom
+ - `collides` - true will set all collision sides to true, if that collision side doesn't have a specific override
+ - `blendMode` - string of the blendMode constant to use for this tile (e.g. 'NORMAL')
+
+#### Tile Layer
+ - `batch` - true will place tile sprites into a SpriteBatch container.
+
+#### Object Layer
+ - `batch` - true will place object sprites into a SpriteBatch container.
+ - `blendMode` - string of the blendMode constant to use for all objects in this layer (e.g. 'NORMAL').
+
+#### Object Layer Object (specific object in the layer)
+ - `blendMode` - string of the blendMode constant to use for this object (e.g. 'NORMAL')
+
+#### Image Layer
+None, yet.
+
 ## Tiled features not yet implemented:
 
 1. Object layers
@@ -95,5 +140,5 @@ Image Layer:
 General:
  - Physics
  - Rerender on resize/rescale seems off
- - Tile render debug stuff
+ - Tile render debug stuff (edges, physics, etc)
  - Memory optimizations
