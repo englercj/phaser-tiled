@@ -103,7 +103,7 @@ module.exports = Objectlayer;
  * @return {Objectlayer} Returns itself.
  * @chainable
  */
-Objectlayer.prototype.spawn = function () {
+Objectlayer.prototype.spawn = function (spawnCallback) {
     // we go through these backwards so that things that are higher in the
     // list of object gets rendered on top.
     for(var i = this.objects.length - 1; i >= 0; --i) {
@@ -163,11 +163,10 @@ Objectlayer.prototype.spawn = function () {
 
         // just a regular DisplayObject
         if (!props.texture) {
-            obj = new Phaser.Group();
+            obj = this.game.add.group(this.container, o.name);
 
             obj.width = o.width;
             obj.height = o.height;
-            obj.name = o.name;
             obj.rotation = o.rotation;
             obj.objectType = o.type;
 
@@ -180,15 +179,13 @@ Objectlayer.prototype.spawn = function () {
 
             // obj.enablePhysics(this.game.physics);
         } else {
-            props.width = o.width;
-            props.height = o.height;
+            obj = this.game.add.sprite(o.x, o.y, props.texture, null, this.container);
 
-            obj = this.map.spritepool.create(o.type, props.texture, props);
+            // obj.width = o.width;
+            // obj.height = o.height;
 
             obj.name = o.name;
-            obj.type = o.type;
-            obj.position.x = o.x;
-            obj.position.y = o.y;
+            obj.objectType = o.type;
 
             // obj.mass = props.mass || props.tileprops.mass;
             // obj.inertia = props.inertia || props.tileprops.inertia;
@@ -282,7 +279,10 @@ Objectlayer.prototype.spawn = function () {
         }
 
         obj._objIndex = i;
-        this.container.addChild(obj);
+
+        if (spawnCallback) {
+            spawnCallback(obj);
+        }
     }
 
     return this;

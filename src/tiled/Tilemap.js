@@ -802,9 +802,9 @@ Tilemap.prototype.postUpdate = function () {
  * @return {Tilemap} Returns itself.
  * @chainable
  */
-Tilemap.prototype.spawnObjects = function () {
+Tilemap.prototype.spawnObjects = function (spawnCallback) {
     for(var i = 0, il = this.objects.length; i < il; ++i) {
-        this.objects[i].spawn();
+        this.objects[i].spawn(spawnCallback);
     }
 
     return this;
