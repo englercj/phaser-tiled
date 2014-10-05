@@ -350,7 +350,7 @@ Tilemap.prototype.calculateFaces = function (layer) {
     {
         for (var x = 0, w = this.layers[layer].size.x; x < w; x++)
         {
-            var tile = this.layers[layer].tiles[y][x];
+            var tile = this.layers[layer].tiles[y] ? this.layers[layer].tiles[y][x] : null;
 
             if (tile)
             {
@@ -413,7 +413,7 @@ Tilemap.prototype.getTileAbove = function (layer, x, y) {
 
     if (y > 0)
     {
-        return this.layers[layer].tiles[y - 1][x];
+        return this.layers[layer].tiles[y - 1] ? this.layers[layer].tiles[y - 1][x] : null;
     }
 
     return null;
@@ -433,7 +433,7 @@ Tilemap.prototype.getTileBelow = function (layer, x, y) {
 
     if (y < this.layers[layer].height - 1)
     {
-        return this.layers[layer].tiles[y + 1][x];
+        return this.layers[layer].tiles[y + 1] ? this.layers[layer].tiles[y + 1][x] : null;
     }
 
     return null;
@@ -453,7 +453,7 @@ Tilemap.prototype.getTileLeft = function (layer, x, y) {
 
     if (x > 0)
     {
-        return this.layers[layer].tiles[y][x - 1];
+        return this.layers[layer].tiles[y] ? this.layers[layer].tiles[y][x - 1] : null;
     }
 
     return null;
@@ -473,7 +473,7 @@ Tilemap.prototype.getTileRight = function (layer, x, y) {
 
     if (x < this.layers[layer].size.x - 1)
     {
-        return this.layers[layer].tiles[y][x + 1];
+        return this.layers[layer].tiles[y] ? this.layers[layer].tiles[y][x + 1] : null;
     }
 
     return null;
@@ -510,7 +510,7 @@ Tilemap.prototype.hasTile = function (x, y, layer) {
 
     layer = this.getLayer(layer);
 
-    return !!(this.layers[layer].tiles[y][x]);
+    return !!(this.layers[layer].tiles[y] ? this.layers[layer].tiles[y][x] : false);
 
 };
 
@@ -593,6 +593,10 @@ Tilemap.prototype.putTile = function (tile, x, y, layer) {
 
     if (x >= 0 && x < this.layers[layer].size.x && y >= 0 && y < this.layers[layer].size.y)
     {
+        if (!this.layers[layer].tiles[y]) {
+            this.layers[layer].tiles[y] = {};
+        }
+
         if (tile instanceof Phaser.Tile)
         {
             var idx = (y * this.layers[layer].size.x) + x;
@@ -680,7 +684,7 @@ Tilemap.prototype.getTile = function (x, y, layer, nonNull) {
 
     if (x >= 0 && x < this.layers[layer].size.x && y >= 0 && y < this.layers[layer].size.y)
     {
-        return this.layers[layer].tiles[y][x];
+        return this.layers[layer].tiles[y] ? this.layers[layer].tiles[y][x] : null;
     }
     else
     {
@@ -742,7 +746,7 @@ Tilemap.prototype.dump = function () {
         {
             txt += '%c  ';
 
-            if (this.layers[this.currentLayer].tiles[y][x])
+            if (this.layers[this.currentLayer].tiles[y] && this.layers[this.currentLayer].tiles[y][x])
             {
                 if (this.debugMap[this.layers[this.currentLayer].tiles[y][x]])
                 {

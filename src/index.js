@@ -41,10 +41,10 @@ var originals = {
     },
     physics: {
         p2: {
-            convertTiledmap: Phaser.Physics.P2.prototype.convertTiledmap
+            convertTiledmap: Phaser.Physics.P2 ? Phaser.Physics.P2.prototype.convertTiledmap : null
         },
         ninja: {
-            convertTiledmap: Phaser.Physics.Ninja.prototype.convertTiledmap
+            convertTiledmap: Phaser.Physics.Ninja ? Phaser.Physics.Ninja.prototype.convertTiledmap : null
         }
     }
 };
@@ -56,8 +56,14 @@ Tiled.prototype.init = function () {
     Phaser.Loader.prototype.jsonLoadComplete = Loader_jsonLoadComplete;
     Phaser.Loader.prototype.xmlLoadComplete = Loader_xmlLoadComplete;
     Phaser.Loader.prototype.packLoadComplete = Loader_packLoadComplete;
-    Phaser.Physics.P2.prototype.convertTiledmap = physics.convertTiledmapForP2;
-    Phaser.Physics.Ninja.prototype.convertTiledmap = physics.convertTiledmapForNinja;
+
+    if (Phaser.Physics.P2) {
+        Phaser.Physics.P2.prototype.convertTiledmap = physics.convertTiledmapForP2;
+    }
+
+    if (Phaser.Physics.Ninja) {
+        Phaser.Physics.Ninja.prototype.convertTiledmap = physics.convertTiledmapForNinja;
+    }
 };
 
 Tiled.prototype.destroy = function () {
@@ -69,8 +75,14 @@ Tiled.prototype.destroy = function () {
     Phaser.Loader.prototype.jsonLoadComplete = originals.loader.jsonLoadComplete;
     Phaser.Loader.prototype.xmlLoadComplete = originals.loader.xmlLoadComplete;
     Phaser.Loader.prototype.packLoadComplete = originals.loader.packLoadComplete;
-    Phaser.Physics.P2.prototype.convertTiledmap = originals.physics.p2.convertTiledmap;
-    Phaser.Physics.Ninja.prototype.convertTiledmap = originals.physics.ninja.convertTiledmap;
+
+    if (originals.physics.p2.convertTiledmap) {
+        Phaser.Physics.P2.prototype.convertTiledmap = originals.physics.p2.convertTiledmap;
+    }
+
+    if (originals.physics.ninja.convertTiledmap) {
+        Phaser.Physics.Ninja.prototype.convertTiledmap = originals.physics.ninja.convertTiledmap;
+    }
 };
 
 function GameObjectFactory_tiledmap(key, tilesetKeyMap, group) {
