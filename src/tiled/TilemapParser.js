@@ -254,7 +254,7 @@ var TilemapParser = {
                 }
             }
 
-            //add .tiles if multi-image set
+            //add .tiles if there are tile-specific properties
             for(var t = 0; t < tiles.length; ++t) {
                 var tile = tiles[t],
                     id = tile.attributes.getNamedItem('id').value,
@@ -295,6 +295,22 @@ var TilemapParser = {
                     for(var tp = 0; tp < tileprops.length; ++tp) {
                         var tileprop = tileprops[tp];
                         tileset.tileproperties[id][tileprop.attributes.getNamedItem('name').value] = tileprop.attributes.getNamedItem('value').value;
+                    }
+                }
+
+                //add all the tile animations
+                var tileanims = tile.getElementsByTagName('animation');
+                if (tileanims.length) {
+                    tileset.tiles[id].animation = [];
+                    tileanims = tileanims[0].getElementsByTagName('frame');
+                    for(var tn = 0; tn < tileanims.length; ++tn) {
+                        var tileanim = tileanims[tn].attributes,
+                            animObj = {};
+                        for (var tna = 0; tna < tileanim.length; ++tna) {
+                            animObj[tileanim[tna].name] = tileanim[tna].value;
+                        }
+
+                        tileset.tiles[id].animation.push(animObj);
                     }
                 }
             }
