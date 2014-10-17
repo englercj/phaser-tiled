@@ -1797,7 +1797,6 @@ var utils = require('../utils');
 
 /**
  * Tiled object group is a special layer that contains entities
- * TODO: This is all trash
  *
  * @class Objectlayer
  * @extends Phaser.Group
@@ -1805,8 +1804,10 @@ var utils = require('../utils');
  * @param map {Tilemap} The tilemap instance that this belongs to
  * @param group {Object} All the settings for the layer
  */
-function Objectlayer(game, map, group) {
+function Objectlayer(game, map, layer, index) {
     Phaser.Group.call(this, game, map);
+
+    this.index = index;
 
     // Non-Tiled related properties
 
@@ -1834,17 +1835,17 @@ function Objectlayer(game, map, group) {
      * @type String
      * @default ''
      */
-    this.name = group.name || '';
+    this.name = layer.name || '';
 
     // Tiled related properties
 
     /**
-     * The color to display objects in this group
+     * The color of this group in the Tiled Editor,
      *
      * @property color
      * @type
      */
-    this.color = group.color;
+    this.color = layer.color;
 
     /**
      * The user-defined properties of this group. Usually defined in the TiledEditor
@@ -1852,7 +1853,7 @@ function Objectlayer(game, map, group) {
      * @property properties
      * @type Object
      */
-    this.properties = utils.parseTiledProperties(group.properties);
+    this.properties = utils.parseTiledProperties(layer.properties);
 
     /**
      * The objects in this group that can be spawned
@@ -1860,7 +1861,7 @@ function Objectlayer(game, map, group) {
      * @property objects
      * @type Array
      */
-    this.objects = group.objects;
+    this.objects = layer.objects;
 
     /**
      * The Tiled type of tile layer, should always be 'objectgroup'
@@ -1870,13 +1871,13 @@ function Objectlayer(game, map, group) {
      * @default 'objectgroup'
      * @readOnly
      */
-    this.layerType = group.type || 'objectgroup';
+    this.layerType = layer.type || 'objectgroup';
 
     // translate some tiled properties to our inherited properties
-    this.position.x = group.x || 0;
-    this.position.y = group.y || 0;
-    this.alpha = group.opacity !== undefined ? group.opacity : 1;
-    this.visible = group.visible !== undefined ? group.visible : true;
+    this.position.x = layer.x || 0;
+    this.position.y = layer.y || 0;
+    this.alpha = layer.opacity !== undefined ? layer.opacity : 1;
+    this.visible = layer.visible !== undefined ? layer.visible : true;
 
     if (this.properties.batch) {
         this.container = this.addChild(new Phaser.SpriteBatch());
@@ -1897,7 +1898,7 @@ module.exports = Objectlayer;
  * @return {Objectlayer} Returns itself.
  * @chainable
  */
-Objectlayer.prototype.spawn = function () {
+Objectlayer.prototype.spawn = function (spawnCallback) {
     // we go through these backwards so that things that are higher in the
     // list of object gets rendered on top.
     for(var i = this.objects.length - 1; i >= 0; --i) {
@@ -1908,6 +1909,7 @@ Objectlayer.prototype.spawn = function () {
             obj;
 
         props.tileprops = {};
+        props.animation = null;
 
         // gid means a sprite from a tileset texture
         if (o.gid) {
@@ -1917,6 +1919,7 @@ Objectlayer.prototype.spawn = function () {
             if (set) {
                 props.texture = set.getTileTexture(o.gid);
                 props.tileprops = set.getTileProperties(o.gid);
+                props.animation = set.getTileAnimations(o.gid);
 
                 // if no hitArea then use the tileset's if available
                 if (!props.hitArea) {
@@ -1957,11 +1960,10 @@ Objectlayer.prototype.spawn = function () {
 
         // just a regular DisplayObject
         if (!props.texture) {
-            obj = new Phaser.Group();
+            obj = this.game.add.group(this.container, o.name);
 
             obj.width = o.width;
             obj.height = o.height;
-            obj.name = o.name;
             obj.rotation = o.rotation;
             obj.objectType = o.type;
 
@@ -1974,15 +1976,13 @@ Objectlayer.prototype.spawn = function () {
 
             // obj.enablePhysics(this.game.physics);
         } else {
-            props.width = o.width;
-            props.height = o.height;
+            obj = this.game.add.sprite(o.x, o.y, props.texture, null, this.container);
 
-            obj = this.map.spritepool.create(o.type, props.texture, props);
+            // obj.width = o.width;
+            // obj.height = o.height;
 
             obj.name = o.name;
-            obj.type = o.type;
-            obj.position.x = o.x;
-            obj.position.y = o.y;
+            obj.objectType = o.type;
 
             // obj.mass = props.mass || props.tileprops.mass;
             // obj.inertia = props.inertia || props.tileprops.inertia;
@@ -2025,10 +2025,10 @@ Objectlayer.prototype.spawn = function () {
                 }
             }
 
-            if (props.animation || props.tileprops.animation) {
-                if (obj.animations) {
-                    obj.animations.play(props.animation || props.tileprops.animation);
-                }
+            if (props.animation && obj.animations) {
+                obj.animations.copyFrameData(props.animation.data, 0);
+                obj.animations.add('tile', null, props.animation.rate, true).play();
+                // obj.animations.play(props.animation || props.tileprops.animation);
             }
 
             if (typeof o.rotation === 'number') {
@@ -2076,7 +2076,10 @@ Objectlayer.prototype.spawn = function () {
         }
 
         obj._objIndex = i;
-        this.container.addChild(obj);
+
+        if (spawnCallback) {
+            spawnCallback(obj);
+        }
     }
 
     return this;
@@ -3343,7 +3346,7 @@ Object.defineProperty(Tilelayer.prototype, 'collisionHeight', {
 
 },{"../utils":15,"./Tile":10}],12:[function(require,module,exports){
 var Tilelayer = require('./Tilelayer'),
-    // Objectlayer = require('./Objectlayer'),
+    Objectlayer = require('./Objectlayer'),
     Tile = require('./Tile'),
     Tileset = require('./Tileset'),
     TilemapParser = require('./TilemapParser'),
@@ -3504,8 +3507,8 @@ function Tilemap(game, key, tilesetKeyMap, group) {
                 break;
 
             case 'objectgroup':
-                // lyr = new Objectlayer(game, this, ldata, this.objects.length);
-                // this.objects.push(lyr);
+                lyr = new Objectlayer(game, this, ldata, this.objects.length);
+                this.objects.push(lyr);
                 break;
 
             case 'imagelayer':
@@ -4146,9 +4149,9 @@ Tilemap.prototype.postUpdate = function () {
  * @return {Tilemap} Returns itself.
  * @chainable
  */
-Tilemap.prototype.spawnObjects = function () {
+Tilemap.prototype.spawnObjects = function (spawnCallback) {
     for(var i = 0, il = this.objects.length; i < il; ++i) {
-        this.objects[i].spawn();
+        this.objects[i].spawn(spawnCallback);
     }
 
     return this;
@@ -4310,7 +4313,7 @@ Tilemap.SOUTH = 2;
  */
 Tilemap.WEST = 3;
 
-},{"../utils":15,"./Tile":10,"./Tilelayer":11,"./TilemapParser":13,"./Tileset":14}],13:[function(require,module,exports){
+},{"../utils":15,"./Objectlayer":9,"./Tile":10,"./Tilelayer":11,"./TilemapParser":13,"./Tileset":14}],13:[function(require,module,exports){
 /* jshint maxlen:200 */
 var utils = require('../utils');
 
@@ -4567,7 +4570,7 @@ var TilemapParser = {
                 }
             }
 
-            //add .tiles if multi-image set
+            //add .tiles if there are tile-specific properties
             for(var t = 0; t < tiles.length; ++t) {
                 var tile = tiles[t],
                     id = tile.attributes.getNamedItem('id').value,
@@ -4608,6 +4611,22 @@ var TilemapParser = {
                     for(var tp = 0; tp < tileprops.length; ++tp) {
                         var tileprop = tileprops[tp];
                         tileset.tileproperties[id][tileprop.attributes.getNamedItem('name').value] = tileprop.attributes.getNamedItem('value').value;
+                    }
+                }
+
+                //add all the tile animations
+                var tileanims = tile.getElementsByTagName('animation');
+                if (tileanims.length) {
+                    tileset.tiles[id].animation = [];
+                    tileanims = tileanims[0].getElementsByTagName('frame');
+                    for(var tn = 0; tn < tileanims.length; ++tn) {
+                        var tileanim = tileanims[tn].attributes,
+                            animObj = {};
+                        for (var tna = 0; tna < tileanim.length; ++tna) {
+                            animObj[tileanim[tna].name] = tileanim[tna].value;
+                        }
+
+                        tileset.tiles[id].animation.push(animObj);
                     }
                 }
             }
