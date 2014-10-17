@@ -114,6 +114,7 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
             obj;
 
         props.tileprops = {};
+        props.animation = null;
 
         // gid means a sprite from a tileset texture
         if (o.gid) {
@@ -123,6 +124,7 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
             if (set) {
                 props.texture = set.getTileTexture(o.gid);
                 props.tileprops = set.getTileProperties(o.gid);
+                props.animation = set.getTileAnimations(o.gid);
 
                 // if no hitArea then use the tileset's if available
                 if (!props.hitArea) {
@@ -228,10 +230,10 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
                 }
             }
 
-            if (props.animation || props.tileprops.animation) {
-                if (obj.animations) {
-                    obj.animations.play(props.animation || props.tileprops.animation);
-                }
+            if (props.animation && obj.animations) {
+                obj.animations.copyFrameData(props.animation.data, 0);
+                obj.animations.add('tile', null, props.animation.rate, true).play();
+                // obj.animations.play(props.animation || props.tileprops.animation);
             }
 
             if (typeof o.rotation === 'number') {
