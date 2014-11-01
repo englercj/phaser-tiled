@@ -139,6 +139,7 @@ function Tilelayer(game, map, layer, index) {
     this.alpha = layer.opacity !== undefined ? layer.opacity : 1;
     this.visible = layer.visible !== undefined ? layer.visible : true;
 
+    // physics bodies in this layer
     this.bodies = [];
 
     // some private trackers

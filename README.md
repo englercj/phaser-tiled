@@ -40,7 +40,16 @@ game.load.tiledmap('tilemap-key', 'assets/levels/tilemap.json', null, Phaser.Til
 // add the tiledmap to the game
 // this method takes the cache key for the tiledmap, a map of tileset
 // names to cache-keys, and an optional group to add the tiledmap to
-game.add.tiledmap('tilemap-key', { tileset1: 'tileset1-key', tileset2: 'tileset2-key' });
+var map = game.add.tiledmap('tilemap-key', { tileset1: 'tileset1-key', tileset2: 'tileset2-key' });
+
+// To enable collisions, use the "convertToledmap" function of your physics driver.
+// Tiles will know they collide if "collides" is set to true in the properties of that
+// tile in the tileset. You can also set `collideLeft`, `collideRight`, `collideUp`, or
+// `collideDown`.
+//
+// For example, if you are using P2 and have a layer called "collisions" that holds
+// the collider tiles; you can do this:
+game.physics.p2.convertTiledmap(map, map.getLayerIndex('collisions'));
 ```
 
 ## Why use this plugin?
@@ -138,7 +147,6 @@ Image Layer:
  - Completely unimplemented
 
 General:
- - Physics
  - Rerender on resize/rescale seems off
  - Tile render debug stuff (edges, physics, etc)
  - Memory optimizations
