@@ -236,7 +236,7 @@ Tilemap.prototype.getIndex = function (location, name) {
 * @param {number|string|object} name - The name of the layer to get.
 * @return {number} The index of the layer in this tilemap, or null if not found.
 */
-Tilemap.prototype.getTilelayerIndex = function (name) {
+Tilemap.prototype.getTilelayerIndex = Tilemap.prototype.getLayer = function (name) {
 
     return this.getIndex(this.layers, name);
 

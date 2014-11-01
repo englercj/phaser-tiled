@@ -18,7 +18,7 @@ module.exports = {
     */
     convertTiledmapForP2: function (map, layer, addToWorld, optimize) {
 
-        layer = map.getLayer(layer);
+        layer = map.getTilelayerIndex(layer);
 
         if (typeof addToWorld === 'undefined') { addToWorld = true; }
         if (typeof optimize === 'undefined') { optimize = true; }
@@ -58,7 +58,7 @@ module.exports = {
                         }
                         else
                         {
-                            body = this.createBody(sx, sy, 0, false);
+                            body = this.createBody(this.pxm(sx) * 1.25, this.pxm(sy) * 1.25, 0, false);
 
                             body.addRectangle(width, tile.height, width / 2, tile.height / 2, 0);
 
@@ -74,7 +74,7 @@ module.exports = {
                     }
                     else
                     {
-                        body = this.createBody(tile.x * tile.width, tile.y * tile.height, 0, false);
+                        body = this.createBody(this.pxm(tile.x * tile.width) * 1.25, this.pxm(tile.y * tile.height) * 1.25, 0, false);
 
                         body.addRectangle(tile.width, tile.height, tile.width / 2, tile.height / 2, 0);
 
@@ -116,7 +116,7 @@ module.exports = {
     */
     convertTiledmapForNinja: function (map, layer, slopeMap) {
 
-        layer = map.getLayer(layer);
+        layer = map.getTilelayerIndex(layer);
 
         //  If the bodies array is already populated we need to nuke it
         this.clearTilemapLayerBodies(map, layer);
