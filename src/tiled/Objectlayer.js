@@ -290,6 +290,14 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
     return this;
 };
 
+Objectlayer.prototype.getObject = function (name) {
+    for (var i = 0; i < this.objects.length; ++i) {
+        if (this.objects[i].name === name) {
+            return this.objects[i];
+        }
+    }
+};
+
 /**
  * Called internally whenever an event happens on an object, used to echo to the map.
  *

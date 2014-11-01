@@ -3,7 +3,8 @@ var Tilelayer = require('./Tilelayer'),
     Tile = require('./Tile'),
     Tileset = require('./Tileset'),
     TilemapParser = require('./TilemapParser'),
-    utils = require('../utils');
+    utils = require('../utils'),
+    C = require('../constants');
 
 /**
  * Tiled map that represents an entire tile map with multiple layers or object groups.
@@ -200,31 +201,39 @@ Tilemap.prototype.setTileSize = function (tileWidth, tileHeight) {
 * @method Phaser.Tilemap#getIndex
 * @protected
 * @param {array} location - The local array to search.
-* @param {string} name - The name of the array element to get.
+* @param {number|string|object} name - The name of the array element to get.
 * @return {number} The index of the element in the array, or null if not found.
 */
 Tilemap.prototype.getIndex = function (location, name) {
 
-    for (var i = 0; i < location.length; i++)
-    {
-        if (location[i].name === name)
+    if (typeof name === 'string') {
+        for (var i = 0; i < location.length; i++)
         {
-            return i;
+            if (location[i].name === name)
+            {
+                return i;
+            }
         }
     }
+    else if (typeof name === 'object') {
+        return name.index;
+    }
+    else if (typeof name === 'number') {
+        return name;
+    }
 
-    return null;
+    return -1;
 
 };
 
 /**
 * Gets the layer index based on its name.
 *
-* @method Phaser.Tilemap#getLayerIndex
-* @param {string} name - The name of the layer to get.
+* @method Phaser.Tilemap#getTilelayerIndex
+* @param {number|string|object} name - The name of the layer to get.
 * @return {number} The index of the layer in this tilemap, or null if not found.
 */
-Tilemap.prototype.getLayerIndex = function (name) {
+Tilemap.prototype.getTilelayerIndex = function (name) {
 
     return this.getIndex(this.layers, name);
 
@@ -234,7 +243,7 @@ Tilemap.prototype.getLayerIndex = function (name) {
 * Gets the tileset index based on its name.
 *
 * @method Phaser.Tilemap#getTilesetIndex
-* @param {string} name - The name of the tileset to get.
+* @param {number|string|object} name - The name of the tileset to get.
 * @return {number} The index of the tileset in this tilemap, or null if not found.
 */
 Tilemap.prototype.getTilesetIndex = function (name) {
@@ -246,11 +255,11 @@ Tilemap.prototype.getTilesetIndex = function (name) {
 /**
 * Gets the image index based on its name.
 *
-* @method Phaser.Tilemap#getImageIndex
-* @param {string} name - The name of the image to get.
+* @method Phaser.Tilemap#getImagelayer
+* @param {number|string|object} name - The name of the image to get.
 * @return {number} The index of the image in this tilemap, or null if not found.
 */
-Tilemap.prototype.getImageIndex = function (name) {
+Tilemap.prototype.getImagelayerIndex = function (name) {
 
     return this.getIndex(this.images, name);
 
@@ -259,40 +268,66 @@ Tilemap.prototype.getImageIndex = function (name) {
 /**
 * Gets the object index based on its name.
 *
-* @method Phaser.Tilemap#getObjectIndex
-* @param {string} name - The name of the object to get.
+* @method Phaser.Tilemap#getObjectlayerIndex
+* @param {number|string|object} name - The name of the object to get.
 * @return {number} The index of the object in this tilemap, or null if not found.
 */
-Tilemap.prototype.getObjectIndex = function (name) {
+Tilemap.prototype.getObjectlayerIndex = function (name) {
 
     return this.getIndex(this.objects, name);
 
 };
 
+
 /**
-* Gets the TilemapLayer index as used in the setCollision calls.
+* Gets the layer based on its name.
 *
-* @method Phaser.Tilemap#getLayer
-* @protected
-* @param {number|string|Phaser.TilemapLayer} layer - The layer to operate on, defaults to this.currentLayer.
-* @return {number} The TilemapLayer index.
+* @method Phaser.Tilemap#getTilelayer
+* @param {number|string|object} name - The name of the layer to get.
+* @return {Tilelayer} The index of the layer in this tilemap, or null if not found.
 */
-Tilemap.prototype.getLayer = function (layer) {
+Tilemap.prototype.getTilelayer = function (name) {
 
-    if (typeof layer === 'undefined')
-    {
-        layer = this.currentLayer;
-    }
-    else if (typeof layer === 'string')
-    {
-        layer = this.getLayerIndex(layer);
-    }
-    else if (layer instanceof Tilelayer)
-    {
-        layer = layer.index;
-    }
+    return this.layers[this.getTilelayerIndex(name)];
 
-    return layer;
+};
+
+/**
+* Gets the tileset index based on its name.
+*
+* @method Phaser.Tilemap#getTileset
+* @param {number|string|object} name - The name of the tileset to get.
+* @return {Tileset} The index of the tileset in this tilemap, or null if not found.
+*/
+Tilemap.prototype.getTileset = function (name) {
+
+    return this.tilesets[this.getTilesetIndex(name)];
+
+};
+
+/**
+* Gets the image index based on its name.
+*
+* @method Phaser.Tilemap#getImagelayer
+* @param {number|string|object} name - The name of the image to get.
+* @return {Image} The index of the image in this tilemap, or null if not found.
+*/
+Tilemap.prototype.getImagelayer = function (name) {
+
+    return this.images[this.getImagelayerIndex(name)];
+
+};
+
+/**
+* Gets the object index based on its name.
+*
+* @method Phaser.Tilemap#getObjectlayer
+* @param {number|string|object} name - The name of the object to get.
+* @return {Objectlayer} The index of the object in this tilemap, or null if not found.
+*/
+Tilemap.prototype.getObjectlayer = function (name) {
+
+    return this.objects[this.getObjectlayerIndex(name)];
 
 };
 
@@ -402,7 +437,7 @@ Tilemap.prototype.calculateFaces = function (layer) {
 * Mostly used as an internal function by calculateFaces.
 *
 * @method Phaser.Tilemap#getTileAbove
-* @param {number} layer - The local layer index to get the tile from. Can be determined by Tilemap.getLayer().
+* @param {number} layer - The local layer index to get the tile from.
 * @param {number} x - The x coordinate to get the tile from. In tiles, not pixels.
 * @param {number} y - The y coordinate to get the tile from. In tiles, not pixels.
 */
@@ -422,7 +457,7 @@ Tilemap.prototype.getTileAbove = function (layer, x, y) {
 * Mostly used as an internal function by calculateFaces.
 *
 * @method Phaser.Tilemap#getTileBelow
-* @param {number} layer - The local layer index to get the tile from. Can be determined by Tilemap.getLayer().
+* @param {number} layer - The local layer index to get the tile from.
 * @param {number} x - The x coordinate to get the tile from. In tiles, not pixels.
 * @param {number} y - The y coordinate to get the tile from. In tiles, not pixels.
 */
@@ -442,7 +477,7 @@ Tilemap.prototype.getTileBelow = function (layer, x, y) {
 * Mostly used as an internal function by calculateFaces.
 *
 * @method Phaser.Tilemap#getTileLeft
-* @param {number} layer - The local layer index to get the tile from. Can be determined by Tilemap.getLayer().
+* @param {number} layer - The local layer index to get the tile from.
 * @param {number} x - The x coordinate to get the tile from. In tiles, not pixels.
 * @param {number} y - The y coordinate to get the tile from. In tiles, not pixels.
 */
@@ -462,7 +497,7 @@ Tilemap.prototype.getTileLeft = function (layer, x, y) {
 * Mostly used as an internal function by calculateFaces.
 *
 * @method Phaser.Tilemap#getTileRight
-* @param {number} layer - The local layer index to get the tile from. Can be determined by Tilemap.getLayer().
+* @param {number} layer - The local layer index to get the tile from.
 * @param {number} x - The x coordinate to get the tile from. In tiles, not pixels.
 * @param {number} y - The y coordinate to get the tile from. In tiles, not pixels.
 */
@@ -485,7 +520,7 @@ Tilemap.prototype.getTileRight = function (layer, x, y) {
 */
 Tilemap.prototype.setLayer = function (layer) {
 
-    layer = this.getLayer(layer);
+    layer = this.getTilelayerIndex(layer);
 
     if (this.layers[layer])
     {
@@ -505,7 +540,7 @@ Tilemap.prototype.setLayer = function (layer) {
 */
 Tilemap.prototype.hasTile = function (x, y, layer) {
 
-    layer = this.getLayer(layer);
+    layer = this.getTilelayerIndex(layer);
 
     return !!(this.layers[layer].tiles[y][x]);
 
@@ -522,7 +557,7 @@ Tilemap.prototype.hasTile = function (x, y, layer) {
 */
 Tilemap.prototype.removeTile = function (x, y, layer) {
 
-    layer = this.getLayer(layer);
+    layer = this.getTilelayerIndex(layer);
 
     if (x >= 0 && x < this.layers[layer].size.x && y >= 0 && y < this.layers[layer].size.y)
     {
@@ -555,8 +590,6 @@ Tilemap.prototype.removeTile = function (x, y, layer) {
 */
 Tilemap.prototype.removeTileWorldXY = function (x, y, tileWidth, tileHeight, layer) {
 
-    layer = this.getLayer(layer);
-
     x = this.game.math.snapToFloor(x, tileWidth) / tileWidth;
     y = this.game.math.snapToFloor(y, tileHeight) / tileHeight;
 
@@ -583,7 +616,7 @@ Tilemap.prototype.putTile = function (tile, x, y, layer) {
         return this.removeTile(x, y, layer);
     }
 
-    layer = this.getLayer(layer);
+    layer = this.getTilelayerIndex(layer);
 
     var tileId,
         tileset;
@@ -649,8 +682,6 @@ Tilemap.prototype.putTile = function (tile, x, y, layer) {
 */
 Tilemap.prototype.putTileWorldXY = function (tile, x, y, tileWidth, tileHeight, layer) {
 
-    layer = this.getLayer(layer);
-
     x = this.game.math.snapToFloor(x, tileWidth) / tileWidth;
     y = this.game.math.snapToFloor(y, tileHeight) / tileHeight;
 
@@ -673,7 +704,7 @@ Tilemap.prototype.getTile = function (x, y, layer, nonNull) {
 
     if (typeof nonNull === 'undefined') { nonNull = false; }
 
-    layer = this.getLayer(layer);
+    layer = this.getTilelayerIndex(layer);
 
     if (x >= 0 && x < this.layers[layer].size.x && y >= 0 && y < this.layers[layer].size.y)
     {
@@ -701,8 +732,6 @@ Tilemap.prototype.getTileWorldXY = function (x, y, tileWidth, tileHeight, layer)
 
     if (typeof tileWidth === 'undefined') { tileWidth = this.tileWidth; }
     if (typeof tileHeight === 'undefined') { tileHeight = this.tileHeight; }
-
-    layer = this.getLayer(layer);
 
     x = this.game.math.snapToFloor(x, tileWidth) / tileWidth;
     y = this.game.math.snapToFloor(y, tileHeight) / tileHeight;
@@ -910,58 +939,6 @@ Object.defineProperty(Tilemap.prototype, 'layer', {
 
 });
 
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.CSV = 0;
-
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.TILED_JSON = 1;
-
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.TILED_XML = 2;
-
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.NORTH = 0;
-
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.EAST = 1;
-
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.SOUTH = 2;
-
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.WEST = 3;
+for (var key in C) {
+    Tilemap[key] = C[key];
+}

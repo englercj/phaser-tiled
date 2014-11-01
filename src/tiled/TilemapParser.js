@@ -1,5 +1,6 @@
 /* jshint maxlen:200 */
-var utils = require('../utils');
+var utils = require('../utils'),
+    C = require('../constants');
 
 var TilemapParser = {
     /**
@@ -35,13 +36,13 @@ var TilemapParser = {
         var map = game.cache.getTilemapData(key);
 
         if (map) {
-            if (map.format === Phaser.Plugin.Tiled.Tilemap.CSV) {
+            if (map.format === C.CSV) {
                 return this.parseCSV(key, map.data, tileWidth, tileHeight);
             }
-            else if (map.format === Phaser.Plugin.Tiled.Tilemap.TILED_XML) {
+            else if (map.format === C.TILED_XML) {
                 return this.parseTiledXML(map.data);
             }
-            else if (!map.format || map.format === Phaser.Plugin.Tiled.Tilemap.TILED_JSON) {
+            else if (!map.format || map.format === C.TILED_JSON) {
                 return this.parseTiledJSON(map.data);
             }
         }
