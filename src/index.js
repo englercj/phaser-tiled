@@ -41,7 +41,8 @@ var originals = {
     },
     physics: {
         p2: {
-            convertTiledmap: Phaser.Physics.P2 ? Phaser.Physics.P2.prototype.convertTiledmap : null
+            convertTiledmap: Phaser.Physics.P2 ? Phaser.Physics.P2.prototype.convertTiledmap : null,
+            convertTiledCollisionObjects: Phaser.Physics.P2 ? Phaser.Physics.P2.prototype.convertTiledCollisionObjects : null
         },
         ninja: {
             convertTiledmap: Phaser.Physics.Ninja ? Phaser.Physics.Ninja.prototype.convertTiledmap : null
@@ -58,11 +59,12 @@ Tiled.prototype.init = function () {
     Phaser.Loader.prototype.packLoadComplete = Loader_packLoadComplete;
 
     if (Phaser.Physics.P2) {
-        Phaser.Physics.P2.prototype.convertTiledmap = physics.convertTiledmapForP2;
+        Phaser.Physics.P2.prototype.convertTiledmap = physics.p2.convertTiledmap;
+        Phaser.Physics.P2.prototype.convertTiledCollisionObjects = physics.p2.convertTiledCollisionObjects;
     }
 
     if (Phaser.Physics.Ninja) {
-        Phaser.Physics.Ninja.prototype.convertTiledmap = physics.convertTiledmapForNinja;
+        Phaser.Physics.Ninja.prototype.convertTiledmap = physics.ninja.convertTiledmap;
     }
 };
 
@@ -78,6 +80,7 @@ Tiled.prototype.destroy = function () {
 
     if (originals.physics.p2.convertTiledmap) {
         Phaser.Physics.P2.prototype.convertTiledmap = originals.physics.p2.convertTiledmap;
+        Phaser.Physics.P2.prototype.convertTiledCollisionObjects = originals.physics.p2.convertTiledCollisionObjects;
     }
 
     if (originals.physics.ninja.convertTiledmap) {
