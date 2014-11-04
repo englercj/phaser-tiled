@@ -30,27 +30,88 @@ game.add.plugin(Phaser.Plugin.Tiled);
 Then you can add a Tiled map to your game like this:
 
 ```js
-// load the images for your tilesets
-game.load.image('tileset1-key', 'assets/levels/tileset1.png');
-game.load.image('tileset2-key', 'assets/levels/tileset2.png');
+// By using the built-in cache key creator, the plugin can
+// automagically find all the necessary items in the cache
+var cacheKey = Phaser.Plugin.Tiled.utils.cacheKey;
 
 // load the tiled map, notice it is "tiledmap" and not "tilemap"
-game.load.tiledmap('tilemap-key', 'assets/levels/tilemap.json', null, Phaser.Tilemap.TILED_JSON);
+game.load.tiledmap(cacheKey('my-tiledmap', 'tiledmap'), 'assets/levels/tilemap.json', null, Phaser.Tilemap.TILED_JSON);
+
+// load the images for your tilesets, make sure the last param to "cacheKey" is
+// the name of the tileset in your map so the plugin can find it later
+game.load.image(cacheKey('my-tiledmap', 'tileset', 'tileset1-name'), 'assets/levels/tileset1.png');
+game.load.image(cacheKey('my-tiledmap', 'tileset', 'tileset2-name'), 'assets/levels/tileset2.png');
+
+// if you have image layers, be sure to load those too! Again,
+// make sure the last param is the name of your layer in the map.
+game.load.image(cacheKey('my-tiledmap', 'layer', 'layer-name'), 'assets/levels/layer.png');
+
+////////////
+// Later after loading is complete:
 
 // add the tiledmap to the game
-// this method takes the cache key for the tiledmap, a map of tileset
-// names to cache-keys, and an optional group to add the tiledmap to
-var map = game.add.tiledmap('tilemap-key', { tileset1: 'tileset1-key', tileset2: 'tileset2-key' });
-
-// To enable collisions, use the "convertToledmap" function of your physics driver.
-// Tiles will know they collide if "collides" is set to true in the properties of that
-// tile in the tileset. You can also set `collideLeft`, `collideRight`, `collideUp`, or
-// `collideDown`.
-//
-// For example, if you are using P2 and have a layer called "collisions" that holds
-// the collider tiles; you can do this:
-game.physics.p2.convertTiledmap(map, map.getLayerIndex('collisions'));
+// this method takes the key for the tiledmap which has been used in the cacheKey calls
+// earlier, and an optional group to add the tilemap to (defaults to game.world).
+var map = game.add.tiledmap('my-tilemap');
 ```
+
+That can get pretty heavy, and hardcoding what to load and how to name it can stink! Luckily, there is an easier
+way to handle it. Instead of hard-coding what the tilemap should load and be named, this plugin has a gulp task
+that can generate a Phaser Asset Pack that describes what and how to load the tiledmap. If you have this pack
+it becomes this simple to load and create a tiledmap:
+
+```js
+// the key will be the filename of the map without the extension.
+game.load.pack('my-tiledmap', 'assets/levels/tilemap-assets.json');
+
+////////////
+// Later after loading is complete:
+var map = game.add.tiledmap('my-tilemap');
+```
+
+Wow, that was a lot easier! You can find out more about the generator on [it's GitHub page][10].
+
+[10]: https://github.com/englercj/gulp-phaser-tiled-pack
+
+### Physics
+
+This plugin comes with a couple ways to implement physics for your games. Right now the only officially supported engine
+is p2.js, but hopefully arcade and others can join the party soon (need it now? submit a PR!).
+
+#### Using the object tools
+
+To create the physics bodies based on a tilemap, the simplest way is to create an object layer in Tiled Editor and use
+the object tools to draw physics. You can use the rectangle, ellipse, polygon, or polyline tools. The only caveats are
+that circles (not ellipses) are supported so height and width of the ellipse must be the same, and if you use the polyline
+tool be sure to close the path to make a convex polygon!
+
+Here is how you can convert your objects into collision bodies:
+
+```js
+var map = game.add.tiledmap('tilemap-key');
+
+game.physics.p2.convertTiledCollisionObjects(map, 'objectlayer-name');
+```
+
+That is it! All the objects in the layer named `objectlayer-name` will be converted to p2 physics bodies and added
+to the simulation.
+
+#### Using collidable tiles
+
+The second method is to set the `collides` custom property on tiles in a tileset to `true`. This tells the engine that
+that specific tile is collidable wherever it is in the map, and a body will be created for it.
+
+Here is how you can convert your collidable tiles into collision bodies:
+
+```js
+var map = game.add.tiledmap('tilemap-key');
+
+game.physics.p2.convertTiledmap(map, 'tilelayer-name');
+```
+
+That is it! All the collidable tiles in the layer named `tilelayer-name` will be converted to p2 physics bodies
+and added to the simulation. This will also try to combine bodies that are adjacent on the same X axis into a single
+body to reduce the total number of bodies that are created. This algorithm can (and should) be much improved.
 
 ## Why use this plugin?
 
