@@ -1,7 +1,8 @@
 # gulp-tiled-pack
 
-This is a gulp plugin that will create phaser asset packs for tilemaps. Right now, it only works with
-the JSON formatted maps.
+This is a gulp plugin that will create phaser asset packs for tilemaps. This is useful to not
+have to hard-code the assets required by a tilemap into your code. You can change the layers,
+tilesets, images, etc. and just use this tool to regenerate the asset pack.
 
 ## Usage
 

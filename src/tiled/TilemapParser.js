@@ -33,7 +33,7 @@ var TilemapParser = {
             return this.getEmptyData(tileWidth, tileHeight, width, height);
         }
 
-        var map = game.cache.getTilemapData(key);
+        var map = game.cache.getTilemapData(utils.cacheKey(key, 'tiledmap'));
 
         if (map) {
             if (map.format === C.CSV) {

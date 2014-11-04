@@ -27,6 +27,7 @@ Tiled.Tileset       = require('./tiled/Tileset');
 Tiled.Tilemap       = require('./tiled/Tilemap');
 Tiled.Tilelayer     = require('./tiled/Tilelayer');
 Tiled.Objectlayer   = require('./tiled/Objectlayer');
+Tiled.utils         = utils;
 
 var originals = {
     gameObjectFactory: {

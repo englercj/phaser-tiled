@@ -14,12 +14,10 @@ var Tilelayer = require('./Tilelayer'),
  * @class Tilemap
  * @constructor
  * @param {Phaser.Game} game - Game reference to the currently running game.
- * @param {string} [key] - The key of the tilemap data as stored in the Cache. If you're creating a
- *      blank map either leave this parameter out or pass `null`.
- * @param {object} [tilesetKeyMap] - Map of tileset names to cache keys.
+ * @param {string} [key] - The name of the tiledmap, this is usually the filename without the extension.
  * @param {Phaser.Group|Phaser.SpriteBatch} [group] - Group to add the tilemap to.
  */
-function Tilemap(game, key, tilesetKeyMap, group) {
+function Tilemap(game, key, group) {
     Phaser.Group.call(this, game, group, key);
 
     var data = TilemapParser.parse(game, key);
@@ -146,7 +144,7 @@ function Tilemap(game, key, tilesetKeyMap, group) {
     // create each tileset
     for(var t = 0, tl = data.tilesets.length; t < tl; ++t) {
         var ts = data.tilesets[t];
-        this.tilesets.push(new Tileset(game, tilesetKeyMap[ts.name], ts));
+        this.tilesets.push(new Tileset(game, utils.cacheKey(key, 'tileset', ts.name), ts));
     }
 
     // create each layer
@@ -169,10 +167,12 @@ function Tilemap(game, key, tilesetKeyMap, group) {
                 break;
 
             case 'imagelayer':
-                //TODO: layer texture data
-                // lyr = new Tile(game);
-                // this.images.push(lyr);
-                // this.addChild(lyr);
+                lyr = game.add.sprite(ldata.x, ldata.y, utils.cacheKey(key, 'layer', ldata.name), null, this);
+
+                lyr.visible = ldata.visible;
+                lyr.apha = ldata.opacity;
+
+                this.images.push(lyr);
                 break;
         }
     }

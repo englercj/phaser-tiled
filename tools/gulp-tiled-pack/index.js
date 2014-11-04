@@ -3,6 +3,7 @@ var through = require('through2'),
     parseXml = require('xml2js').parseString,
     path = require('path'),
     File = require('vinyl'),
+    utils = require('../../src/utils'),
     app = 'gulp-tiled-pack';
 
 function tilemapPack(options) {
@@ -66,7 +67,7 @@ function tilemapPack(options) {
                         assets.push({
                             type: 'image',
                             subtype: 'tileset',
-                            key: key + '_tileset_' + (xml ? tilesets[i].$.name : tilesets[i].name),
+                            key: utils.cacheKey(key, 'tileset', (xml ? tilesets[i].$.name : tilesets[i].name)),
                             name: (xml ? tilesets[i].$.name : tilesets[i].name),
                             url: path.join(options.baseUrl, relDir, imgsrc).replace(/\\/g, '/'),
                             overwrite: false
@@ -81,7 +82,7 @@ function tilemapPack(options) {
                         assets.push({
                             type: 'image',
                             subtype: 'layer',
-                            key: key + '_layer_' + (xml ? imglayers[i].$.name : imglayers[i].name),
+                            key: utils.cacheKey(key, 'layer', (xml ? imglayers[i].$.name : imglayers[i].name)),
                             name: (xml ? imglayers[i].$.name : imglayers[i].name),
                             url: path.join(options.baseUrl, relDir, imgsrc).replace(/\\/g, '/'),
                             overwrite: false
@@ -91,7 +92,7 @@ function tilemapPack(options) {
 
                 assets.push({
                     type: 'tiledmap',
-                    key: 'tiledmap_' + key,
+                    key: utils.cacheKey(key, 'tiledmap'),
                     url: path.join(options.baseUrl, file.relative).replace(/\\/g, '/'),
                     format: xml ? 'TILED_XML' : 'TILED_JSON'
                 });
