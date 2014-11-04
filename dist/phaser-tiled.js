@@ -90,8 +90,8 @@ Tiled.prototype.destroy = function () {
     }
 };
 
-function GameObjectFactory_tiledmap(key, tilesetKeyMap, group) {
-    return new Tiled.Tilemap(this.game, key, tilesetKeyMap, group);
+function GameObjectFactory_tiledmap(key, group) {
+    return new Tiled.Tilemap(this.game, key, group);
 }
 
 /**
