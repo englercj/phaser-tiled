@@ -76,7 +76,9 @@ module.exports = {
                         }
                         else
                         {
-                            body = this.createBody(this.pxm(tile.x * tile.width) * 1.25, this.pxm(tile.y * tile.height) * 1.25, 0, false);
+                            sx = tile.x * tile.width;
+                            sy = tile.x * tile.width;
+                            body = this.createBody(this.pxm(sx) * 1.25, this.pxm(sy) * 1.25, 0, false);
 
                             body.addRectangle(tile.width, tile.height, tile.width / 2, tile.height / 2, 0);
 
@@ -100,7 +102,7 @@ module.exports = {
         *
         * @method Phaser.Physics.P2#convertCollisionObjects
         * @param {Phaser.Tilemap} map - The Tilemap to get the map data from.
-        * @param {number|string|Phaser.TilemapLayer} [layer] - The layer to operate on. If not given will default to map.currentLayer.
+        * @param {number|string|Phaser.TilemapLayer} [layer] - The layer to operate on, defaults to map.currentLayer.
         * @param {boolean} [addToWorld=true] - If true it will automatically add each body to the world.
         * @return {array} An array of the Phaser.Physics.Body objects that have been created.
         */

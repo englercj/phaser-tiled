@@ -18,7 +18,7 @@ utils.stringToBuffer = function (str) {
 };
 
 utils.cacheKey = function (key, type, name) {
-    return mapKey + '_' + type + (name ? '_' + name : '');
+    return key + '_' + type + (name ? '_' + name : '');
 };
 
 utils.decompressBase64Data = function (raw, encoding, compression) {
