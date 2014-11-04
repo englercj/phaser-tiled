@@ -1,6 +1,7 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var n;"undefined"!=typeof window?n=window:"undefined"!=typeof global?n=global:"undefined"!=typeof self&&(n=self);var f=n;f=f.Phaser||(f.Phaser={}),f=f.Plugin||(f.Plugin={}),f.Tiled=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /* jshint -W106 */
-var utils = require('./utils');
+var utils = require('./utils'),
+    physics = require('./physics');
 
 /**
  * @class Phaser.Plugin.Tiled
@@ -22,11 +23,12 @@ Tiled.prototype.constructor = Tiled;
 
 module.exports = Tiled;
 
-Tiled.Tile         = require('./tiled/Tile');
-Tiled.Tileset      = require('./tiled/Tileset');
-Tiled.Tilemap      = require('./tiled/Tilemap');
-Tiled.Tilelayer    = require('./tiled/Tilelayer');
-Tiled.Objectlayer  = require('./tiled/Objectlayer');
+Tiled.Tile          = require('./tiled/Tile');
+Tiled.Tileset       = require('./tiled/Tileset');
+Tiled.Tilemap       = require('./tiled/Tilemap');
+Tiled.Tilelayer     = require('./tiled/Tilelayer');
+Tiled.Objectlayer   = require('./tiled/Objectlayer');
+Tiled.utils         = utils;
 
 var originals = {
     gameObjectFactory: {
@@ -38,6 +40,15 @@ var originals = {
         jsonLoadComplete: Phaser.Loader.prototype.jsonLoadComplete,
         xmlLoadComplete: Phaser.Loader.prototype.xmlLoadComplete,
         packLoadComplete: Phaser.Loader.prototype.packLoadComplete
+    },
+    physics: {
+        p2: {
+            convertTiledmap: Phaser.Physics.P2 ? Phaser.Physics.P2.prototype.convertTiledmap : null,
+            convertTiledCollisionObjects: Phaser.Physics.P2 ? Phaser.Physics.P2.prototype.convertTiledCollisionObjects : null
+        },
+        ninja: {
+            convertTiledmap: Phaser.Physics.Ninja ? Phaser.Physics.Ninja.prototype.convertTiledmap : null
+        }
     }
 };
 
@@ -48,6 +59,15 @@ Tiled.prototype.init = function () {
     Phaser.Loader.prototype.jsonLoadComplete = Loader_jsonLoadComplete;
     Phaser.Loader.prototype.xmlLoadComplete = Loader_xmlLoadComplete;
     Phaser.Loader.prototype.packLoadComplete = Loader_packLoadComplete;
+
+    if (Phaser.Physics.P2) {
+        Phaser.Physics.P2.prototype.convertTiledmap = physics.p2.convertTiledmap;
+        Phaser.Physics.P2.prototype.convertTiledCollisionObjects = physics.p2.convertTiledCollisionObjects;
+    }
+
+    if (Phaser.Physics.Ninja) {
+        Phaser.Physics.Ninja.prototype.convertTiledmap = physics.ninja.convertTiledmap;
+    }
 };
 
 Tiled.prototype.destroy = function () {
@@ -59,6 +79,15 @@ Tiled.prototype.destroy = function () {
     Phaser.Loader.prototype.jsonLoadComplete = originals.loader.jsonLoadComplete;
     Phaser.Loader.prototype.xmlLoadComplete = originals.loader.xmlLoadComplete;
     Phaser.Loader.prototype.packLoadComplete = originals.loader.packLoadComplete;
+
+    if (originals.physics.p2.convertTiledmap) {
+        Phaser.Physics.P2.prototype.convertTiledmap = originals.physics.p2.convertTiledmap;
+        Phaser.Physics.P2.prototype.convertTiledCollisionObjects = originals.physics.p2.convertTiledCollisionObjects;
+    }
+
+    if (originals.physics.ninja.convertTiledmap) {
+        Phaser.Physics.Ninja.prototype.convertTiledmap = originals.physics.ninja.convertTiledmap;
+    }
 };
 
 function GameObjectFactory_tiledmap(key, tilesetKeyMap, group) {
@@ -312,7 +341,7 @@ function Loader_packLoadComplete(index, parse) {
 
 /* jshint +W106 */
 
-},{"./tiled/Objectlayer":9,"./tiled/Tile":10,"./tiled/Tilelayer":11,"./tiled/Tilemap":12,"./tiled/Tileset":14,"./utils":15}],2:[function(require,module,exports){
+},{"./physics":10,"./tiled/Objectlayer":11,"./tiled/Tile":12,"./tiled/Tilelayer":13,"./tiled/Tilemap":14,"./tiled/Tileset":16,"./utils":17}],2:[function(require,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -1215,7 +1244,7 @@ Buffer.prototype.copy = function (target, target_start, start, end) {
 
   var len = end - start
 
-  if (len < 100 || !Buffer.TYPED_ARRAY_SUPPORT) {
+  if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
     for (var i = 0; i < len; i++) {
       target[i + target_start] = this[i + start]
     }
@@ -1284,6 +1313,7 @@ var BP = Buffer.prototype
  * Augment a Uint8Array *instance* (not the Uint8Array class!) with Buffer methods
  */
 Buffer._augment = function (arr) {
+  arr.constructor = Buffer
   arr._isBuffer = true
 
   // save reference to original Uint8Array get/set methods before overwriting
@@ -1793,6 +1823,277 @@ function Cb(b){var a=new Buffer(b.length),c,d;c=0;for(d=b.length;c<d;++c)a[c]=b[
 
 }).call(this,require('_process'),require("buffer").Buffer)
 },{"_process":7,"buffer":3}],9:[function(require,module,exports){
+module.exports = {
+    /**
+     * @property CSV
+     * @type {Number}
+     * @static
+     * @final
+     */
+    CSV: 0,
+
+    /**
+     * @property CSV
+     * @type {Number}
+     * @static
+     * @final
+     */
+    TILED_JSON: 1,
+
+    /**
+     * @property CSV
+     * @type {Number}
+     * @static
+     * @final
+     */
+    TILED_XML: 2,
+
+    /**
+     * @property CSV
+     * @type {Number}
+     * @static
+     * @final
+     */
+    NORTH: 0,
+
+    /**
+     * @property CSV
+     * @type {Number}
+     * @static
+     * @final
+     */
+    EAST: 1,
+
+    /**
+     * @property CSV
+     * @type {Number}
+     * @static
+     * @final
+     */
+    SOUTH: 2,
+
+    /**
+     * @property CSV
+     * @type {Number}
+     * @static
+     * @final
+     */
+    WEST: 3
+};
+
+},{}],10:[function(require,module,exports){
+module.exports = {
+    p2: {
+        /**
+        * Goes through all tiles in the given Tilemap and TilemapLayer and converts those set to collide into physics
+        * bodies. Only call this *after* you have specified all of the tiles you wish to collide with calls like
+        * Tilemap.setCollisionBetween, etc. Every time you call this method it will destroy any previously created
+        * bodies and remove them from the world. Therefore understand it's a very expensive operation and not to be
+        * done in a core game update loop.
+        *
+        * @method Phaser.Physics.P2#convertTilemap
+        * @param {Phaser.Tilemap} map - The Tilemap to get the map data from.
+        * @param {number|string|Phaser.TilemapLayer} [layer] - The layer to operate on. If not given will default
+        *       to map.currentLayer.
+        * @param {boolean} [addToWorld=true] - If true it will automatically add each body to the world, otherwise
+        *       it's up to you to do so.
+        * @param {boolean} [optimize=true] - If true adjacent colliding tiles will be combined into a single body
+        *       to save processing. However it means you cannot perform specific Tile to Body collision responses.
+        * @return {array} An array of the Phaser.Physics.P2.Body objects that were created.
+        */
+        convertTiledmap: function (map, layer, addToWorld, optimize) {
+
+            if (typeof addToWorld === 'undefined') { addToWorld = true; }
+            if (typeof optimize === 'undefined') { optimize = true; }
+            if (typeof layer === 'undefined') { layer = map.currentLayer; }
+
+            layer = map.getTilelayer(layer);
+
+            //  If the bodies array is already populated we need to nuke it
+            this.clearTilemapLayerBodies(map, layer.index);
+
+            var width = 0,
+                sx = 0,
+                sy = 0,
+                tile, body, right;
+
+            for (var y = 0, h = layer.size.y; y < h; y++)
+            {
+                width = 0;
+
+                for (var x = 0, w = layer.size.x; x < w; x++)
+                {
+                    tile = layer.tiles[y][x];
+
+                    if (tile && tile.collides)
+                    {
+                        if (optimize)
+                        {
+                            right = map.getTileRight(layer.index, x, y);
+
+                            if (width === 0)
+                            {
+                                sx = tile.x * tile.width;
+                                sy = tile.y * tile.height;
+                                width = tile.width;
+                            }
+
+                            if (right && right.collides)
+                            {
+                                width += tile.width;
+                            }
+                            else
+                            {
+                                body = this.createBody(this.pxm(sx) * 1.25, this.pxm(sy) * 1.25, 0, false);
+
+                                body.addRectangle(width, tile.height, width / 2, tile.height / 2, 0);
+
+                                if (addToWorld)
+                                {
+                                    this.addBody(body);
+                                }
+
+                                layer.bodies.push(body);
+
+                                width = 0;
+                            }
+                        }
+                        else
+                        {
+                            sx = tile.x * tile.width;
+                            sy = tile.x * tile.width;
+                            body = this.createBody(this.pxm(sx) * 1.25, this.pxm(sy) * 1.25, 0, false);
+
+                            body.addRectangle(tile.width, tile.height, tile.width / 2, tile.height / 2, 0);
+
+                            if (addToWorld)
+                            {
+                                this.addBody(body);
+                            }
+
+                            layer.bodies.push(body);
+                        }
+                    }
+                }
+            }
+
+            return layer.bodies;
+
+        },
+        /**
+        * Converts all of the polylines objects inside a Tiled ObjectGroup into physics bodies that are added to the world.
+        * Note that the polylines must be created in such a way that they can withstand polygon decomposition.
+        *
+        * @method Phaser.Physics.P2#convertCollisionObjects
+        * @param {Phaser.Tilemap} map - The Tilemap to get the map data from.
+        * @param {number|string|Phaser.TilemapLayer} [layer] - The layer to operate on, defaults to map.currentLayer.
+        * @param {boolean} [addToWorld=true] - If true it will automatically add each body to the world.
+        * @return {array} An array of the Phaser.Physics.Body objects that have been created.
+        */
+        convertTiledCollisionObjects: function (map, layer, addToWorld) {
+
+            if (typeof addToWorld === 'undefined') { addToWorld = true; }
+            if (typeof layer === 'undefined') { layer = map.currentLayer; }
+
+            layer = map.getObjectlayer(layer);
+
+            for (var i = 0, len = layer.objects.length; i < len; i++)
+            {
+                var object = layer.objects[i];
+
+                var body = this.createBody(object.x, object.y, 0, false);
+
+                // polygon defined area
+                if (object.polygon || object.polyline) {
+                    if (!body.addPolygon(null, (object.polygon || object.polyline).map(mapPointToArray))) {
+                        console.warn('Unable to add poly collision body for object:', object);
+                        continue;
+                    }
+                }
+                // currently only circles are supported by P2, so we just use the width
+                else if (object.ellipse) {
+                    body.addCircle(object.width, object.width / 2, object.width / 2, object.rotation);
+                }
+                // no polygon, use rectangle defined by object itself
+                else {
+                    body.addRectangle(object.width, object.height, object.width / 2, object.height / 2, object.rotation);
+                }
+
+                if (addToWorld) {
+                    this.addBody(body);
+                }
+
+                layer.bodies.push(body);
+            }
+        }
+    },
+
+    ninja: {
+        /**
+        * Goes through all tiles in the given Tilemap and TilemapLayer and converts those set to collide into physics
+        * bodies. Only call this *after* you have specified all of the tiles you wish to collide with calls like
+        * Tilemap.setCollisionBetween, etc. Every time you call this method it will destroy any previously created
+        * bodies and remove them from the world. Therefore understand it's a very expensive operation and not to be
+        * done in a core game update loop.
+        *
+        * In Ninja the Tiles have an ID from 0 to 33, where 0 is 'empty', 1 is a full tile, 2 is a 45-degree slope,
+        * etc. You can find the ID list either at the very bottom of `Tile.js`, or in a handy visual reference in the
+        * `resources/Ninja Physics Debug Tiles` folder in the repository. The slopeMap parameter is an array that controls
+        * how the indexes of the tiles in your tilemap data will map to the Ninja Tile IDs. For example if you had 6
+        * tiles in your tileset: Imagine the first 4 should be converted into fully solid Tiles and the other 2 are 45-degree
+        * slopes. Your slopeMap array would look like this: `[ 1, 1, 1, 1, 2, 3 ]`. Where each element of the array is
+        * a tile in your tilemap and the resulting Ninja Tile it should create.
+        *
+        * @method Phaser.Physics.Ninja#convertTilemap
+        * @param {Phaser.Tilemap} map - The Tilemap to get the map data from.
+        * @param {number|string|Phaser.TilemapLayer} [layer] - The layer to operate on. Defaults to map.currentLayer.
+        * @param {object} [slopeMap] - The tilemap index to Tile ID map.
+        * @return {array} An array of the Phaser.Physics.Ninja.Tile objects that were created.
+        */
+        convertTiledmapForNinja: function (map, layer, slopeMap) {
+
+            layer = map.getTilelayerIndex(layer);
+
+            //  If the bodies array is already populated we need to nuke it
+            this.clearTilemapLayerBodies(map, layer);
+
+            for (var y = 0, h = layer.size.y; y < h; y++)
+            {
+                for (var x = 0, w = layer.size.x; x < w; x++)
+                {
+                    var tile = layer.tiles[y][x],
+                        index = (y * layer.size.x) + x;
+
+                    if (tile && slopeMap.hasOwnProperty(index))
+                    {
+                        var body = new Phaser.Physics.Ninja.Body(
+                            this,
+                            null,
+                            3,
+                            slopeMap[index],
+                            0,
+                            tile.worldX + tile.centerX,
+                            tile.worldY + tile.centerY,
+                            tile.width,
+                            tile.height
+                        );
+
+                        layer.bodies.push(body);
+                    }
+                }
+            }
+
+            return layer.bodies;
+
+        }
+    }
+};
+
+function mapPointToArray(obj) {
+    return [obj.x, obj.y];
+}
+
+},{}],11:[function(require,module,exports){
 var utils = require('../utils');
 
 /**
@@ -1878,6 +2179,9 @@ function Objectlayer(game, map, layer, index) {
     this.position.y = layer.y || 0;
     this.alpha = layer.opacity !== undefined ? layer.opacity : 1;
     this.visible = layer.visible !== undefined ? layer.visible : true;
+
+    // physics bodies in this layer
+    this.bodies = [];
 
     if (this.properties.batch) {
         this.container = this.addChild(new Phaser.SpriteBatch());
@@ -2085,6 +2389,14 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
     return this;
 };
 
+Objectlayer.prototype.getObject = function (name) {
+    for (var i = 0; i < this.objects.length; ++i) {
+        if (this.objects[i].name === name) {
+            return this.objects[i];
+        }
+    }
+};
+
 /**
  * Called internally whenever an event happens on an object, used to echo to the map.
  *
@@ -2205,7 +2517,7 @@ Objectlayer.prototype.destroy = function () {
     this.type = null;
 };
 
-},{"../utils":15}],10:[function(require,module,exports){
+},{"../utils":17}],12:[function(require,module,exports){
 /**
  * Base Tile implementation, a tile is a single tile in a tilemap layer
  *
@@ -2627,7 +2939,7 @@ Object.defineProperty(Tile.prototype, 'bottom', {
 
 });
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var Tile = require('./Tile'),
     utils = require('../utils');
 
@@ -2769,6 +3081,7 @@ function Tilelayer(game, map, layer, index) {
     this.alpha = layer.opacity !== undefined ? layer.opacity : 1;
     this.visible = layer.visible !== undefined ? layer.visible : true;
 
+    // physics bodies in this layer
     this.bodies = [];
 
     // some private trackers
@@ -3344,13 +3657,14 @@ Object.defineProperty(Tilelayer.prototype, 'collisionHeight', {
 
 });
 
-},{"../utils":15,"./Tile":10}],12:[function(require,module,exports){
+},{"../utils":17,"./Tile":12}],14:[function(require,module,exports){
 var Tilelayer = require('./Tilelayer'),
     Objectlayer = require('./Objectlayer'),
     Tile = require('./Tile'),
     Tileset = require('./Tileset'),
     TilemapParser = require('./TilemapParser'),
-    utils = require('../utils');
+    utils = require('../utils'),
+    C = require('../constants');
 
 /**
  * Tiled map that represents an entire tile map with multiple layers or object groups.
@@ -3360,12 +3674,10 @@ var Tilelayer = require('./Tilelayer'),
  * @class Tilemap
  * @constructor
  * @param {Phaser.Game} game - Game reference to the currently running game.
- * @param {string} [key] - The key of the tilemap data as stored in the Cache. If you're creating a
- *      blank map either leave this parameter out or pass `null`.
- * @param {object} [tilesetKeyMap] - Map of tileset names to cache keys.
+ * @param {string} [key] - The name of the tiledmap, this is usually the filename without the extension.
  * @param {Phaser.Group|Phaser.SpriteBatch} [group] - Group to add the tilemap to.
  */
-function Tilemap(game, key, tilesetKeyMap, group) {
+function Tilemap(game, key, group) {
     Phaser.Group.call(this, game, group, key);
 
     var data = TilemapParser.parse(game, key);
@@ -3492,7 +3804,7 @@ function Tilemap(game, key, tilesetKeyMap, group) {
     // create each tileset
     for(var t = 0, tl = data.tilesets.length; t < tl; ++t) {
         var ts = data.tilesets[t];
-        this.tilesets.push(new Tileset(game, tilesetKeyMap[ts.name], ts));
+        this.tilesets.push(new Tileset(game, utils.cacheKey(key, 'tileset', ts.name), ts));
     }
 
     // create each layer
@@ -3504,6 +3816,9 @@ function Tilemap(game, key, tilesetKeyMap, group) {
             case 'tilelayer':
                 lyr = new Tilelayer(game, this, ldata, this.layers.length);
                 this.layers.push(lyr);
+
+                // calculate the tile faces
+                this.calculateFaces(this.layers.length - 1);
                 break;
 
             case 'objectgroup':
@@ -3512,10 +3827,12 @@ function Tilemap(game, key, tilesetKeyMap, group) {
                 break;
 
             case 'imagelayer':
-                //TODO: layer texture data
-                // lyr = new Tile(game);
-                // this.images.push(lyr);
-                // this.addChild(lyr);
+                lyr = game.add.sprite(ldata.x, ldata.y, utils.cacheKey(key, 'layer', ldata.name), null, this);
+
+                lyr.visible = ldata.visible;
+                lyr.apha = ldata.opacity;
+
+                this.images.push(lyr);
                 break;
         }
     }
@@ -3547,31 +3864,39 @@ Tilemap.prototype.setTileSize = function (tileWidth, tileHeight) {
 * @method Phaser.Tilemap#getIndex
 * @protected
 * @param {array} location - The local array to search.
-* @param {string} name - The name of the array element to get.
+* @param {number|string|object} name - The name of the array element to get.
 * @return {number} The index of the element in the array, or null if not found.
 */
 Tilemap.prototype.getIndex = function (location, name) {
 
-    for (var i = 0; i < location.length; i++)
-    {
-        if (location[i].name === name)
+    if (typeof name === 'string') {
+        for (var i = 0; i < location.length; i++)
         {
-            return i;
+            if (location[i].name === name)
+            {
+                return i;
+            }
         }
     }
+    else if (typeof name === 'object') {
+        return name.index;
+    }
+    else if (typeof name === 'number') {
+        return name;
+    }
 
-    return null;
+    return -1;
 
 };
 
 /**
 * Gets the layer index based on its name.
 *
-* @method Phaser.Tilemap#getLayerIndex
-* @param {string} name - The name of the layer to get.
+* @method Phaser.Tilemap#getTilelayerIndex
+* @param {number|string|object} name - The name of the layer to get.
 * @return {number} The index of the layer in this tilemap, or null if not found.
 */
-Tilemap.prototype.getLayerIndex = function (name) {
+Tilemap.prototype.getTilelayerIndex = Tilemap.prototype.getLayer = function (name) {
 
     return this.getIndex(this.layers, name);
 
@@ -3581,7 +3906,7 @@ Tilemap.prototype.getLayerIndex = function (name) {
 * Gets the tileset index based on its name.
 *
 * @method Phaser.Tilemap#getTilesetIndex
-* @param {string} name - The name of the tileset to get.
+* @param {number|string|object} name - The name of the tileset to get.
 * @return {number} The index of the tileset in this tilemap, or null if not found.
 */
 Tilemap.prototype.getTilesetIndex = function (name) {
@@ -3593,11 +3918,11 @@ Tilemap.prototype.getTilesetIndex = function (name) {
 /**
 * Gets the image index based on its name.
 *
-* @method Phaser.Tilemap#getImageIndex
-* @param {string} name - The name of the image to get.
+* @method Phaser.Tilemap#getImagelayer
+* @param {number|string|object} name - The name of the image to get.
 * @return {number} The index of the image in this tilemap, or null if not found.
 */
-Tilemap.prototype.getImageIndex = function (name) {
+Tilemap.prototype.getImagelayerIndex = function (name) {
 
     return this.getIndex(this.images, name);
 
@@ -3606,40 +3931,66 @@ Tilemap.prototype.getImageIndex = function (name) {
 /**
 * Gets the object index based on its name.
 *
-* @method Phaser.Tilemap#getObjectIndex
-* @param {string} name - The name of the object to get.
+* @method Phaser.Tilemap#getObjectlayerIndex
+* @param {number|string|object} name - The name of the object to get.
 * @return {number} The index of the object in this tilemap, or null if not found.
 */
-Tilemap.prototype.getObjectIndex = function (name) {
+Tilemap.prototype.getObjectlayerIndex = function (name) {
 
     return this.getIndex(this.objects, name);
 
 };
 
+
 /**
-* Gets the TilemapLayer index as used in the setCollision calls.
+* Gets the layer based on its name.
 *
-* @method Phaser.Tilemap#getLayer
-* @protected
-* @param {number|string|Phaser.TilemapLayer} layer - The layer to operate on, defaults to this.currentLayer.
-* @return {number} The TilemapLayer index.
+* @method Phaser.Tilemap#getTilelayer
+* @param {number|string|object} name - The name of the layer to get.
+* @return {Tilelayer} The index of the layer in this tilemap, or null if not found.
 */
-Tilemap.prototype.getLayer = function (layer) {
+Tilemap.prototype.getTilelayer = function (name) {
 
-    if (typeof layer === 'undefined')
-    {
-        layer = this.currentLayer;
-    }
-    else if (typeof layer === 'string')
-    {
-        layer = this.getLayerIndex(layer);
-    }
-    else if (layer instanceof Tilelayer)
-    {
-        layer = layer.index;
-    }
+    return this.layers[this.getTilelayerIndex(name)];
 
-    return layer;
+};
+
+/**
+* Gets the tileset index based on its name.
+*
+* @method Phaser.Tilemap#getTileset
+* @param {number|string|object} name - The name of the tileset to get.
+* @return {Tileset} The index of the tileset in this tilemap, or null if not found.
+*/
+Tilemap.prototype.getTileset = function (name) {
+
+    return this.tilesets[this.getTilesetIndex(name)];
+
+};
+
+/**
+* Gets the image index based on its name.
+*
+* @method Phaser.Tilemap#getImagelayer
+* @param {number|string|object} name - The name of the image to get.
+* @return {Image} The index of the image in this tilemap, or null if not found.
+*/
+Tilemap.prototype.getImagelayer = function (name) {
+
+    return this.images[this.getImagelayerIndex(name)];
+
+};
+
+/**
+* Gets the object index based on its name.
+*
+* @method Phaser.Tilemap#getObjectlayer
+* @param {number|string|object} name - The name of the object to get.
+* @return {Objectlayer} The index of the object in this tilemap, or null if not found.
+*/
+Tilemap.prototype.getObjectlayer = function (name) {
+
+    return this.objects[this.getObjectlayerIndex(name)];
 
 };
 
@@ -3694,7 +4045,7 @@ Tilemap.prototype.calculateFaces = function (layer) {
     {
         for (var x = 0, w = this.layers[layer].size.x; x < w; x++)
         {
-            var tile = this.layers[layer].tiles[y][x];
+            var tile = this.layers[layer].tiles[y] ? this.layers[layer].tiles[y][x] : null;
 
             if (tile)
             {
@@ -3749,7 +4100,7 @@ Tilemap.prototype.calculateFaces = function (layer) {
 * Mostly used as an internal function by calculateFaces.
 *
 * @method Phaser.Tilemap#getTileAbove
-* @param {number} layer - The local layer index to get the tile from. Can be determined by Tilemap.getLayer().
+* @param {number} layer - The local layer index to get the tile from.
 * @param {number} x - The x coordinate to get the tile from. In tiles, not pixels.
 * @param {number} y - The y coordinate to get the tile from. In tiles, not pixels.
 */
@@ -3757,7 +4108,7 @@ Tilemap.prototype.getTileAbove = function (layer, x, y) {
 
     if (y > 0)
     {
-        return this.layers[layer].tiles[y - 1][x];
+        return this.layers[layer].tiles[y - 1] ? this.layers[layer].tiles[y - 1][x] : null;
     }
 
     return null;
@@ -3769,7 +4120,7 @@ Tilemap.prototype.getTileAbove = function (layer, x, y) {
 * Mostly used as an internal function by calculateFaces.
 *
 * @method Phaser.Tilemap#getTileBelow
-* @param {number} layer - The local layer index to get the tile from. Can be determined by Tilemap.getLayer().
+* @param {number} layer - The local layer index to get the tile from.
 * @param {number} x - The x coordinate to get the tile from. In tiles, not pixels.
 * @param {number} y - The y coordinate to get the tile from. In tiles, not pixels.
 */
@@ -3777,7 +4128,7 @@ Tilemap.prototype.getTileBelow = function (layer, x, y) {
 
     if (y < this.layers[layer].height - 1)
     {
-        return this.layers[layer].tiles[y + 1][x];
+        return this.layers[layer].tiles[y + 1] ? this.layers[layer].tiles[y + 1][x] : null;
     }
 
     return null;
@@ -3789,7 +4140,7 @@ Tilemap.prototype.getTileBelow = function (layer, x, y) {
 * Mostly used as an internal function by calculateFaces.
 *
 * @method Phaser.Tilemap#getTileLeft
-* @param {number} layer - The local layer index to get the tile from. Can be determined by Tilemap.getLayer().
+* @param {number} layer - The local layer index to get the tile from.
 * @param {number} x - The x coordinate to get the tile from. In tiles, not pixels.
 * @param {number} y - The y coordinate to get the tile from. In tiles, not pixels.
 */
@@ -3797,7 +4148,7 @@ Tilemap.prototype.getTileLeft = function (layer, x, y) {
 
     if (x > 0)
     {
-        return this.layers[layer].tiles[y][x - 1];
+        return this.layers[layer].tiles[y] ? this.layers[layer].tiles[y][x - 1] : null;
     }
 
     return null;
@@ -3809,7 +4160,7 @@ Tilemap.prototype.getTileLeft = function (layer, x, y) {
 * Mostly used as an internal function by calculateFaces.
 *
 * @method Phaser.Tilemap#getTileRight
-* @param {number} layer - The local layer index to get the tile from. Can be determined by Tilemap.getLayer().
+* @param {number} layer - The local layer index to get the tile from.
 * @param {number} x - The x coordinate to get the tile from. In tiles, not pixels.
 * @param {number} y - The y coordinate to get the tile from. In tiles, not pixels.
 */
@@ -3817,7 +4168,7 @@ Tilemap.prototype.getTileRight = function (layer, x, y) {
 
     if (x < this.layers[layer].size.x - 1)
     {
-        return this.layers[layer].tiles[y][x + 1];
+        return this.layers[layer].tiles[y] ? this.layers[layer].tiles[y][x + 1] : null;
     }
 
     return null;
@@ -3832,7 +4183,7 @@ Tilemap.prototype.getTileRight = function (layer, x, y) {
 */
 Tilemap.prototype.setLayer = function (layer) {
 
-    layer = this.getLayer(layer);
+    layer = this.getTilelayerIndex(layer);
 
     if (this.layers[layer])
     {
@@ -3852,9 +4203,9 @@ Tilemap.prototype.setLayer = function (layer) {
 */
 Tilemap.prototype.hasTile = function (x, y, layer) {
 
-    layer = this.getLayer(layer);
+    layer = this.getTilelayerIndex(layer);
 
-    return !!(this.layers[layer].tiles[y][x]);
+    return !!(this.layers[layer].tiles[y] ? this.layers[layer].tiles[y][x] : false);
 
 };
 
@@ -3869,7 +4220,7 @@ Tilemap.prototype.hasTile = function (x, y, layer) {
 */
 Tilemap.prototype.removeTile = function (x, y, layer) {
 
-    layer = this.getLayer(layer);
+    layer = this.getTilelayerIndex(layer);
 
     if (x >= 0 && x < this.layers[layer].size.x && y >= 0 && y < this.layers[layer].size.y)
     {
@@ -3902,8 +4253,6 @@ Tilemap.prototype.removeTile = function (x, y, layer) {
 */
 Tilemap.prototype.removeTileWorldXY = function (x, y, tileWidth, tileHeight, layer) {
 
-    layer = this.getLayer(layer);
-
     x = this.game.math.snapToFloor(x, tileWidth) / tileWidth;
     y = this.game.math.snapToFloor(y, tileHeight) / tileHeight;
 
@@ -3930,13 +4279,17 @@ Tilemap.prototype.putTile = function (tile, x, y, layer) {
         return this.removeTile(x, y, layer);
     }
 
-    layer = this.getLayer(layer);
+    layer = this.getTilelayerIndex(layer);
 
     var tileId,
         tileset;
 
     if (x >= 0 && x < this.layers[layer].size.x && y >= 0 && y < this.layers[layer].size.y)
     {
+        if (!this.layers[layer].tiles[y]) {
+            this.layers[layer].tiles[y] = {};
+        }
+
         if (tile instanceof Phaser.Tile)
         {
             var idx = (y * this.layers[layer].size.x) + x;
@@ -3996,8 +4349,6 @@ Tilemap.prototype.putTile = function (tile, x, y, layer) {
 */
 Tilemap.prototype.putTileWorldXY = function (tile, x, y, tileWidth, tileHeight, layer) {
 
-    layer = this.getLayer(layer);
-
     x = this.game.math.snapToFloor(x, tileWidth) / tileWidth;
     y = this.game.math.snapToFloor(y, tileHeight) / tileHeight;
 
@@ -4020,11 +4371,11 @@ Tilemap.prototype.getTile = function (x, y, layer, nonNull) {
 
     if (typeof nonNull === 'undefined') { nonNull = false; }
 
-    layer = this.getLayer(layer);
+    layer = this.getTilelayerIndex(layer);
 
     if (x >= 0 && x < this.layers[layer].size.x && y >= 0 && y < this.layers[layer].size.y)
     {
-        return this.layers[layer].tiles[y][x];
+        return this.layers[layer].tiles[y] ? this.layers[layer].tiles[y][x] : null;
     }
     else
     {
@@ -4048,8 +4399,6 @@ Tilemap.prototype.getTileWorldXY = function (x, y, tileWidth, tileHeight, layer)
 
     if (typeof tileWidth === 'undefined') { tileWidth = this.tileWidth; }
     if (typeof tileHeight === 'undefined') { tileHeight = this.tileHeight; }
-
-    layer = this.getLayer(layer);
 
     x = this.game.math.snapToFloor(x, tileWidth) / tileWidth;
     y = this.game.math.snapToFloor(y, tileHeight) / tileHeight;
@@ -4086,7 +4435,7 @@ Tilemap.prototype.dump = function () {
         {
             txt += '%c  ';
 
-            if (this.layers[this.currentLayer].tiles[y][x])
+            if (this.layers[this.currentLayer].tiles[y] && this.layers[this.currentLayer].tiles[y][x])
             {
                 if (this.debugMap[this.layers[this.currentLayer].tiles[y][x]])
                 {
@@ -4257,65 +4606,14 @@ Object.defineProperty(Tilemap.prototype, 'layer', {
 
 });
 
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.CSV = 0;
+for (var key in C) {
+    Tilemap[key] = C[key];
+}
 
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.TILED_JSON = 1;
-
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.TILED_XML = 2;
-
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.NORTH = 0;
-
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.EAST = 1;
-
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.SOUTH = 2;
-
-/**
- * @property CSV
- * @type {Number}
- * @static
- * @final
- */
-Tilemap.WEST = 3;
-
-},{"../utils":15,"./Objectlayer":9,"./Tile":10,"./Tilelayer":11,"./TilemapParser":13,"./Tileset":14}],13:[function(require,module,exports){
+},{"../constants":9,"../utils":17,"./Objectlayer":11,"./Tile":12,"./Tilelayer":13,"./TilemapParser":15,"./Tileset":16}],15:[function(require,module,exports){
 /* jshint maxlen:200 */
-var utils = require('../utils');
+var utils = require('../utils'),
+    C = require('../constants');
 
 var TilemapParser = {
     /**
@@ -4348,16 +4646,16 @@ var TilemapParser = {
             return this.getEmptyData(tileWidth, tileHeight, width, height);
         }
 
-        var map = game.cache.getTilemapData(key);
+        var map = game.cache.getTilemapData(utils.cacheKey(key, 'tiledmap'));
 
         if (map) {
-            if (map.format === Phaser.Plugin.Tiled.Tilemap.CSV) {
+            if (map.format === C.CSV) {
                 return this.parseCSV(key, map.data, tileWidth, tileHeight);
             }
-            else if (map.format === Phaser.Plugin.Tiled.Tilemap.TILED_XML) {
+            else if (map.format === C.TILED_XML) {
                 return this.parseTiledXML(map.data);
             }
-            else if (!map.format || map.format === Phaser.Plugin.Tiled.Tilemap.TILED_JSON) {
+            else if (!map.format || map.format === C.TILED_JSON) {
                 return this.parseTiledJSON(map.data);
             }
         }
@@ -4667,7 +4965,7 @@ var TilemapParser = {
 
 module.exports = TilemapParser;
 
-},{"../utils":15}],14:[function(require,module,exports){
+},{"../constants":9,"../utils":17}],16:[function(require,module,exports){
 var utils = require('../utils');
 
 /**
@@ -4999,7 +5297,7 @@ for(var f in Tileset.FLAGS) {
 
 Tileset.FLAGS.ALL = mask;
 
-},{"../utils":15}],15:[function(require,module,exports){
+},{"../utils":17}],17:[function(require,module,exports){
 /* jshint maxlen:200 */
 
 var zlib = require('zlibjs'),
@@ -5017,6 +5315,10 @@ utils.stringToBuffer = function (str) {
     }
 
     return buf;
+};
+
+utils.cacheKey = function (key, type, name) {
+    return key + '_' + type + (name ? '_' + name : '');
 };
 
 utils.decompressBase64Data = function (raw, encoding, compression) {
