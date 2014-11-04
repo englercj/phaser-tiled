@@ -54,11 +54,14 @@ function tilemapPack(options) {
             function process(fdata, fmt) {
                 var assets = [],
                     xml = fmt === 'xml',
-                    tilesets = xml ? fdata.tileset : fdata.tilesets;
+                    tilesets = xml ? fdata.tileset : fdata.tilesets,
+                    imglayers = xml ? fdata.imagelayer : fdata.layers.filter(function (l) { return l.type === 'imagelayer'; }),
+                    imgsrc,
+                    i;
 
                 if (tilesets) {
-                    for(var i = 0; i < tilesets.length; ++i) {
-                        var imgsrc = xml ? tilesets[i].image[0].$.source : tilesets[i].image;
+                    for(i = 0; i < tilesets.length; ++i) {
+                        imgsrc = xml ? tilesets[i].image[0].$.source : tilesets[i].image;
 
                         assets.push({
                             type: 'image',
@@ -69,16 +72,31 @@ function tilemapPack(options) {
                             overwrite: false
                         });
                     }
-
-                    assets.push({
-                        type: 'tiledmap',
-                        key: 'tiledmap_' + key,
-                        url: path.join(options.baseUrl, file.relative).replace(/\\/g, '/'),
-                        format: xml ? 'TILED_XML' : 'TILED_JSON'
-                    });
-
-                    result[key] = assets;
                 }
+
+                if (imglayers) {
+                    for(i = 0; i < imglayers.length; ++i) {
+                        imgsrc = xml ? imglayers[i].image[0].$.source : imglayers[i].image;
+
+                        assets.push({
+                            type: 'image',
+                            subtype: 'layer',
+                            key: key + '_layer_' + (xml ? imglayers[i].$.name : imglayers[i].name),
+                            name: (xml ? imglayers[i].$.name : imglayers[i].name),
+                            url: path.join(options.baseUrl, relDir, imgsrc).replace(/\\/g, '/'),
+                            overwrite: false
+                        })
+                    }
+                }
+
+                assets.push({
+                    type: 'tiledmap',
+                    key: 'tiledmap_' + key,
+                    url: path.join(options.baseUrl, file.relative).replace(/\\/g, '/'),
+                    format: xml ? 'TILED_XML' : 'TILED_JSON'
+                });
+
+                result[key] = assets;
 
                 cb();
             }
