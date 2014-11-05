@@ -341,7 +341,7 @@ function Loader_packLoadComplete(index, parse) {
 
 /* jshint +W106 */
 
-},{"./physics":10,"./tiled/Objectlayer":11,"./tiled/Tile":12,"./tiled/Tilelayer":13,"./tiled/Tilemap":14,"./tiled/Tileset":16,"./utils":17}],2:[function(require,module,exports){
+},{"./physics":11,"./tiled/Objectlayer":12,"./tiled/Tile":13,"./tiled/Tilelayer":14,"./tiled/Tilemap":15,"./tiled/Tileset":17,"./utils":18}],2:[function(require,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -405,6 +405,8 @@ function Loader_packLoadComplete(index, parse) {
 }());
 
 },{}],3:[function(require,module,exports){
+
+},{}],4:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -1457,7 +1459,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":4,"ieee754":5,"is-array":6}],4:[function(require,module,exports){
+},{"base64-js":5,"ieee754":6,"is-array":7}],5:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -1579,7 +1581,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -1665,7 +1667,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 
 /**
  * isArray
@@ -1700,7 +1702,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1765,7 +1767,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (process,Buffer){
 /** @license zlib.js 2012 - imaya [ https://github.com/imaya/zlib.js ] The MIT License */(function() {'use strict';function q(b){throw b;}var t=void 0,v=!0;var A="undefined"!==typeof Uint8Array&&"undefined"!==typeof Uint16Array&&"undefined"!==typeof Uint32Array&&"undefined"!==typeof DataView;function E(b,a){this.index="number"===typeof a?a:0;this.m=0;this.buffer=b instanceof(A?Uint8Array:Array)?b:new (A?Uint8Array:Array)(32768);2*this.buffer.length<=this.index&&q(Error("invalid index"));this.buffer.length<=this.index&&this.f()}E.prototype.f=function(){var b=this.buffer,a,c=b.length,d=new (A?Uint8Array:Array)(c<<1);if(A)d.set(b);else for(a=0;a<c;++a)d[a]=b[a];return this.buffer=d};
 E.prototype.d=function(b,a,c){var d=this.buffer,e=this.index,f=this.m,g=d[e],k;c&&1<a&&(b=8<a?(G[b&255]<<24|G[b>>>8&255]<<16|G[b>>>16&255]<<8|G[b>>>24&255])>>32-a:G[b]>>8-a);if(8>a+f)g=g<<a|b,f+=a;else for(k=0;k<a;++k)g=g<<1|b>>a-k-1&1,8===++f&&(f=0,d[e++]=G[g],g=0,e===d.length&&(d=this.f()));d[e]=g;this.buffer=d;this.m=f;this.index=e};E.prototype.finish=function(){var b=this.buffer,a=this.index,c;0<this.m&&(b[a]<<=8-this.m,b[a]=G[b[a]],a++);A?c=b.subarray(0,a):(b.length=a,c=b);return c};
@@ -1822,7 +1824,7 @@ function xb(b,a){var c;b.subarray=b.slice;c=(new pb(b)).i();a||(a={});return a.n
 function Cb(b){var a=new Buffer(b.length),c,d;c=0;for(d=b.length;c<d;++c)a[c]=b[c];return a};}).call(this); //@ sourceMappingURL=node-zlib.js.map
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":7,"buffer":3}],9:[function(require,module,exports){
+},{"_process":8,"buffer":4}],10:[function(require,module,exports){
 module.exports = {
     /**
      * @property CSV
@@ -1881,7 +1883,7 @@ module.exports = {
     WEST: 3
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = {
     p2: {
         /**
@@ -2093,7 +2095,7 @@ function mapPointToArray(obj) {
     return [obj.x, obj.y];
 }
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var utils = require('../utils');
 
 /**
@@ -2517,7 +2519,7 @@ Objectlayer.prototype.destroy = function () {
     this.type = null;
 };
 
-},{"../utils":17}],12:[function(require,module,exports){
+},{"../utils":18}],13:[function(require,module,exports){
 /**
  * Base Tile implementation, a tile is a single tile in a tilemap layer
  *
@@ -2939,7 +2941,7 @@ Object.defineProperty(Tile.prototype, 'bottom', {
 
 });
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var Tile = require('./Tile'),
     utils = require('../utils');
 
@@ -3657,7 +3659,7 @@ Object.defineProperty(Tilelayer.prototype, 'collisionHeight', {
 
 });
 
-},{"../utils":17,"./Tile":12}],14:[function(require,module,exports){
+},{"../utils":18,"./Tile":13}],15:[function(require,module,exports){
 var Tilelayer = require('./Tilelayer'),
     Objectlayer = require('./Objectlayer'),
     Tile = require('./Tile'),
@@ -4610,7 +4612,7 @@ for (var key in C) {
     Tilemap[key] = C[key];
 }
 
-},{"../constants":9,"../utils":17,"./Objectlayer":11,"./Tile":12,"./Tilelayer":13,"./TilemapParser":15,"./Tileset":16}],15:[function(require,module,exports){
+},{"../constants":10,"../utils":18,"./Objectlayer":12,"./Tile":13,"./Tilelayer":14,"./TilemapParser":16,"./Tileset":17}],16:[function(require,module,exports){
 /* jshint maxlen:200 */
 var utils = require('../utils'),
     C = require('../constants');
@@ -4965,7 +4967,7 @@ var TilemapParser = {
 
 module.exports = TilemapParser;
 
-},{"../constants":9,"../utils":17}],16:[function(require,module,exports){
+},{"../constants":10,"../utils":18}],17:[function(require,module,exports){
 var utils = require('../utils');
 
 /**
@@ -5297,12 +5299,12 @@ for(var f in Tileset.FLAGS) {
 
 Tileset.FLAGS.ALL = mask;
 
-},{"../utils":17}],17:[function(require,module,exports){
+},{"../utils":18}],18:[function(require,module,exports){
 /* jshint maxlen:200 */
 
 var zlib = require('zlibjs'),
     Buffer = require('buffer').Buffer,
-    decodeB64 = window.atob || require('Base64').atob;
+    decodeB64 = (typeof window !== 'undefined' && window.atob) || require('Base64').atob;
 
 var utils = module.exports = {};
 
@@ -5440,35 +5442,38 @@ utils.parseTiledProperties = function (obj) {
  * @param xmlStr {String} The xml string to parse
  * @return {Document} An XML Document
  */
-//XML Parser in window
-if (typeof window.DOMParser !== 'undefined') {
-    utils.parseXML = function(xmlStr) {
-        return (new window.DOMParser()).parseFromString(xmlStr, 'text/xml');
-    };
-}
-//IE specific XML parser
-else if (typeof window.ActiveXObject !== 'undefined' && new window.ActiveXObject('Microsoft.XMLDOM')) {
-    utils.parseXML = function(xmlStr) {
-        var xmlDoc = new window.ActiveXObject('Microsoft.XMLDOM');
-        xmlDoc.async = 'false';
-        xmlDoc.loadXML(xmlStr);
-        return xmlDoc;
-    };
+// browser environment
+if (typeof window !== 'undefined') {
+    //XML Parser in window
+    if (typeof window.DOMParser !== 'undefined') {
+        utils.parseXML = function(xmlStr) {
+            return (new window.DOMParser()).parseFromString(xmlStr, 'text/xml');
+        };
+    }
+    //IE specific XML parser
+    else if (typeof window.ActiveXObject !== 'undefined' && new window.ActiveXObject('Microsoft.XMLDOM')) {
+        utils.parseXML = function(xmlStr) {
+            var xmlDoc = new window.ActiveXObject('Microsoft.XMLDOM');
+            xmlDoc.async = 'false';
+            xmlDoc.loadXML(xmlStr);
+            return xmlDoc;
+        };
+    }
+    // no parser available
+    else {
+        utils.warn('XML parser not available, trying to parse any XML will result in an error.');
+        utils.parseXML = function() {
+            throw new Error('Trying to parse XML, but not XML parser is available in this environment');
+        };
+    }
 }
 //node.js environment
-/*else if(__isNode) {
+else {
     utils.parseXML = function(xmlStr) {
         var DOMParser = require('xmldom').DOMParser;
-        return (new DOMParser()).parseFromString(xmlStr, "text/xml");
-    };
-}*/
-// no parser available
-else {
-    utils.warn('XML parser not available, trying to parse any XML will result in an error.');
-    utils.parseXML = function() {
-        throw new Error('Trying to parse XML, but not XML parser is available in this environment');
+        return (new DOMParser()).parseFromString(xmlStr, 'text/xml');
     };
 }
 
-},{"Base64":2,"buffer":3,"zlibjs":8}]},{},[1])(1)
+},{"Base64":2,"buffer":4,"xmldom":3,"zlibjs":9}]},{},[1])(1)
 });
