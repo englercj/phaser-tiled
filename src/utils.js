@@ -2,7 +2,7 @@
 
 var zlib = require('zlibjs'),
     Buffer = require('buffer').Buffer,
-    decodeB64 = window.atob || require('Base64').atob;
+    decodeB64 = (typeof window !== 'undefined' && window.atob) || require('Base64').atob;
 
 var utils = module.exports = {};
 
@@ -140,32 +140,35 @@ utils.parseTiledProperties = function (obj) {
  * @param xmlStr {String} The xml string to parse
  * @return {Document} An XML Document
  */
-//XML Parser in window
-if (typeof window.DOMParser !== 'undefined') {
-    utils.parseXML = function(xmlStr) {
-        return (new window.DOMParser()).parseFromString(xmlStr, 'text/xml');
-    };
-}
-//IE specific XML parser
-else if (typeof window.ActiveXObject !== 'undefined' && new window.ActiveXObject('Microsoft.XMLDOM')) {
-    utils.parseXML = function(xmlStr) {
-        var xmlDoc = new window.ActiveXObject('Microsoft.XMLDOM');
-        xmlDoc.async = 'false';
-        xmlDoc.loadXML(xmlStr);
-        return xmlDoc;
-    };
+// browser environment
+if (typeof window !== 'undefined') {
+    //XML Parser in window
+    if (typeof window.DOMParser !== 'undefined') {
+        utils.parseXML = function(xmlStr) {
+            return (new window.DOMParser()).parseFromString(xmlStr, 'text/xml');
+        };
+    }
+    //IE specific XML parser
+    else if (typeof window.ActiveXObject !== 'undefined' && new window.ActiveXObject('Microsoft.XMLDOM')) {
+        utils.parseXML = function(xmlStr) {
+            var xmlDoc = new window.ActiveXObject('Microsoft.XMLDOM');
+            xmlDoc.async = 'false';
+            xmlDoc.loadXML(xmlStr);
+            return xmlDoc;
+        };
+    }
+    // no parser available
+    else {
+        utils.warn('XML parser not available, trying to parse any XML will result in an error.');
+        utils.parseXML = function() {
+            throw new Error('Trying to parse XML, but not XML parser is available in this environment');
+        };
+    }
 }
 //node.js environment
-/*else if(__isNode) {
+else {
     utils.parseXML = function(xmlStr) {
         var DOMParser = require('xmldom').DOMParser;
-        return (new DOMParser()).parseFromString(xmlStr, "text/xml");
-    };
-}*/
-// no parser available
-else {
-    utils.warn('XML parser not available, trying to parse any XML will result in an error.');
-    utils.parseXML = function() {
-        throw new Error('Trying to parse XML, but not XML parser is available in this environment');
+        return (new DOMParser()).parseFromString(xmlStr, 'text/xml');
     };
 }
