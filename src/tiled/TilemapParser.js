@@ -160,7 +160,7 @@ var TilemapParser = {
                 var grp = node,
                     group = {
                         type: 'objectgroup',
-                        draworder: 'topdown',
+                        draworder: 'topdown', //TODO: support custom draworders
                         name: grp.attributes.getNamedItem('name').value,
                         width: 0,
                         height: 0,
@@ -203,6 +203,30 @@ var TilemapParser = {
                 }
 
                 map.layers.push(group);
+            } else if(node.nodeName === 'imagelayer') {
+                var ilyr = node,
+                    imglayer = {
+                        type: 'imagelayer',
+                        image: ilyr.getElementsByTagName('image')[0].attributes.getNamedItem('source').value,
+                        name: ilyr.attributes.getNamedItem('name').value,
+                        width: parseInt(ilyr.attributes.getNamedItem('width').value, 10) || map.width,
+                        height: parseInt(ilyr.attributes.getNamedItem('height').value, 10) || map.height,
+                        visible: ilyr.attributes.getNamedItem('visible') ? ilyr.attributes.getNamedItem('visible').value === '1' : true,
+                        opacity: ilyr.attributes.getNamedItem('opacity') ? parseFloat(ilyr.attributes.getNamedItem('opacity').value, 10) : 1,
+                        x: ilyr.attributes.getNamedItem('x') ? parseInt(ilyr.attributes.getNamedItem('x').value, 10) : 0,
+                        y: ilyr.attributes.getNamedItem('y') ? parseInt(ilyr.attributes.getNamedItem('y').value, 10) : 0,
+                        properties: {}
+                    };
+
+                var props = obj.getElementsByTagName('properties');
+                if(props.length) {
+                    props = props[0].getElementsByTagName('property');
+                    for(var pr = 0; pr < props.length; ++pr) {
+                        imglayer.properties[props[pr].attributes.getNamedItem('name').value] = props[pr].attributes.getNamedItem('value').value;
+                    }
+                }
+
+                map.layers.push(imglayer);
             }
         }
 
