@@ -159,7 +159,7 @@ if (typeof window !== 'undefined') {
     }
     // no parser available
     else {
-        utils.warn('XML parser not available, trying to parse any XML will result in an error.');
+        console.warn('XML parser not available, trying to parse any XML will result in an error.');
         utils.parseXML = function() {
             throw new Error('Trying to parse XML, but not XML parser is available in this environment');
         };

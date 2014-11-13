@@ -27,7 +27,7 @@ var utils = require('../utils');
 //TODO: Support external tilesets (TSX files) via the "source" attribute
 //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
 function Tileset(game, textureKey, settings) {
-    PIXI.Texture.call(this, PIXI.BaseTextureCache[textureKey]);
+    PIXI.Texture.call(this, PIXI.BaseTextureCache[textureKey] || new PIXI.BaseTexture());
 
     this.game = game;
 
@@ -104,8 +104,8 @@ function Tileset(game, textureKey, settings) {
      * @type Vector
      */
     this.numTiles = new Phaser.Point(
-        Phaser.Math.floor((this.baseTexture.source.width - this.margin) / (this.tileWidth - this.spacing)),
-        Phaser.Math.floor((this.baseTexture.source.height - this.margin) / (this.tileHeight - this.spacing))
+        Phaser.Math.floor((this.baseTexture.width - this.margin) / (this.tileWidth - this.spacing)),
+        Phaser.Math.floor((this.baseTexture.height - this.margin) / (this.tileHeight - this.spacing))
     );
 
     /**
@@ -144,8 +144,8 @@ function Tileset(game, textureKey, settings) {
      * @type Vector
      */
     this.size = new Phaser.Point(
-        settings.imagewidth || this.baseTexture.source.width,
-        settings.imageheight || this.baseTexture.source.height
+        settings.imagewidth || this.baseTexture.width,
+        settings.imageheight || this.baseTexture.height
     );
 
     /**
