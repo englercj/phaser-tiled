@@ -209,8 +209,8 @@ var TilemapParser = {
                         type: 'imagelayer',
                         image: ilyr.getElementsByTagName('image')[0].attributes.getNamedItem('source').value,
                         name: ilyr.attributes.getNamedItem('name').value,
-                        width: parseInt(ilyr.attributes.getNamedItem('width').value, 10) || map.width,
-                        height: parseInt(ilyr.attributes.getNamedItem('height').value, 10) || map.height,
+                        width: 0, //always 0 for imagelayers
+                        height: 0, //always 0 for imagelayers
                         visible: ilyr.attributes.getNamedItem('visible') ? ilyr.attributes.getNamedItem('visible').value === '1' : true,
                         opacity: ilyr.attributes.getNamedItem('opacity') ? parseFloat(ilyr.attributes.getNamedItem('opacity').value, 10) : 1,
                         x: ilyr.attributes.getNamedItem('x') ? parseInt(ilyr.attributes.getNamedItem('x').value, 10) : 0,
@@ -218,7 +218,7 @@ var TilemapParser = {
                         properties: {}
                     };
 
-                var props = obj.getElementsByTagName('properties');
+                var props = ilyr.getElementsByTagName('properties');
                 if(props.length) {
                     props = props[0].getElementsByTagName('property');
                     for(var pr = 0; pr < props.length; ++pr) {
