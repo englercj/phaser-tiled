@@ -144,7 +144,7 @@ function Tilemap(game, key, group) {
     // create each tileset
     for(var t = 0, tl = data.tilesets.length; t < tl; ++t) {
         var ts = data.tilesets[t];
-        this.tilesets.push(new Tileset(game, utils.cacheKey(key, 'tileset', ts.name), ts));
+        this.tilesets.push(new Tileset(game, key, ts));
     }
 
     // create each layer

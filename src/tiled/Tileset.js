@@ -7,6 +7,8 @@ var utils = require('../utils');
  * @class Tileset
  * @extends Texture
  * @constructor
+ * @param game {Phaser.Game} Phaser game this belongs to.
+ * @param key {string} The name of the tiledmap, this is usually the filename without the extension.
  * @param settings {Object} All the settings for the tileset
  * @param settings.tilewidth {Number} The width of a single tile in the set
  * @param settings.tileheight {Number} The height of a single tile in the set
@@ -26,10 +28,48 @@ var utils = require('../utils');
 //TODO: Implement multi-image tileset support
 //TODO: Support external tilesets (TSX files) via the "source" attribute
 //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
-function Tileset(game, textureKey, settings) {
-    PIXI.Texture.call(this, PIXI.BaseTextureCache[textureKey] || new PIXI.BaseTexture());
+function Tileset(game, key, settings) {
+    var txkey = utils.cacheKey(key, 'tileset', settings.name),
+        tx = PIXI.BaseTextureCache[txkey],
+        ids,
+        ttxkey,
+        ttx,
+        tileTextures;
+
+    // if no main texture, check if multi-image tileset
+    if (!tx && settings.tiles) {
+        // need to sort because order matters here, and can't guarantee that the object's keys will be ordered.
+        // We need a custom comparator because .sort() is lexagraphic, not numeric.
+        ids = Object.keys(settings.tiles).sort(function (a, b) { return parseInt(a, 10) - parseInt(b, 10); });
+
+        for (var i = 0; i < ids.length; ++i) {
+            if (settings.tiles[ids[i]].image) {
+                // this is a multi-image tileset
+                tileTextures = tileTextures || [];
+
+                ttxkey = utils.cacheKey(key, 'tileset_image_' + ids[i], settings.name);
+                ttx = PIXI.TextureCache[ttxkey];
+
+                if (!ttx) {
+                    console.warn('Tileset "' + settings.name + '" unable to find texture cached by key "' + ttxkey + '", using blank texture.');
+                    ttx = new PIXI.Texture(new PIXI.BaseTexture());
+                }
+
+                tileTextures.push(ttx);
+            }
+        }
+    }
+
+    // if no main texture, and we didn't find any image tiles then warn about blank tileset
+    if (!tx && !tileTextures) {
+        console.warn('Tileset "' + settings.name + '" unable to find texture cached by key "' + txkey +  '", using blank texture.');
+    }
+
+    PIXI.Texture.call(this, tx || new PIXI.BaseTexture());
 
     this.game = game;
+
+    this.multiImage = !!tileTextures;
 
     //Tiled Editor properties
 
@@ -103,7 +143,7 @@ function Tileset(game, textureKey, settings) {
      * @property numTiles
      * @type Vector
      */
-    this.numTiles = new Phaser.Point(
+    this.numTiles = this.multiImage ? tileTextures.length : new Phaser.Point(
         Phaser.Math.floor((this.baseTexture.width - this.margin) / (this.tileWidth - this.spacing)),
         Phaser.Math.floor((this.baseTexture.height - this.margin) / (this.tileHeight - this.spacing))
     );
@@ -114,7 +154,7 @@ function Tileset(game, textureKey, settings) {
      * @property lastgid
      * @type Number
      */
-    this.lastgid = this.firstgid + ((this.numTiles.x * this.numTiles.y) || 1) - 1;
+    this.lastgid = this.firstgid + (this.multiImage ? tileTextures.length : ((this.numTiles.x * this.numTiles.y) || 1)) - 1;
 
     /**
      * The properties of the tileset
@@ -143,7 +183,7 @@ function Tileset(game, textureKey, settings) {
      * @property size
      * @type Vector
      */
-    this.size = new Phaser.Point(
+    this.size = this.multiImage ? new Phaser.Point(0, 0) : new Phaser.Point(
         settings.imagewidth || this.baseTexture.width,
         settings.imageheight || this.baseTexture.height
     );
@@ -154,24 +194,26 @@ function Tileset(game, textureKey, settings) {
      * @property textures
      * @type Array
      */
-    this.textures = [];
+    this.textures = this.multiImage ? tileTextures : [];
 
-    // generate tile textures
-    for(var t = 0, tl = this.lastgid - this.firstgid + 1; t < tl; ++t) {
-        // convert the tileId to x,y coords of the tile in the Texture
-        var y = Phaser.Math.floor(t / this.numTiles.x),
-            x = (t - (y * this.numTiles.x));
+    // generate tile textures for single image tileset
+    if (!this.multiImage) {
+        for(var t = 0, tl = this.lastgid - this.firstgid + 1; t < tl; ++t) {
+            // convert the tileId to x,y coords of the tile in the Texture
+            var y = Phaser.Math.floor(t / this.numTiles.x),
+                x = (t - (y * this.numTiles.x));
 
-        // get location in pixels
-        x = (x * this.tileWidth) + (x * this.spacing) + this.margin;
-        y = (y * this.tileHeight) + (y * this.spacing) + this.margin;
+            // get location in pixels
+            x = (x * this.tileWidth) + (x * this.spacing) + this.margin;
+            y = (y * this.tileHeight) + (y * this.spacing) + this.margin;
 
-        this.textures.push(
-            new PIXI.Texture(
-                this.baseTexture,
-                new Phaser.Rectangle(x, y, this.tileWidth, this.tileHeight)
-            )
-        );
+            this.textures.push(
+                new PIXI.Texture(
+                    this.baseTexture,
+                    new Phaser.Rectangle(x, y, this.tileWidth, this.tileHeight)
+                )
+            );
+        }
     }
 
     /**
