@@ -185,10 +185,38 @@ var TilemapParser = {
                             x: parseFloat(obj.attributes.getNamedItem('x').value, 10),
                             y: parseFloat(obj.attributes.getNamedItem('y').value, 10),
                             properties: {}
-                        };
+                        },
+                        poly;
 
                     if(object.gid === null) {
                         delete object.gid;
+                    }
+
+                    poly = obj.getElementsByTagName('polygon');
+                    if (poly.length) {
+                        object.polygon = poly[0].attributes.getNamedItem('points').value.split(' ').map(function (pt) {
+                                var points = pt.split(',');
+                                return {
+                                    x: parseInt(points[0], 10),
+                                    y: parseInt(points[1], 10)
+                                };
+                            });
+                    }
+
+                    poly = obj.getElementsByTagName('polyline');
+                    if (poly.length) {
+                        object.polyline = poly[0].attributes.getNamedItem('points').value.split(' ').map(function (pt) {
+                                var points = pt.split(',');
+                                return {
+                                    x: parseInt(points[0], 10),
+                                    y: parseInt(points[1], 10)
+                                };
+                            });
+                    }
+
+                    poly = obj.getElementsByTagName('ellipse');
+                    if (poly.length) {
+                        object.ellipse = true;
                     }
 
                     var props = obj.getElementsByTagName('properties');
