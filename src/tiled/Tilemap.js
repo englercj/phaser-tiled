@@ -194,8 +194,14 @@ Tilemap.prototype.setTileSize = function (tileWidth, tileHeight) {
     this.tileWidth = tileWidth;
     this.tileHeight = tileHeight;
 
+    this.scaledTileWidth = tileWidth * this.game.camera.scale.x;
+    this.scaledTileHeight = tileHeight * this.game.camera.scale.y;
+
     this.widthInPixels = this.width * tileWidth;
-    this.heightInPixels = this.height * tileHeight;
+    this.heightInPixels = this.height * tileWidth;
+
+    // update the world bounds
+    this.game.world.setBounds(0, 0, this.width * this.game.camera.scale.x, this.height * this.game.camera.scale.y);
 };
 
 /**
@@ -820,8 +826,7 @@ Tilemap.prototype.postUpdate = function () {
         this._camScaleX = this.game.camera.scale.x;
         this._camScaleY = this.game.camera.scale.y;
 
-        this.scaledTileWidth = this.tileWidth * this.game.camera.scale.x;
-        this.scaledTileHeight = this.tileHeight * this.game.camera.scale.y;
+        this.setTileSize(this.tileWidth, this.tileHeight);
 
         this.dirty = true;
     }
