@@ -1246,7 +1246,7 @@ Buffer.prototype.copy = function (target, target_start, start, end) {
 
   var len = end - start
 
-  if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
+  if (len < 100 || !Buffer.TYPED_ARRAY_SUPPORT) {
     for (var i = 0; i < len; i++) {
       target[i + target_start] = this[i + start]
     }
@@ -1315,7 +1315,6 @@ var BP = Buffer.prototype
  * Augment a Uint8Array *instance* (not the Uint8Array class!) with Buffer methods
  */
 Buffer._augment = function (arr) {
-  arr.constructor = Buffer
   arr._isBuffer = true
 
   // save reference to original Uint8Array get/set methods before overwriting
@@ -2186,7 +2185,7 @@ function Objectlayer(game, map, layer, index) {
     this.bodies = [];
 
     if (this.properties.batch) {
-        this.container = this.addChild(new Phaser.SpriteBatch());
+        this.container = this.addChild(new Phaser.SpriteBatch(game));
     } else {
         this.container = this;
     }
@@ -3110,7 +3109,7 @@ function Tilelayer(game, map, layer, index) {
 
     // if batch is true, store children in a spritebatch
     if (this.properties.batch) {
-        this.container = this.addChild(new Phaser.SpriteBatch());
+        this.container = this.addChild(new Phaser.SpriteBatch(game));
     } else {
         this.container = this;
     }
@@ -3416,14 +3415,14 @@ Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interest
     // x = this._fixX(x);
     // y = this._fixY(y);
 
-    if (width > this.layer.widthInPixels)
+    if (width > this.widthInPixels)
     {
-        width = this.layer.widthInPixels;
+        width = this.widthInPixels;
     }
 
-    if (height > this.layer.heightInPixels)
+    if (height > this.heightInPixels)
     {
-        height = this.layer.heightInPixels;
+        height = this.heightInPixels;
     }
 
     //  Convert the pixel values into tile coordinates
@@ -3806,7 +3805,7 @@ function Tilemap(game, key, group) {
     // create each tileset
     for(var t = 0, tl = data.tilesets.length; t < tl; ++t) {
         var ts = data.tilesets[t];
-        this.tilesets.push(new Tileset(game, utils.cacheKey(key, 'tileset', ts.name), ts));
+        this.tilesets.push(new Tileset(game, key, ts));
     }
 
     // create each layer
@@ -3856,8 +3855,14 @@ Tilemap.prototype.setTileSize = function (tileWidth, tileHeight) {
     this.tileWidth = tileWidth;
     this.tileHeight = tileHeight;
 
+    this.scaledTileWidth = tileWidth * this.game.camera.scale.x;
+    this.scaledTileHeight = tileHeight * this.game.camera.scale.y;
+
     this.widthInPixels = this.width * tileWidth;
-    this.heightInPixels = this.height * tileHeight;
+    this.heightInPixels = this.height * tileWidth;
+
+    // update the world bounds
+    this.game.world.setBounds(0, 0, this.width * this.game.camera.scale.x, this.height * this.game.camera.scale.y);
 };
 
 /**
@@ -4482,8 +4487,7 @@ Tilemap.prototype.postUpdate = function () {
         this._camScaleX = this.game.camera.scale.x;
         this._camScaleY = this.game.camera.scale.y;
 
-        this.scaledTileWidth = this.tileWidth * this.game.camera.scale.x;
-        this.scaledTileHeight = this.tileHeight * this.game.camera.scale.y;
+        this.setTileSize(this.tileWidth, this.tileHeight);
 
         this.dirty = true;
     }
@@ -4644,7 +4648,7 @@ var TilemapParser = {
             return this.getEmptyData();
         }
 
-        if (key === null) {
+        if (!key) {
             return this.getEmptyData(tileWidth, tileHeight, width, height);
         }
 
@@ -4775,7 +4779,7 @@ var TilemapParser = {
                 var grp = node,
                     group = {
                         type: 'objectgroup',
-                        draworder: 'topdown',
+                        draworder: 'topdown', //TODO: support custom draworders
                         name: grp.attributes.getNamedItem('name').value,
                         width: 0,
                         height: 0,
@@ -4800,10 +4804,26 @@ var TilemapParser = {
                             x: parseFloat(obj.attributes.getNamedItem('x').value, 10),
                             y: parseFloat(obj.attributes.getNamedItem('y').value, 10),
                             properties: {}
-                        };
+                        },
+                        poly;
 
                     if(object.gid === null) {
                         delete object.gid;
+                    }
+
+                    poly = obj.getElementsByTagName('polygon');
+                    if (poly.length) {
+                        object.polygon = poly[0].attributes.getNamedItem('points').value.split(' ').map(csvToXY);
+                    }
+
+                    poly = obj.getElementsByTagName('polyline');
+                    if (poly.length) {
+                        object.polyline = poly[0].attributes.getNamedItem('points').value.split(' ').map(csvToXY);
+                    }
+
+                    poly = obj.getElementsByTagName('ellipse');
+                    if (poly.length) {
+                        object.ellipse = true;
                     }
 
                     var props = obj.getElementsByTagName('properties');
@@ -4818,6 +4838,30 @@ var TilemapParser = {
                 }
 
                 map.layers.push(group);
+            } else if(node.nodeName === 'imagelayer') {
+                var ilyr = node,
+                    imglayer = {
+                        type: 'imagelayer',
+                        image: ilyr.getElementsByTagName('image')[0].attributes.getNamedItem('source').value,
+                        name: ilyr.attributes.getNamedItem('name').value,
+                        width: 0, //always 0 for imagelayers
+                        height: 0, //always 0 for imagelayers
+                        visible: ilyr.attributes.getNamedItem('visible') ? ilyr.attributes.getNamedItem('visible').value === '1' : true,
+                        opacity: ilyr.attributes.getNamedItem('opacity') ? parseFloat(ilyr.attributes.getNamedItem('opacity').value, 10) : 1,
+                        x: ilyr.attributes.getNamedItem('x') ? parseInt(ilyr.attributes.getNamedItem('x').value, 10) : 0,
+                        y: ilyr.attributes.getNamedItem('y') ? parseInt(ilyr.attributes.getNamedItem('y').value, 10) : 0,
+                        properties: {}
+                    };
+
+                var iprops = ilyr.getElementsByTagName('properties');
+                if(iprops.length) {
+                    iprops = iprops[0].getElementsByTagName('property');
+                    for(var ip = 0; ip < iprops.length; ++ip) {
+                        imglayer.properties[iprops[ip].attributes.getNamedItem('name').value] = iprops[ip].attributes.getNamedItem('value').value;
+                    }
+                }
+
+                map.layers.push(imglayer);
             }
         }
 
@@ -4967,6 +5011,14 @@ var TilemapParser = {
 
 module.exports = TilemapParser;
 
+function csvToXY(pt) {
+    var points = pt.split(',');
+    return {
+        x: parseInt(points[0], 10),
+        y: parseInt(points[1], 10)
+    };
+}
+
 },{"../constants":10,"../utils":18}],17:[function(require,module,exports){
 var utils = require('../utils');
 
@@ -4977,6 +5029,8 @@ var utils = require('../utils');
  * @class Tileset
  * @extends Texture
  * @constructor
+ * @param game {Phaser.Game} Phaser game this belongs to.
+ * @param key {string} The name of the tiledmap, this is usually the filename without the extension.
  * @param settings {Object} All the settings for the tileset
  * @param settings.tilewidth {Number} The width of a single tile in the set
  * @param settings.tileheight {Number} The height of a single tile in the set
@@ -4996,10 +5050,54 @@ var utils = require('../utils');
 //TODO: Implement multi-image tileset support
 //TODO: Support external tilesets (TSX files) via the "source" attribute
 //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
-function Tileset(game, textureKey, settings) {
-    PIXI.Texture.call(this, PIXI.BaseTextureCache[textureKey]);
+function Tileset(game, key, settings) {
+    var txkey = utils.cacheKey(key, 'tileset', settings.name),
+        tx = PIXI.BaseTextureCache[txkey],
+        ids,
+        ttxkey,
+        ttx,
+        tileTextures;
+
+    // if no main texture, check if multi-image tileset
+    if (!tx && settings.tiles) {
+        // need to sort because order matters here, and can't guarantee that the object's keys will be ordered.
+        // We need a custom comparator because .sort() is lexagraphic, not numeric.
+        ids = Object.keys(settings.tiles).sort(function (a, b) { return parseInt(a, 10) - parseInt(b, 10); });
+
+        for (var i = 0; i < ids.length; ++i) {
+            if (settings.tiles[ids[i]].image) {
+                // this is a multi-image tileset
+                tileTextures = tileTextures || [];
+
+                ttxkey = utils.cacheKey(key, 'tileset_image_' + ids[i], settings.name);
+                ttx = PIXI.TextureCache[ttxkey];
+
+                if (!ttx) {
+                    console.warn(
+                        'Tileset "' + settings.name + '" unable to find texture cached by key "' +
+                        ttxkey + '", using blank texture.'
+                    );
+                    ttx = new PIXI.Texture(new PIXI.BaseTexture());
+                }
+
+                tileTextures.push(ttx);
+            }
+        }
+    }
+
+    // if no main texture, and we didn't find any image tiles then warn about blank tileset
+    if (!tx && !tileTextures) {
+        console.warn(
+            'Tileset "' + settings.name + '" unable to find texture cached by key "' +
+            txkey +  '", using blank texture.'
+        );
+    }
+
+    PIXI.Texture.call(this, tx || new PIXI.BaseTexture());
 
     this.game = game;
+
+    this.multiImage = !!tileTextures;
 
     //Tiled Editor properties
 
@@ -5073,9 +5171,9 @@ function Tileset(game, textureKey, settings) {
      * @property numTiles
      * @type Vector
      */
-    this.numTiles = new Phaser.Point(
-        Phaser.Math.floor((this.baseTexture.source.width - this.margin) / (this.tileWidth - this.spacing)),
-        Phaser.Math.floor((this.baseTexture.source.height - this.margin) / (this.tileHeight - this.spacing))
+    this.numTiles = this.multiImage ? tileTextures.length : new Phaser.Point(
+        Phaser.Math.floor((this.baseTexture.width - this.margin) / (this.tileWidth - this.spacing)),
+        Phaser.Math.floor((this.baseTexture.height - this.margin) / (this.tileHeight - this.spacing))
     );
 
     /**
@@ -5084,7 +5182,7 @@ function Tileset(game, textureKey, settings) {
      * @property lastgid
      * @type Number
      */
-    this.lastgid = this.firstgid + ((this.numTiles.x * this.numTiles.y) || 1) - 1;
+    this.lastgid = this.firstgid + (this.multiImage ? tileTextures.length : ((this.numTiles.x * this.numTiles.y) || 1)) - 1;
 
     /**
      * The properties of the tileset
@@ -5113,9 +5211,9 @@ function Tileset(game, textureKey, settings) {
      * @property size
      * @type Vector
      */
-    this.size = new Phaser.Point(
-        settings.imagewidth || this.baseTexture.source.width,
-        settings.imageheight || this.baseTexture.source.height
+    this.size = this.multiImage ? new Phaser.Point(0, 0) : new Phaser.Point(
+        settings.imagewidth || this.baseTexture.width,
+        settings.imageheight || this.baseTexture.height
     );
 
     /**
@@ -5124,24 +5222,26 @@ function Tileset(game, textureKey, settings) {
      * @property textures
      * @type Array
      */
-    this.textures = [];
+    this.textures = this.multiImage ? tileTextures : [];
 
-    // generate tile textures
-    for(var t = 0, tl = this.lastgid - this.firstgid + 1; t < tl; ++t) {
-        // convert the tileId to x,y coords of the tile in the Texture
-        var y = Phaser.Math.floor(t / this.numTiles.x),
-            x = (t - (y * this.numTiles.x));
+    // generate tile textures for single image tileset
+    if (!this.multiImage) {
+        for(var t = 0, tl = this.lastgid - this.firstgid + 1; t < tl; ++t) {
+            // convert the tileId to x,y coords of the tile in the Texture
+            var y = Phaser.Math.floor(t / this.numTiles.x),
+                x = (t - (y * this.numTiles.x));
 
-        // get location in pixels
-        x = (x * this.tileWidth) + (x * this.spacing) + this.margin;
-        y = (y * this.tileHeight) + (y * this.spacing) + this.margin;
+            // get location in pixels
+            x = (x * this.tileWidth) + (x * this.spacing) + this.margin;
+            y = (y * this.tileHeight) + (y * this.spacing) + this.margin;
 
-        this.textures.push(
-            new PIXI.Texture(
-                this.baseTexture,
-                new Phaser.Rectangle(x, y, this.tileWidth, this.tileHeight)
-            )
-        );
+            this.textures.push(
+                new PIXI.Texture(
+                    this.baseTexture,
+                    new Phaser.Rectangle(x, y, this.tileWidth, this.tileHeight)
+                )
+            );
+        }
     }
 
     /**
@@ -5461,7 +5561,7 @@ if (typeof window !== 'undefined') {
     }
     // no parser available
     else {
-        utils.warn('XML parser not available, trying to parse any XML will result in an error.');
+        console.warn('XML parser not available, trying to parse any XML will result in an error.');
         utils.parseXML = function() {
             throw new Error('Trying to parse XML, but not XML parser is available in this environment');
         };
