@@ -88,7 +88,7 @@ function Objectlayer(game, map, layer, index) {
     this.bodies = [];
 
     if (this.properties.batch) {
-        this.container = this.addChild(new Phaser.SpriteBatch());
+        this.container = this.addChild(new Phaser.SpriteBatch(game));
     } else {
         this.container = this;
     }

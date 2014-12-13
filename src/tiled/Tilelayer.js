@@ -166,7 +166,7 @@ function Tilelayer(game, map, layer, index) {
 
     // if batch is true, store children in a spritebatch
     if (this.properties.batch) {
-        this.container = this.addChild(new Phaser.SpriteBatch());
+        this.container = this.addChild(new Phaser.SpriteBatch(game));
     } else {
         this.container = this;
     }
