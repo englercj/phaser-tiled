@@ -29,7 +29,7 @@ var TilemapParser = {
             return this.getEmptyData();
         }
 
-        if (key === null) {
+        if (!key) {
             return this.getEmptyData(tileWidth, tileHeight, width, height);
         }
 
