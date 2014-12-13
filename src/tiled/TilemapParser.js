@@ -194,24 +194,12 @@ var TilemapParser = {
 
                     poly = obj.getElementsByTagName('polygon');
                     if (poly.length) {
-                        object.polygon = poly[0].attributes.getNamedItem('points').value.split(' ').map(function (pt) {
-                                var points = pt.split(',');
-                                return {
-                                    x: parseInt(points[0], 10),
-                                    y: parseInt(points[1], 10)
-                                };
-                            });
+                        object.polygon = poly[0].attributes.getNamedItem('points').value.split(' ').map(csvToXY);
                     }
 
                     poly = obj.getElementsByTagName('polyline');
                     if (poly.length) {
-                        object.polyline = poly[0].attributes.getNamedItem('points').value.split(' ').map(function (pt) {
-                                var points = pt.split(',');
-                                return {
-                                    x: parseInt(points[0], 10),
-                                    y: parseInt(points[1], 10)
-                                };
-                            });
+                        object.polyline = poly[0].attributes.getNamedItem('points').value.split(' ').map(csvToXY);
                     }
 
                     poly = obj.getElementsByTagName('ellipse');
@@ -246,11 +234,11 @@ var TilemapParser = {
                         properties: {}
                     };
 
-                var props = ilyr.getElementsByTagName('properties');
-                if(props.length) {
-                    props = props[0].getElementsByTagName('property');
-                    for(var pr = 0; pr < props.length; ++pr) {
-                        imglayer.properties[props[pr].attributes.getNamedItem('name').value] = props[pr].attributes.getNamedItem('value').value;
+                var iprops = ilyr.getElementsByTagName('properties');
+                if(iprops.length) {
+                    iprops = iprops[0].getElementsByTagName('property');
+                    for(var ip = 0; ip < iprops.length; ++ip) {
+                        imglayer.properties[iprops[ip].attributes.getNamedItem('name').value] = iprops[ip].attributes.getNamedItem('value').value;
                     }
                 }
 
@@ -403,3 +391,11 @@ var TilemapParser = {
 };
 
 module.exports = TilemapParser;
+
+function csvToXY(pt) {
+    var points = pt.split(',');
+    return {
+        x: parseInt(points[0], 10),
+        y: parseInt(points[1], 10)
+    };
+}

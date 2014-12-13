@@ -51,7 +51,10 @@ function Tileset(game, key, settings) {
                 ttx = PIXI.TextureCache[ttxkey];
 
                 if (!ttx) {
-                    console.warn('Tileset "' + settings.name + '" unable to find texture cached by key "' + ttxkey + '", using blank texture.');
+                    console.warn(
+                        'Tileset "' + settings.name + '" unable to find texture cached by key "' +
+                        ttxkey + '", using blank texture.'
+                    );
                     ttx = new PIXI.Texture(new PIXI.BaseTexture());
                 }
 
@@ -62,7 +65,10 @@ function Tileset(game, key, settings) {
 
     // if no main texture, and we didn't find any image tiles then warn about blank tileset
     if (!tx && !tileTextures) {
-        console.warn('Tileset "' + settings.name + '" unable to find texture cached by key "' + txkey +  '", using blank texture.');
+        console.warn(
+            'Tileset "' + settings.name + '" unable to find texture cached by key "' +
+            txkey +  '", using blank texture.'
+        );
     }
 
     PIXI.Texture.call(this, tx || new PIXI.BaseTexture());
