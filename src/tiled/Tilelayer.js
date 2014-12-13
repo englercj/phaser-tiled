@@ -472,14 +472,14 @@ Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interest
     // x = this._fixX(x);
     // y = this._fixY(y);
 
-    if (width > this.layer.widthInPixels)
+    if (width > this.widthInPixels)
     {
-        width = this.layer.widthInPixels;
+        width = this.widthInPixels;
     }
 
-    if (height > this.layer.heightInPixels)
+    if (height > this.heightInPixels)
     {
-        height = this.layer.heightInPixels;
+        height = this.heightInPixels;
     }
 
     //  Convert the pixel values into tile coordinates
