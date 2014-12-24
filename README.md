@@ -52,7 +52,7 @@ game.load.image(cacheKey('my-tiledmap', 'layer', 'layer-name'), 'assets/levels/l
 // add the tiledmap to the game
 // this method takes the key for the tiledmap which has been used in the cacheKey calls
 // earlier, and an optional group to add the tilemap to (defaults to game.world).
-var map = game.add.tiledmap('my-tilemap');
+var map = game.add.tiledmap('my-tiledmap');
 ```
 
 That can get pretty heavy, and hardcoding what to load and how to name it can stink! Luckily, there is an easier
@@ -66,7 +66,7 @@ game.load.pack('my-tiledmap', 'assets/levels/tilemap-assets.json');
 
 ////////////
 // Later after loading is complete:
-var map = game.add.tiledmap('my-tilemap');
+var map = game.add.tiledmap('my-tiledmap');
 ```
 
 Wow, that was a lot easier! You can find out more about the generator on [it's GitHub page][10].
