@@ -26,6 +26,12 @@ function Tile(game, x, y, tileId, tileset, layer) {
     this.tileset = tileset;
 
     /**
+    * @property {number} tileId - The index of this tile within the map data
+    * corresponding to the tileset, or -1 if this represents a blank/null tile.
+    */
+    this.tileId = tileId;
+
+    /**
     * @property {Phaser.Point} tilePosition - The position of the tile in 'tile coords'
     */
     this.tilePosition = new Phaser.Point(x, y);

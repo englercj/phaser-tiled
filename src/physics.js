@@ -155,15 +155,16 @@ module.exports = {
         * In Ninja the Tiles have an ID from 0 to 33, where 0 is 'empty', 1 is a full tile, 2 is a 45-degree slope,
         * etc. You can find the ID list either at the very bottom of `Tile.js`, or in a handy visual reference in the
         * `resources/Ninja Physics Debug Tiles` folder in the repository. The slopeMap parameter is an array that controls
-        * how the indexes of the tiles in your tilemap data will map to the Ninja Tile IDs. For example if you had 6
+        * how the indexes of the tiles in your tilemap data will map to the Ninja Tile slopes. For example if you had 6
         * tiles in your tileset: Imagine the first 4 should be converted into fully solid Tiles and the other 2 are 45-degree
-        * slopes. Your slopeMap array would look like this: `[ 1, 1, 1, 1, 2, 3 ]`. Where each element of the array is
-        * a tile in your tilemap and the resulting Ninja Tile it should create.
+        * slopes. Your slopeMap array would look like this: `{0:1, 1:1, 2:1,
+        * 3:1, 4:2, 5:3 }`. Where each element of the map is a tile in your
+        * tileset and the resulting Ninja Tile it should create.
         *
         * @method Phaser.Physics.Ninja#convertTilemap
         * @param {Phaser.Tilemap} map - The Tilemap to get the map data from.
         * @param {number|string|Phaser.TilemapLayer} [layer] - The layer to operate on. Defaults to map.currentLayer.
-        * @param {object} [slopeMap] - The tilemap index to Tile ID map.
+        * @param {object} [slopeMap] - Map of tileIds to Ninja Physics slope IDs
         * @return {array} An array of the Phaser.Physics.Ninja.Tile objects that were created.
         */
         convertTiledmap: function (map, layer, slopeMap) {
@@ -181,15 +182,13 @@ module.exports = {
                     if (layer.tiles[y] && layer.tiles[y][x]) {
                         var tile = layer.tiles[y][x];
 
-                        var index = tile.index;
-
-                        if (tile && slopeMap.hasOwnProperty(index))
+                        if (tile && slopeMap.hasOwnProperty(tile.tileId))
                         {
                             var body = new Phaser.Physics.Ninja.Body(
                                 this,
                                 null,
                                 3,
-                                slopeMap[index],
+                                slopeMap[tile.tileId],
                                 0,
                                 tile.worldX + tile.centerX,
                                 tile.worldY + tile.centerY,
