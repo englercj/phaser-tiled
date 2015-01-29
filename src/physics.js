@@ -168,7 +168,7 @@ module.exports = {
         */
         convertTiledmap: function (map, layer, slopeMap) {
 
-            layer = map.getTilelayerIndex(layer);
+            layer = map.getTilelayer(layer);
 
             //  If the bodies array is already populated we need to nuke it
             this.clearTilemapLayerBodies(map, layer);
