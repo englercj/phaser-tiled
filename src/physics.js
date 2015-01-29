@@ -166,7 +166,7 @@ module.exports = {
         * @param {object} [slopeMap] - The tilemap index to Tile ID map.
         * @return {array} An array of the Phaser.Physics.Ninja.Tile objects that were created.
         */
-        convertTiledmapForNinja: function (map, layer, slopeMap) {
+        convertTiledmap: function (map, layer, slopeMap) {
 
             layer = map.getTilelayerIndex(layer);
 
