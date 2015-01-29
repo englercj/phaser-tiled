@@ -167,6 +167,7 @@ module.exports = {
         * @return {array} An array of the Phaser.Physics.Ninja.Tile objects that were created.
         */
         convertTiledmap: function (map, layer, slopeMap) {
+            console.log('!!! test');
 
             layer = map.getTilelayer(layer);
 
@@ -177,24 +178,27 @@ module.exports = {
             {
                 for (var x = 0, w = layer.size.x; x < w; x++)
                 {
-                    var tile = layer.tiles[y][x],
-                        index = (y * layer.size.x) + x;
+                    if (layer.tiles[y] && layer.tiles[y][x]) {
+                        var tile = layer.tiles[y][x];
 
-                    if (tile && slopeMap.hasOwnProperty(index))
-                    {
-                        var body = new Phaser.Physics.Ninja.Body(
-                            this,
-                            null,
-                            3,
-                            slopeMap[index],
-                            0,
-                            tile.worldX + tile.centerX,
-                            tile.worldY + tile.centerY,
-                            tile.width,
-                            tile.height
-                        );
+                        var index = tile.index;
 
-                        layer.bodies.push(body);
+                        if (tile && slopeMap.hasOwnProperty(index))
+                        {
+                            var body = new Phaser.Physics.Ninja.Body(
+                                this,
+                                null,
+                                3,
+                                slopeMap[index],
+                                0,
+                                tile.worldX + tile.centerX,
+                                tile.worldY + tile.centerY,
+                                tile.width,
+                                tile.height
+                            );
+
+                            layer.bodies.push(body);
+                        }
                     }
                 }
             }
