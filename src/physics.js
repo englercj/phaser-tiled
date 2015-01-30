@@ -168,7 +168,6 @@ module.exports = {
         * @return {array} An array of the Phaser.Physics.Ninja.Tile objects that were created.
         */
         convertTiledmap: function (map, layer, slopeMap) {
-            console.log('!!! test');
 
             layer = map.getTilelayer(layer);
 
