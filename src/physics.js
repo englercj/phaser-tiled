@@ -183,7 +183,7 @@ module.exports = {
 
                         if (tile && slopeMap.hasOwnProperty(tile.tileId))
                         {
-                            var body = new Phaser.Physics.Ninja.Body(
+                            tile.body = new Phaser.Physics.Ninja.Body(
                                 this,
                                 null,
                                 3,
@@ -195,7 +195,7 @@ module.exports = {
                                 tile.height
                             );
 
-                            layer.bodies.push(body);
+                            layer.bodies.push(tile.body);
                         }
                     }
                 }

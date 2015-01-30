@@ -2055,7 +2055,6 @@ module.exports = {
         * @return {array} An array of the Phaser.Physics.Ninja.Tile objects that were created.
         */
         convertTiledmap: function (map, layer, slopeMap) {
-            console.log('!!! test');
 
             layer = map.getTilelayer(layer);
 
@@ -2071,7 +2070,7 @@ module.exports = {
 
                         if (tile && slopeMap.hasOwnProperty(tile.tileId))
                         {
-                            var body = new Phaser.Physics.Ninja.Body(
+                            tile.body = new Phaser.Physics.Ninja.Body(
                                 this,
                                 null,
                                 3,
@@ -2083,7 +2082,7 @@ module.exports = {
                                 tile.height
                             );
 
-                            layer.bodies.push(body);
+                            layer.bodies.push(tile.body);
                         }
                     }
                 }
