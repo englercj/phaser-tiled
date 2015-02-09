@@ -47,13 +47,14 @@ define(function() {
             // 'maps/iso/Isometric_land.tmx',
 
             // Orthogonal test maps
-            'maps/ortho/formosa_gzip.tmx',
-            'maps/ortho/formosa_zlib.tmx',
-            'maps/ortho/Ortho_1_16__16_large.json',
-            'maps/ortho/Ortho_1_16__16_large.tmx',
-            'maps/ortho/Ortho_1_32__32.tmx',
-            'maps/ortho/Ortho_1_32__32_objects.tmx',
-            'maps/ortho/Ortho_1_32__32_objects.json'
+            // 'maps/ortho/formosa_gzip.tmx',
+            // 'maps/ortho/formosa_zlib.tmx',
+            // 'maps/ortho/Ortho_1_16__16_large.json',
+            // 'maps/ortho/Ortho_1_16__16_large.tmx',
+            // 'maps/ortho/Ortho_1_32__32.tmx',
+            // 'maps/ortho/Ortho_1_32__32_objects.tmx',
+            // 'maps/ortho/Ortho_1_32__32_objects.json',
+            'maps/ortho/basicRotate.tmx'
         ]
     };
 

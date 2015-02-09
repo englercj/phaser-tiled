@@ -41,20 +41,7 @@ require([
                     this.load.pack(key, null, packData);
                 },
                 create: function () {
-                    var pack = packData[key],
-                        tilesetPackData = [],
-                        levelPackData;
-
-                    for (var i = 0; i < pack.length; ++i) {
-                        if (pack[i].type === 'image' && pack[i].subtype === 'tileset') {
-                            tilesetPackData[pack[i].name] = pack[i].key;
-                        }
-                        else if (pack[i].type === 'tiledmap') {
-                            levelPackData = pack[i];
-                        }
-                    }
-
-                    this.add.tiledmap(levelPackData.key, tilesetPackData).spawnObjects(function (obj) {
+                    this.add.tiledmap(key).spawnObjects(function (obj) {
                         if (obj.type !== Phaser.SPRITE) return;
 
                         obj.inputEnabled = true;
