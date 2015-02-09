@@ -211,10 +211,12 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
             if (props.tileprops) {
                 if (props.tileprops.flippedX) {
                     obj.scale.x = -1;
+                    obj.position.x += Math.abs(obj.width);
                 }
 
                 if (props.tileprops.flippedY) {
                     obj.scale.y = -1;
+                    obj.position.y += Math.abs(obj.height);
                 }
 
                 // from Tiled Editor:
@@ -227,7 +229,7 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
                     obj.scale.x = obj.scale.y;
                     obj.scale.y = sx;
 
-                    var halfDiff = (o.height / 2) - (o.width / 2);
+                    var halfDiff = Math.abs(o.height / 2) - Math.abs(o.width / 2);
                     obj.position.y += halfDiff;
                     obj.position.x += halfDiff;
                 }

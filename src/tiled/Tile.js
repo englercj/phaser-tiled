@@ -124,10 +124,12 @@ function Tile(game, x, y, tileId, tileset, layer) {
     // setup the flipped states
     if (this.properties.flippedX) {
         this.scale.x = -1;
+        this.position.x += tileset.tileWidth;
     }
 
     if (this.properties.flippedY) {
         this.scale.y = -1;
+        this.position.y += tileset.tileHeight;
     }
 
     // from Tiled Editor:
@@ -140,7 +142,7 @@ function Tile(game, x, y, tileId, tileset, layer) {
         this.scale.x = this.scale.y;
         this.scale.y = sx;
 
-        var halfDiff = (this.height / 2) - (this.width / 2);
+        var halfDiff = Math.abs(this.height / 2) - Math.abs(this.width / 2);
         this.position.y += halfDiff;
         this.position.x += halfDiff;
     }
