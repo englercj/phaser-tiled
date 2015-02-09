@@ -2308,10 +2308,12 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
             if (props.tileprops) {
                 if (props.tileprops.flippedX) {
                     obj.scale.x = -1;
+                    obj.position.x += Math.abs(obj.width);
                 }
 
                 if (props.tileprops.flippedY) {
                     obj.scale.y = -1;
+                    obj.position.y += Math.abs(obj.height);
                 }
 
                 // from Tiled Editor:
@@ -2324,7 +2326,7 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
                     obj.scale.x = obj.scale.y;
                     obj.scale.y = sx;
 
-                    var halfDiff = (o.height / 2) - (o.width / 2);
+                    var halfDiff = Math.abs(o.height / 2) - Math.abs(o.width / 2);
                     obj.position.y += halfDiff;
                     obj.position.x += halfDiff;
                 }
@@ -2645,10 +2647,12 @@ function Tile(game, x, y, tileId, tileset, layer) {
     // setup the flipped states
     if (this.properties.flippedX) {
         this.scale.x = -1;
+        this.position.x += tileset.tileWidth;
     }
 
     if (this.properties.flippedY) {
         this.scale.y = -1;
+        this.position.y += tileset.tileHeight;
     }
 
     // from Tiled Editor:
@@ -2661,7 +2665,7 @@ function Tile(game, x, y, tileId, tileset, layer) {
         this.scale.x = this.scale.y;
         this.scale.y = sx;
 
-        var halfDiff = (this.height / 2) - (this.width / 2);
+        var halfDiff = Math.abs(this.height / 2) - Math.abs(this.width / 2);
         this.position.y += halfDiff;
         this.position.x += halfDiff;
     }
