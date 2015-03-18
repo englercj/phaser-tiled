@@ -39,6 +39,10 @@ module.exports = {
 
                 for (var x = 0, w = layer.size.x; x < w; x++)
                 {
+                    if (!layer.tiles[y]) {
+                        continue;
+                    }
+
                     tile = layer.tiles[y][x];
 
                     if (tile && tile.collides)
@@ -49,8 +53,8 @@ module.exports = {
 
                             if (width === 0)
                             {
-                                sx = tile.x * tile.width;
-                                sy = tile.y * tile.height;
+                                sx = tile.x;
+                                sy = tile.y;
                                 width = tile.width;
                             }
 
@@ -60,7 +64,7 @@ module.exports = {
                             }
                             else
                             {
-                                body = this.createBody(this.pxm(sx) * 1.25, this.pxm(sy) * 1.25, 0, false);
+                                body = this.createBody(sx, sy, 0, false);
 
                                 body.addRectangle(width, tile.height, width / 2, tile.height / 2, 0);
 
@@ -76,11 +80,10 @@ module.exports = {
                         }
                         else
                         {
-                            sx = tile.x * tile.width;
-                            sy = tile.x * tile.width;
-                            body = this.createBody(this.pxm(sx) * 1.25, this.pxm(sy) * 1.25, 0, false);
+                            body = this.createBody(tile.x, tile.y, 0, false);
 
-                            body.addRectangle(tile.width, tile.height, tile.width / 2, tile.height / 2, 0);
+                            body.clearShapes();
+                            body.addRectangle(tile.width, tile.height, tile.width / 2, tile.height / 2, tile.rotation);
 
                             if (addToWorld)
                             {
@@ -175,6 +178,10 @@ module.exports = {
 
             for (var y = 0, h = layer.size.y; y < h; y++)
             {
+                if (!layer.tiles[y]) {
+                    continue;
+                }
+
                 for (var x = 0, w = layer.size.x; x < w; x++)
                 {
                     var tile = layer.tiles[y][x],
