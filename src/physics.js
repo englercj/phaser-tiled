@@ -25,6 +25,10 @@ module.exports = {
 
             layer = map.getTilelayer(layer);
 
+            if (!layer) {
+                return;
+            }
+
             //  If the bodies array is already populated we need to nuke it
             this.clearTilemapLayerBodies(map, layer.index);
 
@@ -116,6 +120,10 @@ module.exports = {
 
             layer = map.getObjectlayer(layer);
 
+            if (!layer) {
+                return;
+            }
+
             for (var i = 0, len = layer.objects.length; i < len; i++)
             {
                 var object = layer.objects[i];
@@ -172,6 +180,10 @@ module.exports = {
         convertTiledmap: function (map, layer, slopeMap) {
 
             layer = map.getTilelayer(layer);
+
+            if (!layer) {
+                return;
+            }
 
             //  If the bodies array is already populated we need to nuke it
             this.clearTilemapLayerBodies(map, layer);
