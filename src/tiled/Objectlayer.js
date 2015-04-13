@@ -102,11 +102,12 @@ module.exports = Objectlayer;
 /**
  * Spawns all the entities associated with this layer, and properly sets their attributes
  *
- * @method spawn
- * @return {Objectlayer} Returns itself.
  * @chainable
+ * @param [physicsBodyType=Phaser.Physics.ARCADE] {number} The physics system to create stuff on.
+ * @param [spawnCallback] {function} A function to call for each object spawned.
+ * @return {Objectlayer} Returns itself.
  */
-Objectlayer.prototype.spawn = function (spawnCallback) {
+Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
     // we go through these backwards so that things that are higher in the
     // list of object gets rendered on top.
     for(var i = this.objects.length - 1; i >= 0; --i) {
@@ -128,35 +129,8 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
                 props.texture = set.getTileTexture(o.gid);
                 props.tileprops = set.getTileProperties(o.gid);
                 props.animation = set.getTileAnimations(o.gid);
-
-                // if no hitArea then use the tileset's if available
-                if (!props.hitArea) {
-                    if (props.tileprops.hitArea) {
-                        props.hitArea = props.tileprops.hitArea;
-                    }
-                    else {
-                        props.hitArea = set.properties.hitArea;
-                    }
-                }
             }
         }
-        // non-sprite object (usually to define an "area" on a map)
-        // else {
-        //     if (!props.hitArea) {
-        //         if (o.polyline) {
-        //             props.hitArea = this._getPolyline(o);
-        //         }
-        //         else if (o.polygon) {
-        //             props.hitArea = this._getPolygon(o);
-        //         }
-        //         else if (o.ellipse) {
-        //             props.hitArea = this._getEllipse(o);
-        //         }
-        //         else {
-        //             props.hitArea = this._getRectangle(o);
-        //         }
-        //     }
-        // }
 
         o.name = o.name || props.name || props.tileprops.name || '';
         o.type = o.type || props.type || props.tileprops.type || '';
@@ -166,84 +140,72 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
             props.texture = PIXI.TextureCache[props.texture];
         }
 
-        // just a regular DisplayObject
-        if (!props.texture) {
-            obj = this.game.add.group(this.container, o.name);
+        // when props.texture is empty it will just create an empty sprite.
+        obj = this.game.add.sprite(o.x, o.y, props.texture, null, this.container);
 
+        // setup the properties of the sprite
+        obj.name = o.name;
+        obj.rotation = o.rotation;
+        obj.objectType = o.type;
+
+        if (!obj.texture) {
             obj.width = o.width;
             obj.height = o.height;
+        }
+
+        obj.blendMode = (props.blendMode || this.properties.blendMode) ?
+            PIXI.blendModes[(props.blendMode || this.properties.blendMode)] : PIXI.blendModes.NORMAL;
+
+        // create physics if this body is physical.
+        if (props.collides || props.tileprops.collides) {
+            this.game.physics.enable(obj, physicsBodyType, props.debug || props.tileprops.debug);
+
+            obj.body.setRectangle(obj.width, obj.height, obj.width / 2, -obj.height / 2, obj.rotation);
+
+            obj.body[props.bodyType || props.tileprops.bodyType || 'static'] = true;
+
+            if (props.sensor) {
+                obj.body.data.shapes[0].sensor = true;
+            }
+        }
+
+        var a = props.anchor || props.tileprops.anchor;
+        obj.anchor.x = a ? a[0] : 0;
+        obj.anchor.y = a ? a[1] : 1;
+
+        if (props.tileprops.flippedX) {
+            obj.scale.x = -1;
+            obj.position.x += Math.abs(obj.width);
+        }
+
+        if (props.tileprops.flippedY) {
+            obj.scale.y = -1;
+            obj.position.y += Math.abs(obj.height);
+        }
+
+        // from Tiled Editor:
+        // https://github.com/bjorn/tiled/blob/b059a13b2864ea029fb741a90780d31cf5b67043/src/libtiled/maprenderer.cpp#L135-L145
+        if (props.tileprops.flippedAD) {
+            obj.rotation = this.game.math.degToRad(90);
+            obj.scale.x *= -1;
+
+            var sx = obj.scale.x;
+            obj.scale.x = obj.scale.y;
+            obj.scale.y = sx;
+
+            var halfDiff = Math.abs(o.height / 2) - Math.abs(o.width / 2);
+            obj.position.y += halfDiff;
+            obj.position.x += halfDiff;
+        }
+
+        if (props.animation && obj.animations) {
+            obj.animations.copyFrameData(props.animation.data, 0);
+            obj.animations.add('tile', null, props.animation.rate, true).play();
+            // obj.animations.play(props.animation || props.tileprops.animation);
+        }
+
+        if (typeof o.rotation === 'number') {
             obj.rotation = o.rotation;
-            obj.objectType = o.type;
-
-            obj.position.x = o.x;
-            obj.position.y = o.y;
-
-            // these are treated as sensor bodies, so always enable physics
-            obj.sensor = true;
-            // obj.hitArea = props.hitArea;
-
-            // obj.enablePhysics(this.game.physics);
-        } else {
-            obj = this.game.add.sprite(o.x, o.y, props.texture, null, this.container);
-
-            // obj.width = o.width;
-            // obj.height = o.height;
-
-            obj.name = o.name;
-            obj.objectType = o.type;
-
-            // obj.mass = props.mass || props.tileprops.mass;
-            // obj.inertia = props.inertia || props.tileprops.inertia;
-            // obj.friction = props.friction || props.tileprops.friction;
-            // obj.sensor = props.sensor || props.tileprops.sensor;
-            // obj.hitArea = props.hitArea;
-            obj.blendMode = (props.blendMode || this.properties.blendMode) ?
-                PIXI.blendModes[(props.blendMode || this.properties.blendMode)] : PIXI.blendModes.NORMAL;
-
-            var a = props.anchor || props.tileprops.anchor;
-            obj.anchor.x = a ? a[0] : 0;
-            obj.anchor.y = a ? a[1] : 1;
-
-            // if (obj.mass) {
-            //     obj.enablePhysics(this.game.physics);
-            // }
-
-            if (props.tileprops) {
-                if (props.tileprops.flippedX) {
-                    obj.scale.x = -1;
-                    obj.position.x += Math.abs(obj.width);
-                }
-
-                if (props.tileprops.flippedY) {
-                    obj.scale.y = -1;
-                    obj.position.y += Math.abs(obj.height);
-                }
-
-                // from Tiled Editor:
-                // https://github.com/bjorn/tiled/blob/b059a13b2864ea029fb741a90780d31cf5b67043/src/libtiled/maprenderer.cpp#L135-L145
-                if (props.tileprops.flippedAD) {
-                    obj.rotation = this.game.math.degToRad(90);
-                    obj.scale.x *= -1;
-
-                    var sx = obj.scale.x;
-                    obj.scale.x = obj.scale.y;
-                    obj.scale.y = sx;
-
-                    var halfDiff = Math.abs(o.height / 2) - Math.abs(o.width / 2);
-                    obj.position.y += halfDiff;
-                    obj.position.x += halfDiff;
-                }
-            }
-
-            if (props.animation && obj.animations) {
-                obj.animations.copyFrameData(props.animation.data, 0);
-                obj.animations.add('tile', null, props.animation.rate, true).play();
-                // obj.animations.play(props.animation || props.tileprops.animation);
-            }
-
-            if (typeof o.rotation === 'number') {
-                obj.rotation = o.rotation;
-            }
         }
 
         //visible was recently added to Tiled, default old versions to true

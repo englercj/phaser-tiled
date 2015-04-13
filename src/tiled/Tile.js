@@ -175,6 +175,7 @@ Tile.prototype.containsPoint = function (x, y) {
 * @param {number} y - The y axis in pixels.
 * @param {number} right - The right point.
 * @param {number} bottom - The bottom point.
+* @return {boolean} True if the coordinates are within this Tile, otherwise false.
 */
 Tile.prototype.intersects = function (x, y, right, bottom) {
 
