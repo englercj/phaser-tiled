@@ -68,6 +68,10 @@ function Objectlayer(game, map, layer, index) {
      */
     this.objects = layer.objects;
 
+    for (var i = 0; i < this.objects.length; ++i) {
+        utils.parseTiledProperties(this.objects[i].properties);
+    }
+
     /**
      * The Tiled type of tile layer, should always be 'objectgroup'
      *
@@ -112,7 +116,7 @@ Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
     // list of object gets rendered on top.
     for(var i = this.objects.length - 1; i >= 0; --i) {
         var o = this.objects[i],
-            props = utils.parseTiledProperties(o.properties),
+            props = o.properties,
             set,
             // interactive,
             obj;
@@ -374,6 +378,13 @@ Objectlayer.prototype.despawn = function (destroy) {
  */
 Objectlayer.prototype.destroy = function () {
     Phaser.Group.prototype.destroy.apply(this, arguments);
+
+    // destroy bodies
+    for (var i = 0; i < this.bodies.length; ++i) {
+        this.bodies[i].destroy();
+    }
+
+    this.bodies = null;
 
     this.map = null;
     this.game = null;

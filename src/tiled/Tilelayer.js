@@ -621,6 +621,13 @@ Tilelayer.prototype._renderDown = function (forceNew) {
 Tilelayer.prototype.destroy = function () {
     Phaser.Group.prototype.destroy.apply(this, arguments);
 
+    // destroy bodies
+    for (var i = 0; i < this.bodies.length; ++i) {
+        this.bodies[i].destroy();
+    }
+
+    this.bodies = null;
+
     this.state = null;
     this.name = null;
     this.size = null;
