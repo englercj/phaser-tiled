@@ -146,6 +146,14 @@ module.exports = {
                     body.addRectangle(object.width, object.height, object.width / 2, object.height / 2, object.rotation);
                 }
 
+                body.data.shapes[0].sensor = !!(object.properties && object.properties.sensor);
+
+                var bodyType = object.properties && object.properties.bodyType || 'static';
+
+                body[bodyType] = true;
+
+                body.tiledObject = object;
+
                 if (addToWorld) {
                     this.addBody(body);
                 }
