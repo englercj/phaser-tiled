@@ -39,7 +39,7 @@ var originals = {
         loadFile: Phaser.Loader.prototype.loadFile,
         jsonLoadComplete: Phaser.Loader.prototype.jsonLoadComplete,
         xmlLoadComplete: Phaser.Loader.prototype.xmlLoadComplete,
-        packLoadComplete: Phaser.Loader.prototype.packLoadComplete
+        processPack: Phaser.Loader.prototype.processPack
     },
     physics: {
         p2: {
@@ -58,7 +58,7 @@ Tiled.prototype.init = function () {
     Phaser.Loader.prototype.loadFile = Loader_loadFile;
     Phaser.Loader.prototype.jsonLoadComplete = Loader_jsonLoadComplete;
     Phaser.Loader.prototype.xmlLoadComplete = Loader_xmlLoadComplete;
-    Phaser.Loader.prototype.packLoadComplete = Loader_packLoadComplete;
+    Phaser.Loader.prototype.processPack = Loader_processPack;
 
     if (Phaser.Physics.P2) {
         Phaser.Physics.P2.prototype.convertTiledmap = physics.p2.convertTiledmap;
@@ -78,7 +78,7 @@ Tiled.prototype.destroy = function () {
     Phaser.Loader.prototype.loadFile = originals.loader.loadFile;
     Phaser.Loader.prototype.jsonLoadComplete = originals.loader.jsonLoadComplete;
     Phaser.Loader.prototype.xmlLoadComplete = originals.loader.xmlLoadComplete;
-    Phaser.Loader.prototype.packLoadComplete = originals.loader.packLoadComplete;
+    Phaser.Loader.prototype.processPack = originals.loader.processPack;
 
     if (originals.physics.p2.convertTiledmap) {
         Phaser.Physics.P2.prototype.convertTiledmap = originals.physics.p2.convertTiledmap;
@@ -148,46 +148,34 @@ function Loader_tiledmap(key, url, data, format) {
     return this;
 }
 
-function Loader_loadFile() {
+function Loader_loadFile(file) {
     originals.loader.loadFile.apply(this, arguments);
-
-    var file = this._fileList[this._fileIndex];
 
     if (file.type === 'tiledmap') {
         if (file.format === Tiled.Tilemap.TILED_JSON) {
-            this.xhrLoad(this._fileIndex, this.baseURL + file.url, 'text', 'jsonLoadComplete', 'dataLoadError');
+            this.xhrLoad(file, this.transformUrl(file.url, file), 'text', this.jsonLoadComplete);
         }
         else if (file.format === Tiled.Tilemap.CSV) {
-            this.xhrLoad(this._fileIndex, this.baseURL + file.url, 'text', 'csvLoadComplete', 'dataLoadError');
+            this.xhrLoad(file, this.transformUrl(file.url, file), 'text', this.csvLoadComplete);
         }
         else if (file.format === Tiled.Tilemap.TILED_XML) {
-            this.xhrLoad(this._fileIndex, this.baseURL + file.url, 'text', 'xmlLoadComplete', 'dataLoadError');
+            this.xhrLoad(file, this.transformUrl(file.url, file), 'text', this.xmlLoadComplete);
         }
         else {
-            throw new Error('Phaser.Loader. Invalid Tiledmap format: ' + file.format);
+            this.asyncComplete(file, 'invalid Tilemap format: ' + file.format);
         }
     }
 }
 
-function Loader_jsonLoadComplete(index) {
-    if (!this._fileList[index]) {
-        console.warn('Phaser.Loader jsonLoadComplete invalid index ' + index);
-        return;
-    }
-
-    var file = this._fileList[index],
-        data;
-
-    if (this._ajax && this._ajax.responseText)
-    {
-        data = JSON.parse(this._ajax.responseText);
-    }
-    else
-    {
-        data = JSON.parse(this._xhr.responseText);
-    }
-
-    file.loaded = true;
+/**
+ * Successfully loaded a JSON file.
+ *
+ * @method Phaser.Loader#jsonLoadComplete
+ * @param {object} file - File associated with this request
+ * @param {XMLHttpRequest} xhr
+ */
+function Loader_jsonLoadComplete(file, xhr) {
+    var data = JSON.parse(xhr.responseText);
 
     if (file.type === 'tilemap' || file.type === 'tiledmap')
     {
@@ -202,146 +190,137 @@ function Loader_jsonLoadComplete(index) {
         this.game.cache.addTextureAtlas(file.key, file.url, file.data, data, file.format);
     }
 
-    this.nextFile(index, true);
+    this.asyncComplete(file);
 }
 
 /**
  * Successfully loaded an XML file.
  *
- * @method Phaser.Loader#jsonLoadComplete
- * @param {number} index - The index of the file in the file queue that loaded.
+ * @method Phaser.Loader#xmlLoadComplete
+ * @param {object} file - File associated with this request
+ * @param {XMLHttpRequest} xhr
  */
-function Loader_xmlLoadComplete(index) {
-    if (!this._fileList[index]) {
-        console.warn('Phaser.Loader xmlLoadComplete invalid index ' + index);
+function Loader_xmlLoadComplete(file, xhr) {
+    // Always try parsing the content as XML, regardless of actually response type
+    var data = xhr.responseText;
+    var xml = this.parseXml(data);
+
+    if (!xml)
+    {
+        var responseType = xhr.responseType || xhr.contentType; // contentType for MS-XDomainRequest
+        console.warn('Phaser.Loader - ' + file.key + ': invalid XML (' + responseType + ')');
+        this.asyncComplete(file, 'invalid XML');
         return;
     }
-
-    var file = this._fileList[index],
-        data;
-
-    if (this._ajax && this._ajax.responseText) {
-        data = utils.parseXML(this._ajax.responseText);
-    }
-    else {
-        data = utils.parseXML(this._xhr.responseText);
-    }
-
-    file.loaded = true;
 
     if (file.type === 'tilemap' || file.type === 'tiledmap') {
         this.game.cache.addTilemap(file.key, file.url, data, file.format);
     }
+    else if (file.type === 'bitmapfont')
+    {
+        this.game.cache.addBitmapFont(file.key, file.url, file.data, xml, file.xSpacing, file.ySpacing);
+    }
+    else if (file.type === 'textureatlas')
+    {
+        this.game.cache.addTextureAtlas(file.key, file.url, file.data, xml, file.format);
+    }
+    else if (file.type === 'xml')
+    {
+        this.game.cache.addXML(file.key, file.url, xml);
+    }
 
-    this.nextFile(index, true);
+    this.asyncComplete(file);
 
 }
 
 // the same as the core one, but we add 'tiledmap'
-function Loader_packLoadComplete(index, parse) {
+function Loader_processPack(pack) {
+    var packData = pack.data[pack.key];
 
-    if (typeof parse === 'undefined') { parse = true; }
-
-    if (!this._packList[index])
+    if (!packData)
     {
-        console.warn('Phaser.Loader packLoadComplete invalid index ' + index);
+        console.warn('Phaser.Loader - ' + pack.key + ': pack has data, but not for pack key');
         return;
     }
 
-    var pack = this._packList[index],
-        data;
 
-    pack.loaded = true;
-
-    if (parse)
+    for (var i = 0; i < packData.length; i++)
     {
-        data = JSON.parse(this._xhr.responseText);
-    }
-    else
-    {
-        data = this._packList[index].data;
-    }
+        var file = packData[i];
 
-    if (data[pack.key])
-    {
-        var file;
-
-        for (var i = 0; i < data[pack.key].length; i++)
+        switch (file.type)
         {
-            file = data[pack.key][i];
+            case 'image':
+                this.image(file.key, file.url, file.overwrite);
+                break;
 
-            switch (file.type)
-            {
-                case 'image':
-                    this.image(file.key, file.url, file.overwrite);
-                    break;
+            case 'text':
+                this.text(file.key, file.url, file.overwrite);
+                break;
 
-                case 'text':
-                    this.text(file.key, file.url, file.overwrite);
-                    break;
+            case 'json':
+                this.json(file.key, file.url, file.overwrite);
+                break;
 
-                case 'json':
-                    this.json(file.key, file.url, file.overwrite);
-                    break;
+            case 'script':
+                this.script(file.key, file.url, file.callback, pack.callbackContext || this);
+                break;
 
-                case 'script':
-                    this.script(file.key, file.url, file.callback, pack.callbackContext);
-                    break;
+            case 'binary':
+                this.binary(file.key, file.url, file.callback, pack.callbackContext || this);
+                break;
 
-                case 'binary':
-                    this.binary(file.key, file.url, file.callback, pack.callbackContext);
-                    break;
+            case 'spritesheet':
+                this.spritesheet(file.key, file.url, file.frameWidth, file.frameHeight,
+                        file.frameMax, file.margin, file.spacing);
+                break;
 
-                case 'spritesheet':
-                    this.spritesheet(file.key, file.url, file.frameWidth, file.frameHeight,
-                            file.frameMax, file.margin, file.spacing);
-                    break;
+            case 'audio':
+                this.audio(file.key, file.urls, file.autoDecode);
+                break;
 
-                case 'audio':
-                    this.audio(file.key, file.urls, file.autoDecode);
-                    break;
+            case 'audiosprite':
+                this.audio(file.key, file.urls, file.jsonURL);
+                break;
 
-                case 'tilemap':
-                    this.tilemap(file.key, file.url, file.data, Phaser.Tilemap[file.format]);
-                    break;
+            case 'tilemap':
+                this.tilemap(file.key, file.url, file.data, Phaser.Tilemap[file.format]);
+                break;
 
-                case 'tiledmap':
-                    this.tiledmap(file.key, file.url, file.data, Tiled.Tilemap[file.format]);
-                    break;
+            case 'tiledmap':
+                this.tiledmap(file.key, file.url, file.data, Tiled.Tilemap[file.format]);
+                break;
 
-                case 'physics':
-                    this.physics(file.key, file.url, file.data, Phaser.Loader[file.format]);
-                    break;
+            case 'physics':
+                this.physics(file.key, file.url, file.data, Phaser.Loader[file.format]);
+                break;
 
-                case 'bitmapFont':
-                    this.bitmapFont(file.key, file.textureURL, file.xmlURL, file.xmlData, file.xSpacing, file.ySpacing);
-                    break;
+            case 'bitmapFont':
+                this.bitmapFont(file.key, file.textureURL, file.xmlURL, file.xmlData, file.xSpacing, file.ySpacing);
+                break;
 
-                case 'atlasJSONArray':
-                    this.atlasJSONArray(file.key, file.textureURL, file.atlasURL, file.atlasData);
-                    break;
+            case 'atlasJSONArray':
+                this.atlasJSONArray(file.key, file.textureURL, file.atlasURL, file.atlasData);
+                break;
 
-                case 'atlasJSONHash':
-                    this.atlasJSONHash(file.key, file.textureURL, file.atlasURL, file.atlasData);
-                    break;
+            case 'atlasJSONHash':
+                this.atlasJSONHash(file.key, file.textureURL, file.atlasURL, file.atlasData);
+                break;
 
-                case 'atlasXML':
-                    this.atlasXML(file.key, file.textureURL, file.atlasURL, file.atlasData);
-                    break;
+            case 'atlasXML':
+                this.atlasXML(file.key, file.textureURL, file.atlasURL, file.atlasData);
+                break;
 
-                case 'atlas':
-                    this.atlas(file.key, file.textureURL, file.atlasURL, file.atlasData, Phaser.Loader[file.format]);
-                    break;
-            }
+            case 'atlas':
+                this.atlas(file.key, file.textureURL, file.atlasURL, file.atlasData, Phaser.Loader[file.format]);
+                break;
         }
     }
-
-    this.nextPack(index, true);
 }
 
 /* jshint +W106 */
 
-},{"./physics":11,"./tiled/Objectlayer":12,"./tiled/Tile":13,"./tiled/Tilelayer":14,"./tiled/Tilemap":15,"./tiled/Tileset":17,"./utils":18}],2:[function(require,module,exports){
+},{"./physics":10,"./tiled/Objectlayer":11,"./tiled/Tile":12,"./tiled/Tilelayer":13,"./tiled/Tilemap":14,"./tiled/Tileset":16,"./utils":17}],2:[function(require,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -405,8 +384,6 @@ function Loader_packLoadComplete(index, parse) {
 }());
 
 },{}],3:[function(require,module,exports){
-
-},{}],4:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -1458,7 +1435,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":5,"ieee754":6,"is-array":7}],5:[function(require,module,exports){
+},{"base64-js":4,"ieee754":5,"is-array":6}],4:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -1580,7 +1557,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -1666,7 +1643,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 
 /**
  * isArray
@@ -1701,7 +1678,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1766,7 +1743,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function (process,Buffer){
 /** @license zlib.js 2012 - imaya [ https://github.com/imaya/zlib.js ] The MIT License */(function() {'use strict';function q(b){throw b;}var t=void 0,v=!0;var A="undefined"!==typeof Uint8Array&&"undefined"!==typeof Uint16Array&&"undefined"!==typeof Uint32Array&&"undefined"!==typeof DataView;function E(b,a){this.index="number"===typeof a?a:0;this.m=0;this.buffer=b instanceof(A?Uint8Array:Array)?b:new (A?Uint8Array:Array)(32768);2*this.buffer.length<=this.index&&q(Error("invalid index"));this.buffer.length<=this.index&&this.f()}E.prototype.f=function(){var b=this.buffer,a,c=b.length,d=new (A?Uint8Array:Array)(c<<1);if(A)d.set(b);else for(a=0;a<c;++a)d[a]=b[a];return this.buffer=d};
 E.prototype.d=function(b,a,c){var d=this.buffer,e=this.index,f=this.m,g=d[e],k;c&&1<a&&(b=8<a?(G[b&255]<<24|G[b>>>8&255]<<16|G[b>>>16&255]<<8|G[b>>>24&255])>>32-a:G[b]>>8-a);if(8>a+f)g=g<<a|b,f+=a;else for(k=0;k<a;++k)g=g<<1|b>>a-k-1&1,8===++f&&(f=0,d[e++]=G[g],g=0,e===d.length&&(d=this.f()));d[e]=g;this.buffer=d;this.m=f;this.index=e};E.prototype.finish=function(){var b=this.buffer,a=this.index,c;0<this.m&&(b[a]<<=8-this.m,b[a]=G[b[a]],a++);A?c=b.subarray(0,a):(b.length=a,c=b);return c};
@@ -1823,7 +1800,7 @@ function xb(b,a){var c;b.subarray=b.slice;c=(new pb(b)).i();a||(a={});return a.n
 function Cb(b){var a=new Buffer(b.length),c,d;c=0;for(d=b.length;c<d;++c)a[c]=b[c];return a};}).call(this); //@ sourceMappingURL=node-zlib.js.map
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":8,"buffer":4}],10:[function(require,module,exports){
+},{"_process":7,"buffer":3}],9:[function(require,module,exports){
 module.exports = {
     /**
      * @property CSV
@@ -1882,7 +1859,7 @@ module.exports = {
     WEST: 3
 };
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = {
     p2: {
         /**
@@ -2094,7 +2071,7 @@ function mapPointToArray(obj) {
     return [obj.x, obj.y];
 }
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var utils = require('../utils');
 
 /**
@@ -2520,7 +2497,7 @@ Objectlayer.prototype.destroy = function () {
     this.type = null;
 };
 
-},{"../utils":18}],13:[function(require,module,exports){
+},{"../utils":17}],12:[function(require,module,exports){
 /**
  * Base Tile implementation, a tile is a single tile in a tilemap layer
  *
@@ -2944,7 +2921,7 @@ Object.defineProperty(Tile.prototype, 'bottom', {
 
 });
 
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var Tile = require('./Tile'),
     utils = require('../utils');
 
@@ -3662,7 +3639,7 @@ Object.defineProperty(Tilelayer.prototype, 'collisionHeight', {
 
 });
 
-},{"../utils":18,"./Tile":13}],15:[function(require,module,exports){
+},{"../utils":17,"./Tile":12}],14:[function(require,module,exports){
 var Tilelayer = require('./Tilelayer'),
     Objectlayer = require('./Objectlayer'),
     Tile = require('./Tile'),
@@ -4620,7 +4597,7 @@ for (var key in C) {
     Tilemap[key] = C[key];
 }
 
-},{"../constants":10,"../utils":18,"./Objectlayer":12,"./Tile":13,"./Tilelayer":14,"./TilemapParser":16,"./Tileset":17}],16:[function(require,module,exports){
+},{"../constants":9,"../utils":17,"./Objectlayer":11,"./Tile":12,"./Tilelayer":13,"./TilemapParser":15,"./Tileset":16}],15:[function(require,module,exports){
 /* jshint maxlen:200 */
 var utils = require('../utils'),
     C = require('../constants');
@@ -5023,7 +5000,7 @@ function csvToXY(pt) {
     };
 }
 
-},{"../constants":10,"../utils":18}],17:[function(require,module,exports){
+},{"../constants":9,"../utils":17}],16:[function(require,module,exports){
 var utils = require('../utils');
 
 /**
@@ -5403,7 +5380,7 @@ for(var f in Tileset.FLAGS) {
 
 Tileset.FLAGS.ALL = mask;
 
-},{"../utils":18}],18:[function(require,module,exports){
+},{"../utils":17}],17:[function(require,module,exports){
 /* jshint maxlen:200 */
 
 var zlib = require('zlibjs'),
@@ -5535,49 +5512,5 @@ utils.parseTiledProperties = function (obj) {
     return obj;
 };
 
-/**
- * Parses an XML string into a Document object. Will use window.DOMParser
- * if available, falling back to Microsoft.XMLDOM ActiveXObject in IE.
- *
- * Eventually, it would be nice to include a node.js alternative as well
- * for running in that environment.
- *
- * @method parseXML
- * @param xmlStr {String} The xml string to parse
- * @return {Document} An XML Document
- */
-// browser environment
-if (typeof window !== 'undefined') {
-    //XML Parser in window
-    if (typeof window.DOMParser !== 'undefined') {
-        utils.parseXML = function(xmlStr) {
-            return (new window.DOMParser()).parseFromString(xmlStr, 'text/xml');
-        };
-    }
-    //IE specific XML parser
-    else if (typeof window.ActiveXObject !== 'undefined' && new window.ActiveXObject('Microsoft.XMLDOM')) {
-        utils.parseXML = function(xmlStr) {
-            var xmlDoc = new window.ActiveXObject('Microsoft.XMLDOM');
-            xmlDoc.async = 'false';
-            xmlDoc.loadXML(xmlStr);
-            return xmlDoc;
-        };
-    }
-    // no parser available
-    else {
-        console.warn('XML parser not available, trying to parse any XML will result in an error.');
-        utils.parseXML = function() {
-            throw new Error('Trying to parse XML, but not XML parser is available in this environment');
-        };
-    }
-}
-//node.js environment
-else {
-    utils.parseXML = function(xmlStr) {
-        var DOMParser = require('xmldom').DOMParser;
-        return (new DOMParser()).parseFromString(xmlStr, 'text/xml');
-    };
-}
-
-},{"Base64":2,"buffer":4,"xmldom":3,"zlibjs":9}]},{},[1])(1)
+},{"Base64":2,"buffer":3,"zlibjs":8}]},{},[1])(1)
 });
