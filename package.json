@@ -36,6 +36,9 @@
     "vinyl-source-stream": "^0.1.1",
     "watchify": "^1.0.2"
   },
+  "peerDependency": {
+    "phaser": "^2.3.0"
+  },
   "main": "./src/index.js",
   "browser": {
     "./src/index.js": "./src/browser.js",
