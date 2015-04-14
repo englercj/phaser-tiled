@@ -372,7 +372,7 @@ Tileset.prototype.destroy = function () {
     this.size = null;
     this.textures = null;
     this.tileanimations = null;
-}
+};
 
 /**
  * Tileset GID flags, these flags are set on a tile's ID to give it a special property

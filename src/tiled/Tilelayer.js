@@ -512,7 +512,7 @@ Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interest
 };
 
 Tilelayer.prototype.getTile = function (x, y) {
-    return this.tiles[wy] && this.tiles[wy][wx]
+    return this.tiles[y] && this.tiles[y][x];
 };
 
 /**
