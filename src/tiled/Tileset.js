@@ -25,7 +25,6 @@ var utils = require('../utils');
  * @param [settings.imagewidth] {Number} An override for the image width
  * @param [settings.imageheight] {Number} An override for the image height
  */
-//TODO: Implement multi-image tileset support
 //TODO: Support external tilesets (TSX files) via the "source" attribute
 //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
 function Tileset(game, key, settings) {
@@ -55,7 +54,7 @@ function Tileset(game, key, settings) {
                         'Tileset "' + settings.name + '" unable to find texture cached by key "' +
                         ttxkey + '", using blank texture.'
                     );
-                    ttx = new PIXI.Texture(new PIXI.BaseTexture());
+                    ttx = PIXI.Texture.emptyTexture;
                 }
 
                 tileTextures.push(ttx);
@@ -71,7 +70,7 @@ function Tileset(game, key, settings) {
         );
     }
 
-    PIXI.Texture.call(this, tx || new PIXI.BaseTexture());
+    PIXI.Texture.call(this, tx || PIXI.Texture.emptyTexture.baseTexture);
 
     this.game = game;
 
@@ -357,6 +356,23 @@ Tileset.prototype.contains = function (tileId) {
 
     return (tileId >= this.firstgid && tileId <= this.lastgid);
 };
+
+Tileset.prototype.destroy = function () {
+    PIXI.Texture.prototype.destroy.apply(this, arguments);
+
+    // destroy sub tile textures
+    for (var i = 0; i < this.textures.length; ++i) {
+        this.textures[i].destroy();
+    }
+
+    this.tileoffset = null;
+    this.numTiles = null;
+    this.properties = null;
+    this.tileproperties = null;
+    this.size = null;
+    this.textures = null;
+    this.tileanimations = null;
+}
 
 /**
  * Tileset GID flags, these flags are set on a tile's ID to give it a special property

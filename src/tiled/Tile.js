@@ -224,11 +224,17 @@ Tile.prototype.setCollisionCallback = function (callback, context) {
 * @method Phaser.Tile#destroy
 */
 Tile.prototype.destroy = function () {
+    Phaser.Sprite.prototype.destroy.apply(this, arguments);
 
-    this.collisionCallback = null;
-    this.collisionCallbackContext = null;
+    this.layer = null;
+    this.tileset = null;
+    this.tilePosition = null;
+
     this.properties = null;
 
+    this.collisionCallback = null;
+
+    this.collisionCallbackContext = null;
 };
 
 /**

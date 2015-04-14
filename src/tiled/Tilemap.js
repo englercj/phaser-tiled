@@ -889,6 +889,10 @@ Tilemap.prototype.clearTiles = function () {
 Tilemap.prototype.destroy = function () {
     Phaser.Group.prototype.destroy.apply(this, arguments);
 
+    for (var i = 0; i < this.tilesets.length; ++i) {
+        this.tilesets[i].destroy();
+    }
+
     this.key = null;
     this.size = null;
     this.tileWidth = null;
@@ -902,22 +906,16 @@ Tilemap.prototype.destroy = function () {
     this.widthInPixels = null;
     this.heightInPixels = null;
 
-    this.layers.length = 0;
     this.layers = null;
 
-    this.tilesets.length = 0;
     this.tilesets = null;
 
-    this.objects.length = 0;
     this.objects = null;
 
-    this.images.length = 0;
     this.images = null;
 
-    this.collideIndexes.length = 0;
     this.collideIndexes = null;
 
-    this.debugMap.length = 0;
     this.debugMap = null;
 
     this.currentLayer = null;

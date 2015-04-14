@@ -387,11 +387,6 @@ Objectlayer.prototype.destroy = function () {
     this.bodies = null;
 
     this.map = null;
-    this.game = null;
-    this.state = null;
-    this.name = null;
-    this.color = null;
     this.properties = null;
     this.objects = null;
-    this.type = null;
 };

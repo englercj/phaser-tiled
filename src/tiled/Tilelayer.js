@@ -489,17 +489,19 @@ Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interest
     this._mc.th = (this.game.math.snapToCeil(height, this._mc.ch) + this._mc.ch) / this._mc.ch;
 
     //  This should apply the layer x/y here
-    var results = [];
+    var results = [],
+        tile = null;
 
     for (var wy = this._mc.ty; wy < this._mc.ty + this._mc.th; wy++)
     {
         for (var wx = this._mc.tx; wx < this._mc.tx + this._mc.tw; wx++)
         {
-            if (this.tiles[wy] && this.tiles[wy][wx])
+            tile = this.getTile(wx, wy);
+            if (tile)
             {
-                if ((!collides && !interestingFace) || this.tiles[wy][wx].isInteresting(collides, interestingFace))
+                if ((!collides && !interestingFace) || tile.isInteresting(collides, interestingFace))
                 {
-                    results.push(this.tiles[wy][wx]);
+                    results.push(tile);
                 }
             }
         }
@@ -507,6 +509,10 @@ Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interest
 
     return results;
 
+};
+
+Tilelayer.prototype.getTile = function (x, y) {
+    return this.tiles[wy] && this.tiles[wy][wx]
 };
 
 /**
@@ -621,29 +627,37 @@ Tilelayer.prototype._renderDown = function (forceNew) {
 Tilelayer.prototype.destroy = function () {
     Phaser.Group.prototype.destroy.apply(this, arguments);
 
-    // destroy bodies
-    for (var i = 0; i < this.bodies.length; ++i) {
-        this.bodies[i].destroy();
+    // destroy tiles
+    for (var i = 0; i < this.tileIds.length; ++i) {
+        var x = i % this.size.x,
+            y = (i - x) / this.size.x;
+
+        if (!this.tiles[y] || !this.tiles[y][x]) {
+            continue;
+        }
+
+        this.tiles[y][x].destroy();
+        this.tiles[y][x] = null;
     }
 
     this.bodies = null;
+    this.tiles = null;
 
-    this.state = null;
-    this.name = null;
+    this.map = null;
+    this.cameraOffset = null;
+    this.scrollFactor = null;
+
     this.size = null;
     this.tileIds = null;
     this.properties = null;
-    this.type = null;
-    this.position.x = null;
-    this.position.y = null;
-    this.alpha = null;
-    this.visible = null;
-    this.preRender = null;
-    this.chunkSize = null;
 
     this._buffered = null;
     this._scroll = null;
+    this._scrollDelta = null;
     this._renderArea = null;
+    this._mc = null;
+
+    this.container = null;
 };
 
 Object.defineProperty(Tilelayer.prototype, 'scrollX', {
