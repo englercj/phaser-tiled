@@ -358,11 +358,11 @@ Tileset.prototype.contains = function (tileId) {
 };
 
 Tileset.prototype.destroy = function () {
-    PIXI.Texture.prototype.destroy.apply(this, arguments);
+    destroyTexture(this);
 
     // destroy sub tile textures
     for (var i = 0; i < this.textures.length; ++i) {
-        this.textures[i].destroy();
+        destroyTexture(this.textures[i]);
     }
 
     this.tileoffset = null;
@@ -392,3 +392,13 @@ for(var f in Tileset.FLAGS) {
 }
 
 Tileset.FLAGS.ALL = mask;
+
+function destroyTexture(texture) {
+    texture.destroy();
+
+    texture.baseTexture = null;
+    texture.frame = null;
+    texture.trim = null;
+    texture.crop = null;
+    texture._uvs = null;
+}

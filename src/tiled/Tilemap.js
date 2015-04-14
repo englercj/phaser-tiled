@@ -893,6 +893,10 @@ Tilemap.prototype.destroy = function () {
         this.tilesets[i].destroy();
     }
 
+    this.position = null;
+    this.scale = null;
+    this.pivot = null;
+
     this.key = null;
     this.size = null;
     this.tileWidth = null;
