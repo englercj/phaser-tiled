@@ -214,7 +214,7 @@ function Loader_xmlLoadComplete(file, xhr) {
     }
 
     if (file.type === 'tilemap' || file.type === 'tiledmap') {
-        this.game.cache.addTilemap(file.key, file.url, data, file.format);
+        this.game.cache.addTilemap(file.key, file.url, xml, file.format);
     }
     else if (file.type === 'bitmapfont')
     {
@@ -1887,6 +1887,10 @@ module.exports = {
 
             layer = map.getTilelayer(layer);
 
+            if (!layer) {
+                return;
+            }
+
             //  If the bodies array is already populated we need to nuke it
             this.clearTilemapLayerBodies(map, layer.index);
 
@@ -1901,6 +1905,10 @@ module.exports = {
 
                 for (var x = 0, w = layer.size.x; x < w; x++)
                 {
+                    if (!layer.tiles[y]) {
+                        continue;
+                    }
+
                     tile = layer.tiles[y][x];
 
                     if (tile && tile.collides)
@@ -1911,8 +1919,8 @@ module.exports = {
 
                             if (width === 0)
                             {
-                                sx = tile.x * tile.width;
-                                sy = tile.y * tile.height;
+                                sx = tile.x;
+                                sy = tile.y;
                                 width = tile.width;
                             }
 
@@ -1922,7 +1930,7 @@ module.exports = {
                             }
                             else
                             {
-                                body = this.createBody(this.pxm(sx) * 1.25, this.pxm(sy) * 1.25, 0, false);
+                                body = this.createBody(sx, sy, 0, false);
 
                                 body.addRectangle(width, tile.height, width / 2, tile.height / 2, 0);
 
@@ -1938,11 +1946,10 @@ module.exports = {
                         }
                         else
                         {
-                            sx = tile.x * tile.width;
-                            sy = tile.x * tile.width;
-                            body = this.createBody(this.pxm(sx) * 1.25, this.pxm(sy) * 1.25, 0, false);
+                            body = this.createBody(tile.x, tile.y, 0, false);
 
-                            body.addRectangle(tile.width, tile.height, tile.width / 2, tile.height / 2, 0);
+                            body.clearShapes();
+                            body.addRectangle(tile.width, tile.height, tile.width / 2, tile.height / 2, tile.rotation);
 
                             if (addToWorld)
                             {
@@ -1975,6 +1982,10 @@ module.exports = {
 
             layer = map.getObjectlayer(layer);
 
+            if (!layer) {
+                return;
+            }
+
             for (var i = 0, len = layer.objects.length; i < len; i++)
             {
                 var object = layer.objects[i];
@@ -1996,6 +2007,14 @@ module.exports = {
                 else {
                     body.addRectangle(object.width, object.height, object.width / 2, object.height / 2, object.rotation);
                 }
+
+                body.data.shapes[0].sensor = !!(object.properties && object.properties.sensor);
+
+                var bodyType = object.properties && object.properties.bodyType || 'static';
+
+                body[bodyType] = true;
+
+                body.tiledObject = object;
 
                 if (addToWorld) {
                     this.addBody(body);
@@ -2032,11 +2051,19 @@ module.exports = {
 
             layer = map.getTilelayer(layer);
 
+            if (!layer) {
+                return;
+            }
+
             //  If the bodies array is already populated we need to nuke it
             this.clearTilemapLayerBodies(map, layer);
 
             for (var y = 0, h = layer.size.y; y < h; y++)
             {
+                if (!layer.tiles[y]) {
+                    continue;
+                }
+
                 for (var x = 0, w = layer.size.x; x < w; x++)
                 {
                     var tile = layer.tiles[y][x],
@@ -2142,6 +2169,10 @@ function Objectlayer(game, map, layer, index) {
      */
     this.objects = layer.objects;
 
+    for (var i = 0; i < this.objects.length; ++i) {
+        utils.parseTiledProperties(this.objects[i].properties);
+    }
+
     /**
      * The Tiled type of tile layer, should always be 'objectgroup'
      *
@@ -2176,16 +2207,17 @@ module.exports = Objectlayer;
 /**
  * Spawns all the entities associated with this layer, and properly sets their attributes
  *
- * @method spawn
- * @return {Objectlayer} Returns itself.
  * @chainable
+ * @param [physicsBodyType=Phaser.Physics.ARCADE] {number} The physics system to create stuff on.
+ * @param [spawnCallback] {function} A function to call for each object spawned.
+ * @return {Objectlayer} Returns itself.
  */
-Objectlayer.prototype.spawn = function (spawnCallback) {
+Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
     // we go through these backwards so that things that are higher in the
     // list of object gets rendered on top.
     for(var i = this.objects.length - 1; i >= 0; --i) {
         var o = this.objects[i],
-            props = utils.parseTiledProperties(o.properties),
+            props = o.properties,
             set,
             // interactive,
             obj;
@@ -2202,35 +2234,8 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
                 props.texture = set.getTileTexture(o.gid);
                 props.tileprops = set.getTileProperties(o.gid);
                 props.animation = set.getTileAnimations(o.gid);
-
-                // if no hitArea then use the tileset's if available
-                if (!props.hitArea) {
-                    if (props.tileprops.hitArea) {
-                        props.hitArea = props.tileprops.hitArea;
-                    }
-                    else {
-                        props.hitArea = set.properties.hitArea;
-                    }
-                }
             }
         }
-        // non-sprite object (usually to define an "area" on a map)
-        // else {
-        //     if (!props.hitArea) {
-        //         if (o.polyline) {
-        //             props.hitArea = this._getPolyline(o);
-        //         }
-        //         else if (o.polygon) {
-        //             props.hitArea = this._getPolygon(o);
-        //         }
-        //         else if (o.ellipse) {
-        //             props.hitArea = this._getEllipse(o);
-        //         }
-        //         else {
-        //             props.hitArea = this._getRectangle(o);
-        //         }
-        //     }
-        // }
 
         o.name = o.name || props.name || props.tileprops.name || '';
         o.type = o.type || props.type || props.tileprops.type || '';
@@ -2240,84 +2245,72 @@ Objectlayer.prototype.spawn = function (spawnCallback) {
             props.texture = PIXI.TextureCache[props.texture];
         }
 
-        // just a regular DisplayObject
-        if (!props.texture) {
-            obj = this.game.add.group(this.container, o.name);
+        // when props.texture is empty it will just create an empty sprite.
+        obj = this.game.add.sprite(o.x, o.y, props.texture, null, this.container);
 
+        // setup the properties of the sprite
+        obj.name = o.name;
+        obj.rotation = o.rotation;
+        obj.objectType = o.type;
+
+        if (!obj.texture) {
             obj.width = o.width;
             obj.height = o.height;
+        }
+
+        obj.blendMode = (props.blendMode || this.properties.blendMode) ?
+            PIXI.blendModes[(props.blendMode || this.properties.blendMode)] : PIXI.blendModes.NORMAL;
+
+        // create physics if this body is physical.
+        if (props.collides || props.tileprops.collides) {
+            this.game.physics.enable(obj, physicsBodyType, props.debug || props.tileprops.debug);
+
+            obj.body.setRectangle(obj.width, obj.height, obj.width / 2, -obj.height / 2, obj.rotation);
+
+            obj.body[props.bodyType || props.tileprops.bodyType || 'static'] = true;
+
+            if (props.sensor) {
+                obj.body.data.shapes[0].sensor = true;
+            }
+        }
+
+        var a = props.anchor || props.tileprops.anchor;
+        obj.anchor.x = a ? a[0] : 0;
+        obj.anchor.y = a ? a[1] : 1;
+
+        if (props.tileprops.flippedX) {
+            obj.scale.x = -1;
+            obj.position.x += Math.abs(obj.width);
+        }
+
+        if (props.tileprops.flippedY) {
+            obj.scale.y = -1;
+            obj.position.y += Math.abs(obj.height);
+        }
+
+        // from Tiled Editor:
+        // https://github.com/bjorn/tiled/blob/b059a13b2864ea029fb741a90780d31cf5b67043/src/libtiled/maprenderer.cpp#L135-L145
+        if (props.tileprops.flippedAD) {
+            obj.rotation = this.game.math.degToRad(90);
+            obj.scale.x *= -1;
+
+            var sx = obj.scale.x;
+            obj.scale.x = obj.scale.y;
+            obj.scale.y = sx;
+
+            var halfDiff = Math.abs(o.height / 2) - Math.abs(o.width / 2);
+            obj.position.y += halfDiff;
+            obj.position.x += halfDiff;
+        }
+
+        if (props.animation && obj.animations) {
+            obj.animations.copyFrameData(props.animation.data, 0);
+            obj.animations.add('tile', null, props.animation.rate, true).play();
+            // obj.animations.play(props.animation || props.tileprops.animation);
+        }
+
+        if (typeof o.rotation === 'number') {
             obj.rotation = o.rotation;
-            obj.objectType = o.type;
-
-            obj.position.x = o.x;
-            obj.position.y = o.y;
-
-            // these are treated as sensor bodies, so always enable physics
-            obj.sensor = true;
-            // obj.hitArea = props.hitArea;
-
-            // obj.enablePhysics(this.game.physics);
-        } else {
-            obj = this.game.add.sprite(o.x, o.y, props.texture, null, this.container);
-
-            // obj.width = o.width;
-            // obj.height = o.height;
-
-            obj.name = o.name;
-            obj.objectType = o.type;
-
-            // obj.mass = props.mass || props.tileprops.mass;
-            // obj.inertia = props.inertia || props.tileprops.inertia;
-            // obj.friction = props.friction || props.tileprops.friction;
-            // obj.sensor = props.sensor || props.tileprops.sensor;
-            // obj.hitArea = props.hitArea;
-            obj.blendMode = (props.blendMode || this.properties.blendMode) ?
-                PIXI.blendModes[(props.blendMode || this.properties.blendMode)] : PIXI.blendModes.NORMAL;
-
-            var a = props.anchor || props.tileprops.anchor;
-            obj.anchor.x = a ? a[0] : 0;
-            obj.anchor.y = a ? a[1] : 1;
-
-            // if (obj.mass) {
-            //     obj.enablePhysics(this.game.physics);
-            // }
-
-            if (props.tileprops) {
-                if (props.tileprops.flippedX) {
-                    obj.scale.x = -1;
-                    obj.position.x += Math.abs(obj.width);
-                }
-
-                if (props.tileprops.flippedY) {
-                    obj.scale.y = -1;
-                    obj.position.y += Math.abs(obj.height);
-                }
-
-                // from Tiled Editor:
-                // https://github.com/bjorn/tiled/blob/b059a13b2864ea029fb741a90780d31cf5b67043/src/libtiled/maprenderer.cpp#L135-L145
-                if (props.tileprops.flippedAD) {
-                    obj.rotation = this.game.math.degToRad(90);
-                    obj.scale.x *= -1;
-
-                    var sx = obj.scale.x;
-                    obj.scale.x = obj.scale.y;
-                    obj.scale.y = sx;
-
-                    var halfDiff = Math.abs(o.height / 2) - Math.abs(o.width / 2);
-                    obj.position.y += halfDiff;
-                    obj.position.x += halfDiff;
-                }
-            }
-
-            if (props.animation && obj.animations) {
-                obj.animations.copyFrameData(props.animation.data, 0);
-                obj.animations.add('tile', null, props.animation.rate, true).play();
-                // obj.animations.play(props.animation || props.tileprops.animation);
-            }
-
-            if (typeof o.rotation === 'number') {
-                obj.rotation = o.rotation;
-            }
         }
 
         //visible was recently added to Tiled, default old versions to true
@@ -2486,6 +2479,13 @@ Objectlayer.prototype.despawn = function (destroy) {
  */
 Objectlayer.prototype.destroy = function () {
     Phaser.Group.prototype.destroy.apply(this, arguments);
+
+    // destroy bodies
+    for (var i = 0; i < this.bodies.length; ++i) {
+        this.bodies[i].destroy();
+    }
+
+    this.bodies = null;
 
     this.map = null;
     this.game = null;
@@ -2675,6 +2675,7 @@ Tile.prototype.containsPoint = function (x, y) {
 * @param {number} y - The y axis in pixels.
 * @param {number} right - The right point.
 * @param {number} bottom - The bottom point.
+* @return {boolean} True if the coordinates are within this Tile, otherwise false.
 */
 Tile.prototype.intersects = function (x, y, right, bottom) {
 
@@ -3544,6 +3545,13 @@ Tilelayer.prototype._renderDown = function (forceNew) {
  */
 Tilelayer.prototype.destroy = function () {
     Phaser.Group.prototype.destroy.apply(this, arguments);
+
+    // destroy bodies
+    for (var i = 0; i < this.bodies.length; ++i) {
+        this.bodies[i].destroy();
+    }
+
+    this.bodies = null;
 
     this.state = null;
     this.name = null;
