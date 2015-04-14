@@ -2488,13 +2488,8 @@ Objectlayer.prototype.destroy = function () {
     this.bodies = null;
 
     this.map = null;
-    this.game = null;
-    this.state = null;
-    this.name = null;
-    this.color = null;
     this.properties = null;
     this.objects = null;
-    this.type = null;
 };
 
 },{"../utils":17}],12:[function(require,module,exports){
@@ -2724,11 +2719,17 @@ Tile.prototype.setCollisionCallback = function (callback, context) {
 * @method Phaser.Tile#destroy
 */
 Tile.prototype.destroy = function () {
+    Phaser.Sprite.prototype.destroy.apply(this, arguments);
 
-    this.collisionCallback = null;
-    this.collisionCallbackContext = null;
+    this.layer = null;
+    this.tileset = null;
+    this.tilePosition = null;
+
     this.properties = null;
 
+    this.collisionCallback = null;
+
+    this.collisionCallbackContext = null;
 };
 
 /**
@@ -3414,17 +3415,19 @@ Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interest
     this._mc.th = (this.game.math.snapToCeil(height, this._mc.ch) + this._mc.ch) / this._mc.ch;
 
     //  This should apply the layer x/y here
-    var results = [];
+    var results = [],
+        tile = null;
 
     for (var wy = this._mc.ty; wy < this._mc.ty + this._mc.th; wy++)
     {
         for (var wx = this._mc.tx; wx < this._mc.tx + this._mc.tw; wx++)
         {
-            if (this.tiles[wy] && this.tiles[wy][wx])
+            tile = this.getTile(wx, wy);
+            if (tile)
             {
-                if ((!collides && !interestingFace) || this.tiles[wy][wx].isInteresting(collides, interestingFace))
+                if ((!collides && !interestingFace) || tile.isInteresting(collides, interestingFace))
                 {
-                    results.push(this.tiles[wy][wx]);
+                    results.push(tile);
                 }
             }
         }
@@ -3432,6 +3435,10 @@ Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interest
 
     return results;
 
+};
+
+Tilelayer.prototype.getTile = function (x, y) {
+    return this.tiles[y] && this.tiles[y][x];
 };
 
 /**
@@ -3546,29 +3553,37 @@ Tilelayer.prototype._renderDown = function (forceNew) {
 Tilelayer.prototype.destroy = function () {
     Phaser.Group.prototype.destroy.apply(this, arguments);
 
-    // destroy bodies
-    for (var i = 0; i < this.bodies.length; ++i) {
-        this.bodies[i].destroy();
+    // destroy tiles
+    for (var i = 0; i < this.tileIds.length; ++i) {
+        var x = i % this.size.x,
+            y = (i - x) / this.size.x;
+
+        if (!this.tiles[y] || !this.tiles[y][x]) {
+            continue;
+        }
+
+        this.tiles[y][x].destroy();
+        this.tiles[y][x] = null;
     }
 
     this.bodies = null;
+    this.tiles = null;
 
-    this.state = null;
-    this.name = null;
+    this.map = null;
+    this.cameraOffset = null;
+    this.scrollFactor = null;
+
     this.size = null;
     this.tileIds = null;
     this.properties = null;
-    this.type = null;
-    this.position.x = null;
-    this.position.y = null;
-    this.alpha = null;
-    this.visible = null;
-    this.preRender = null;
-    this.chunkSize = null;
 
     this._buffered = null;
     this._scroll = null;
+    this._scrollDelta = null;
     this._renderArea = null;
+    this._mc = null;
+
+    this.container = null;
 };
 
 Object.defineProperty(Tilelayer.prototype, 'scrollX', {
@@ -4539,6 +4554,10 @@ Tilemap.prototype.clearTiles = function () {
 Tilemap.prototype.destroy = function () {
     Phaser.Group.prototype.destroy.apply(this, arguments);
 
+    for (var i = 0; i < this.tilesets.length; ++i) {
+        this.tilesets[i].destroy();
+    }
+
     this.key = null;
     this.size = null;
     this.tileWidth = null;
@@ -4552,22 +4571,16 @@ Tilemap.prototype.destroy = function () {
     this.widthInPixels = null;
     this.heightInPixels = null;
 
-    this.layers.length = 0;
     this.layers = null;
 
-    this.tilesets.length = 0;
     this.tilesets = null;
 
-    this.objects.length = 0;
     this.objects = null;
 
-    this.images.length = 0;
     this.images = null;
 
-    this.collideIndexes.length = 0;
     this.collideIndexes = null;
 
-    this.debugMap.length = 0;
     this.debugMap = null;
 
     this.currentLayer = null;
@@ -5036,7 +5049,6 @@ var utils = require('../utils');
  * @param [settings.imagewidth] {Number} An override for the image width
  * @param [settings.imageheight] {Number} An override for the image height
  */
-//TODO: Implement multi-image tileset support
 //TODO: Support external tilesets (TSX files) via the "source" attribute
 //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
 function Tileset(game, key, settings) {
@@ -5066,7 +5078,7 @@ function Tileset(game, key, settings) {
                         'Tileset "' + settings.name + '" unable to find texture cached by key "' +
                         ttxkey + '", using blank texture.'
                     );
-                    ttx = new PIXI.Texture(new PIXI.BaseTexture());
+                    ttx = PIXI.Texture.emptyTexture;
                 }
 
                 tileTextures.push(ttx);
@@ -5082,7 +5094,7 @@ function Tileset(game, key, settings) {
         );
     }
 
-    PIXI.Texture.call(this, tx || new PIXI.BaseTexture());
+    PIXI.Texture.call(this, tx || PIXI.Texture.emptyTexture.baseTexture);
 
     this.game = game;
 
@@ -5367,6 +5379,23 @@ Tileset.prototype.contains = function (tileId) {
     tileId &= ~Tileset.FLAGS.ALL;
 
     return (tileId >= this.firstgid && tileId <= this.lastgid);
+};
+
+Tileset.prototype.destroy = function () {
+    PIXI.Texture.prototype.destroy.apply(this, arguments);
+
+    // destroy sub tile textures
+    for (var i = 0; i < this.textures.length; ++i) {
+        this.textures[i].destroy();
+    }
+
+    this.tileoffset = null;
+    this.numTiles = null;
+    this.properties = null;
+    this.tileproperties = null;
+    this.size = null;
+    this.textures = null;
+    this.tileanimations = null;
 };
 
 /**
