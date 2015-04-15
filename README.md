@@ -166,6 +166,10 @@ None, yet.
 
 #### Object Layer Object (specific object in the layer)
  - `blendMode` - string of the blendMode constant to use for this object (e.g. 'NORMAL')
+ - `texture` - string of the texture to load from the cache, usually the URL you would load the texture with.
+ - `collides` - true/false whether this object is collidable, falls back to the tileset tile collides property.
+ - `sensor` - Makes the physics shape a sensor shape when `collides` is true.
+ - `anchor` - A custom anchor override for a tile in array format, e.g. "[0,1]"
 
 #### Image Layer
 None, yet.
