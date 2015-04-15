@@ -222,6 +222,20 @@ Tilelayer.prototype.setupRenderArea = function () {
  */
 Tilelayer.prototype.resizeWorld = function () {
     this.game.world.setBounds(0, 0, this.widthInPixels, this.heightInPixels);
+
+    var physics = this.game.physics;
+
+    if (physics.arcade) {
+        physics.arcade.setBoundsToWorld();
+    }
+
+    if (physics.ninja) {
+        physics.ninja.setBoundsToWorld();
+    }
+
+    if (physics.p2) {
+        physics.p2.setBoundsToWorld(true, true, false, true, false);
+    }
 };
 
 /**
