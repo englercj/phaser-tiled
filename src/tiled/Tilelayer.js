@@ -1,5 +1,4 @@
-var Tile = require('./Tile'),
-    utils = require('../utils');
+var utils = require('../utils');
 
 /**
  * The Tilelayer is the visual tiled layer that actually displays on the screen
@@ -173,21 +172,17 @@ function Tilelayer(game, map, layer, index) {
 
     for (var i = 0; i < this.tileIds.length; ++i) {
         var x = i % this.size.x,
-            y = (i - x) / this.size.x,
-            tileId = this.tileIds[i],
-            set = this.map.getTileset(tileId);
-
-        // if no tileset, return
-        if (!set) {
-            continue;
-        }
+            y = (i - x) / this.size.x;
 
         if (!this.tiles[y]) {
             this.tiles[y] = {};
         }
 
-        this.tiles[y][x] = new Tile(this.game, x, y, tileId, set, this);
+        this.tiles[y][x] = null;
     }
+
+    this._tilePool = [];
+    this._animTexturePool = [];
 }
 
 Tilelayer.prototype = Object.create(Phaser.Group.prototype);
@@ -286,11 +281,16 @@ Tilelayer.prototype.setupTiles = function () {
     // clear all the tiles
     this.clearTiles();
 
-    // setup a tile for each location in the renderArea
-    for (var x = this._renderArea.x; x < this._renderArea.right; ++x) {
-        for (var y = this._renderArea.y; y < this._renderArea.bottom; ++y) {
-            this.moveTileSprite(-1, -1, x, y);
-        }
+    var area = (this._renderArea.width + 2) * (this._renderArea.height + 2);
+
+    // prealloc the pool with the necessary objects
+    while (this._tilePool.length < area) {
+        this._tilePool.push(this._createTile());
+    }
+
+    // dealloc objects that we no longer need
+    while (this._tilePool.length > area) {
+        this._tilePool.pop().destroy();
     }
 
     // reset buffered status
@@ -299,6 +299,14 @@ Tilelayer.prototype.setupTiles = function () {
     // reset scroll delta
     this._scrollDelta.x = this._scroll.x % this.map.scaledTileWidth;
     this._scrollDelta.y = this._scroll.y % this.map.scaledTileHeight;
+
+    // setup the current viewport
+    // setup a tile for each location in the renderArea
+    for (var x = this._renderArea.x; x < this._renderArea.right; ++x) {
+        for (var y = this._renderArea.y; y < this._renderArea.bottom; ++y) {
+            this.moveTileSprite(-1, -1, x, y);
+        }
+    }
 };
 
 /**
@@ -319,11 +327,95 @@ Tilelayer.prototype.clearTiles = function () {
 };
 
 Tilelayer.prototype.clearTile = function (tile) {
-    if (!tile || tile.parent !== this.container) {
-        return;
+    // this was playing an animation, put its texture back into the animation texture pool
+    if (tile.animations._anims.tile && tile.animations._anims.tile.isPlaying) {
+        this._animTexturePool.push(tile.texture);
     }
 
-    this.container.removeChild(tile);
+    tile.visible = false;
+    tile.animations.stop();
+    this._tilePool.push(tile);
+};
+
+Tilelayer.prototype._freeTile = function (x, y) {
+    if (this.tiles[y] && this.tiles[y][x]) {
+        this.clearTile(this.tiles[y][x]);
+        this.tiles[y][x] = null;
+    }
+};
+
+Tilelayer.prototype._createTile = function () {
+    var s = new Phaser.Sprite(this.game);
+
+    s.type = Phaser.TILESPRITE;
+
+    this.container.addChild(s);
+
+    return s;
+};
+
+Tilelayer.prototype._resetTile = function (tile, x, y, tileId, tileset) {
+    // calculate some values for the tile
+    var texture = tileset.getTileTexture(tileId),
+        props = tileset.getTileProperties(tileId),
+        animData = tileset.getTileAnimations(tileId);
+
+    tile.reset(x, y);
+
+    tile.setTexture(texture);
+
+    tile.blendMode = (props.blendMode || this.properties.blendMode) ?
+        Phaser.blendModes[(props.blendMode || this.properties.blendMode)] : Phaser.blendModes.NORMAL;
+
+    // add animations if there are any
+    if (animData) {
+        tile.animations.loadFrameData(animData.data);
+
+        // use a tile animation texture, each animated tile *must* be using
+        // a separate texture or they will share one and mess with eachother's
+        // animations. Phaser updates a sprite's texture frame as animations play out
+        // so a shared texture means each sprite's update effects other sprites besides itself.
+        var animTexture = this._animTexturePool.pop() || new PIXI.Texture(texture.baseTexture, texture.frame);
+
+        animTexture.baseTexture = texture.baseTexture;
+        animTexture.frame.copyFrom(texture.frame);
+        animTexture.setFrame(animTexture.frame);
+
+        tile.setTexture(animTexture);
+
+        if (!tile.animations._anims.tile) {
+            tile.animations.add('tile');
+        }
+
+        tile.animations.play('tile', animData.rate, true);
+    }
+
+    // Flipped states based on TiledEditor source:
+    // https://github.com/bjorn/tiled/blob/0ae2b91d31dfc5caf35cb4f116d71cec73a5ac7d/src/libtiled/maprenderer.cpp#L134-L154
+
+    // setup the flipped states
+    if (props.flippedX) {
+        tile.scale.x = -1;
+        tile.position.x += tileset.tileWidth;
+    }
+
+    if (props.flippedY) {
+        tile.scale.y = -1;
+        tile.position.y += tileset.tileHeight;
+    }
+
+    if (props.flippedAD) {
+        tile.rotation = 1.5707963267948966; // this.game.math.degToRad(90);
+        tile.scale.x *= -1;
+
+        var sx = tile.scale.x;
+        tile.scale.x = tile.scale.y;
+        tile.scale.y = sx;
+
+        var halfDiff = Math.abs(tile.height / 2) - Math.abs(tile.width / 2);
+        tile.position.y += halfDiff;
+        tile.position.x += halfDiff;
+    }
 };
 
 /**
@@ -338,13 +430,52 @@ Tilelayer.prototype.clearTile = function (tile) {
  * @return {Tile} The sprite to display
  */
 Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, toTileY) {
-    // remove the old tile that is no longer needed to be shown
-    this.clearTile(this.tiles[fromTileY] && this.tiles[fromTileY][fromTileX]);
+    // free the tiles we are dealing with
+    this._freeTile(toTileX, toTileY);
+    this._freeTile(fromTileX, fromTileY);
 
-    // add the tile we need to show
-    if (this.tiles[toTileY] && this.tiles[toTileY][toTileX]) {
-        this.container.addChild(this.tiles[toTileY][toTileX]);
+    // if off the map, just ignore it
+    if (toTileX < 0 || toTileY < 0 || toTileX >= this.map.size.x || toTileY >= this.map.size.y) {
+        return;
     }
+
+    var tile,
+        id = (toTileX + (toTileY * this.size.x)),
+        tileId = this.tileIds[id],
+        tileset = this.map.getTileset(tileId);
+
+    // if no tileset, return
+    if (!tileset) {
+        return;
+    }
+
+    // grab a new tile from the pool
+    // should exist since we just freed earlier, and the pool is hydrated
+    // with enough tiles for the viewport
+    tile = this._tilePool.pop();
+
+    // if we couldn't find a tile from the pool, then explode.
+    if (!tile) {
+        throw new Error(
+            '[phaser-tiled] Unable to find a tile in the pool, this shouldn\'t be possible! ' +
+            'Please report this issue at (https://github.com/englercj/phaser-tiled/issues), ' +
+            'and include a running example.'
+        );
+    }
+
+    this._resetTile(
+        tile,
+        (toTileX * this.map.tileWidth) + tileset.tileoffset.x,
+        (toTileY * this.map.tileHeight) + tileset.tileoffset.y,
+        tileId,
+        tileset
+    );
+
+
+    // update sprite reference in the map
+    this.tiles[toTileY][toTileX] = tile;
+
+    return tile;
 };
 
 /**
@@ -639,20 +770,18 @@ Tilelayer.prototype._renderDown = function (forceNew) {
  * @method destroy
  */
 Tilelayer.prototype.destroy = function () {
+    this.clearTiles();
+
+    // this will destroy the tile sprites that are children of this group
     Phaser.Group.prototype.destroy.apply(this, arguments);
 
-    // destroy tiles
-    for (var i = 0; i < this.tileIds.length; ++i) {
-        var x = i % this.size.x,
-            y = (i - x) / this.size.x;
-
-        if (!this.tiles[y] || !this.tiles[y][x]) {
-            continue;
-        }
-
-        this.tiles[y][x].destroy();
-        this.tiles[y][x] = null;
+    // destroy all the animation textures
+    for (var i = 0; i < this._animTexturePool.length; ++i) {
+        utils.destroyTexture(this._animTexturePool[i]);
     }
+
+    this._tilePool = null;
+    this._animTexturePool = null;
 
     this.bodies = null;
     this.tiles = null;
