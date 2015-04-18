@@ -6,6 +6,18 @@ var zlib = require('zlibjs'),
 
 var utils = module.exports = {};
 
+utils.destroyTexture = function (texture, callDestroy) {
+    if (callDestroy !== false) {
+        texture.destroy();
+    }
+
+    texture.baseTexture = null;
+    texture.frame = null;
+    texture.trim = null;
+    texture.crop = null;
+    texture._uvs = null;
+};
+
 utils.stringToBuffer = function (str) {
     var len = str.length,
         buf = new Buffer(len);

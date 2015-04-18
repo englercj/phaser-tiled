@@ -363,11 +363,11 @@ Tileset.prototype.contains = function (tileId) {
 };
 
 Tileset.prototype.destroy = function () {
-    destroyTexture(this, false);
+    utils.destroyTexture(this, false);
 
     // destroy tile textures
     for (var id in this.textures) {
-        destroyTexture(this.textures[id]);
+        utils.destroyTexture(this.textures[id]);
     }
 
     // destroy tile animations
@@ -403,15 +403,3 @@ for(var f in Tileset.FLAGS) {
 }
 
 Tileset.FLAGS.ALL = mask;
-
-function destroyTexture(texture, callDestroy) {
-    if (callDestroy !== false) {
-        texture.destroy();
-    }
-
-    texture.baseTexture = null;
-    texture.frame = null;
-    texture.trim = null;
-    texture.crop = null;
-    texture._uvs = null;
-}
