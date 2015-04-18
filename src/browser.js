@@ -22,7 +22,7 @@ Tiled.prototype.constructor = Tiled;
 
 module.exports = Tiled;
 
-Tiled.Tile          = require('./tiled/Tile');
+// Tiled.Tile          = require('./tiled/Tile');
 Tiled.Tileset       = require('./tiled/Tileset');
 Tiled.Tilemap       = require('./tiled/Tilemap');
 Tiled.Tilelayer     = require('./tiled/Tilelayer');
