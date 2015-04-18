@@ -338,10 +338,10 @@ Tileset.prototype.getTileTexture = function (tileId) {
         x = (x * this.tileWidth) + (x * this.spacing) + this.margin;
         y = (y * this.tileHeight) + (y * this.spacing) + this.margin;
 
-        return this.textures[tileId] = new PIXI.Texture(
+        return (this.textures[tileId] = new PIXI.Texture(
             this.baseTexture,
             new Phaser.Rectangle(x, y, this.tileWidth, this.tileHeight)
-        );
+        ));
     }
 };
 
