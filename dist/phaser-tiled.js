@@ -735,7 +735,7 @@ function base64Write (buf, string, offset, length) {
 }
 
 function utf16leWrite (buf, string, offset, length) {
-  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length)
+  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length, 2)
   return charsWritten
 }
 
@@ -1223,7 +1223,7 @@ Buffer.prototype.copy = function (target, target_start, start, end) {
 
   var len = end - start
 
-  if (len < 100 || !Buffer.TYPED_ARRAY_SUPPORT) {
+  if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
     for (var i = 0; i < len; i++) {
       target[i + target_start] = this[i + start]
     }
@@ -1292,6 +1292,7 @@ var BP = Buffer.prototype
  * Augment a Uint8Array *instance* (not the Uint8Array class!) with Buffer methods
  */
 Buffer._augment = function (arr) {
+  arr.constructor = Buffer
   arr._isBuffer = true
 
   // save reference to original Uint8Array get/set methods before overwriting
@@ -1418,7 +1419,8 @@ function base64ToBytes (str) {
   return base64.toByteArray(str)
 }
 
-function blitBuffer (src, dst, offset, length) {
+function blitBuffer (src, dst, offset, length, unitSize) {
+  if (unitSize) length -= length % unitSize;
   for (var i = 0; i < length; i++) {
     if ((i + offset >= dst.length) || (i >= src.length))
       break
@@ -1558,90 +1560,90 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 },{}],5:[function(require,module,exports){
-exports.read = function(buffer, offset, isLE, mLen, nBytes) {
-  var e, m,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      nBits = -7,
-      i = isLE ? (nBytes - 1) : 0,
-      d = isLE ? -1 : 1,
-      s = buffer[offset + i];
+exports.read = function (buffer, offset, isLE, mLen, nBytes) {
+  var e, m
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var nBits = -7
+  var i = isLE ? (nBytes - 1) : 0
+  var d = isLE ? -1 : 1
+  var s = buffer[offset + i]
 
-  i += d;
+  i += d
 
-  e = s & ((1 << (-nBits)) - 1);
-  s >>= (-nBits);
-  nBits += eLen;
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8);
+  e = s & ((1 << (-nBits)) - 1)
+  s >>= (-nBits)
+  nBits += eLen
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
 
-  m = e & ((1 << (-nBits)) - 1);
-  e >>= (-nBits);
-  nBits += mLen;
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8);
+  m = e & ((1 << (-nBits)) - 1)
+  e >>= (-nBits)
+  nBits += mLen
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
 
   if (e === 0) {
-    e = 1 - eBias;
+    e = 1 - eBias
   } else if (e === eMax) {
-    return m ? NaN : ((s ? -1 : 1) * Infinity);
+    return m ? NaN : ((s ? -1 : 1) * Infinity)
   } else {
-    m = m + Math.pow(2, mLen);
-    e = e - eBias;
+    m = m + Math.pow(2, mLen)
+    e = e - eBias
   }
-  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
-};
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
+}
 
-exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
-  var e, m, c,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
-      i = isLE ? 0 : (nBytes - 1),
-      d = isLE ? 1 : -1,
-      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
+exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+  var e, m, c
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
+  var i = isLE ? 0 : (nBytes - 1)
+  var d = isLE ? 1 : -1
+  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
 
-  value = Math.abs(value);
+  value = Math.abs(value)
 
   if (isNaN(value) || value === Infinity) {
-    m = isNaN(value) ? 1 : 0;
-    e = eMax;
+    m = isNaN(value) ? 1 : 0
+    e = eMax
   } else {
-    e = Math.floor(Math.log(value) / Math.LN2);
+    e = Math.floor(Math.log(value) / Math.LN2)
     if (value * (c = Math.pow(2, -e)) < 1) {
-      e--;
-      c *= 2;
+      e--
+      c *= 2
     }
     if (e + eBias >= 1) {
-      value += rt / c;
+      value += rt / c
     } else {
-      value += rt * Math.pow(2, 1 - eBias);
+      value += rt * Math.pow(2, 1 - eBias)
     }
     if (value * c >= 2) {
-      e++;
-      c /= 2;
+      e++
+      c /= 2
     }
 
     if (e + eBias >= eMax) {
-      m = 0;
-      e = eMax;
+      m = 0
+      e = eMax
     } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen);
-      e = e + eBias;
+      m = (value * c - 1) * Math.pow(2, mLen)
+      e = e + eBias
     } else {
-      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
-      e = 0;
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
+      e = 0
     }
   }
 
-  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8);
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
 
-  e = (e << mLen) | m;
-  eLen += mLen;
-  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
+  e = (e << mLen) | m
+  eLen += mLen
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
 
-  buffer[offset + i - d] |= s * 128;
-};
+  buffer[offset + i - d] |= s * 128
+}
 
 },{}],6:[function(require,module,exports){
 
@@ -3123,18 +3125,18 @@ module.exports = Tilelayer;
 
 Tilelayer.prototype.setupRenderArea = function () {
     // calculate the X/Y start of the render area as the tile location of the top-left of the camera view.
-    this._renderArea.x = this.game.math.clampBottom(this.game.math.floor(this._scroll.x / this.map.scaledTileWidth), 0);
-    this._renderArea.y = this.game.math.clampBottom(this.game.math.floor(this._scroll.y / this.map.scaledTileHeight), 0);
+    this._renderArea.x = this.game.math.clampBottom(this.game.math.floorTo(this._scroll.x / this.map.scaledTileWidth), 0);
+    this._renderArea.y = this.game.math.clampBottom(this.game.math.floorTo(this._scroll.y / this.map.scaledTileHeight), 0);
 
     // the width of the render area is the camera view width in tiles
-    this._renderArea.width = this.game.math.ceil(this.game.camera.view.width / this.map.scaledTileWidth);
+    this._renderArea.width = this.game.math.ceilTo(this.game.camera.view.width / this.map.scaledTileWidth);
 
     // ensure we don't go outside the map width
     this._renderArea.width = (this._renderArea.x + this._renderArea.width > this.map.size.x) ?
         (this.map.size.x - this._renderArea.x) : this._renderArea.width;
 
     // the height of the render area is the camera view height in tiles
-    this._renderArea.height = this.game.math.ceil(this.game.camera.view.height / this.map.scaledTileHeight);
+    this._renderArea.height = this.game.math.ceilTo(this.game.camera.view.height / this.map.scaledTileHeight);
 
     // ensure we don't go outside the map height
     this._renderArea.height = (this._renderArea.y + this._renderArea.height > this.map.size.y) ?
@@ -4558,6 +4560,10 @@ Tilemap.prototype.destroy = function () {
         this.tilesets[i].destroy();
     }
 
+    this.position = null;
+    this.scale = null;
+    this.pivot = null;
+
     this.key = null;
     this.size = null;
     this.tileWidth = null;
@@ -5053,7 +5059,7 @@ var utils = require('../utils');
 //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
 function Tileset(game, key, settings) {
     var txkey = utils.cacheKey(key, 'tileset', settings.name),
-        tx = PIXI.BaseTextureCache[txkey],
+        tx = game.cache.getPixiBaseTexture(txkey),
         ids,
         ttxkey,
         ttx,
@@ -5071,7 +5077,7 @@ function Tileset(game, key, settings) {
                 tileTextures = tileTextures || [];
 
                 ttxkey = utils.cacheKey(key, 'tileset_image_' + ids[i], settings.name);
-                ttx = PIXI.TextureCache[ttxkey];
+                ttx = game.cache.getPixiTexture(ttxkey);
 
                 if (!ttx) {
                     console.warn(
@@ -5173,8 +5179,8 @@ function Tileset(game, key, settings) {
      * @type Vector
      */
     this.numTiles = this.multiImage ? tileTextures.length : new Phaser.Point(
-        Phaser.Math.floor((this.baseTexture.width - this.margin) / (this.tileWidth - this.spacing)),
-        Phaser.Math.floor((this.baseTexture.height - this.margin) / (this.tileHeight - this.spacing))
+        Phaser.Math.floorTo((this.baseTexture.width - this.margin) / (this.tileWidth - this.spacing)),
+        Phaser.Math.floorTo((this.baseTexture.height - this.margin) / (this.tileHeight - this.spacing))
     );
 
     /**
@@ -5229,7 +5235,7 @@ function Tileset(game, key, settings) {
     if (!this.multiImage) {
         for(var t = 0, tl = this.lastgid - this.firstgid + 1; t < tl; ++t) {
             // convert the tileId to x,y coords of the tile in the Texture
-            var y = Phaser.Math.floor(t / this.numTiles.x),
+            var y = Phaser.Math.floorTo(t / this.numTiles.x),
                 x = (t - (y * this.numTiles.x));
 
             // get location in pixels
@@ -5382,11 +5388,11 @@ Tileset.prototype.contains = function (tileId) {
 };
 
 Tileset.prototype.destroy = function () {
-    PIXI.Texture.prototype.destroy.apply(this, arguments);
+    destroyTexture(this);
 
     // destroy sub tile textures
     for (var i = 0; i < this.textures.length; ++i) {
-        this.textures[i].destroy();
+        destroyTexture(this.textures[i]);
     }
 
     this.tileoffset = null;
@@ -5416,6 +5422,16 @@ for(var f in Tileset.FLAGS) {
 }
 
 Tileset.FLAGS.ALL = mask;
+
+function destroyTexture(texture) {
+    texture.destroy();
+
+    texture.baseTexture = null;
+    texture.frame = null;
+    texture.trim = null;
+    texture.crop = null;
+    texture._uvs = null;
+}
 
 },{"../utils":17}],17:[function(require,module,exports){
 /* jshint maxlen:200 */
