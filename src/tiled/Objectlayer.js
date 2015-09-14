@@ -164,7 +164,7 @@ Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
         if (props.collides || props.tileprops.collides) {
             this.game.physics.enable(obj, physicsBodyType, props.debug || props.tileprops.debug);
 
-            obj.body.setRectangle(obj.width, obj.height, obj.width / 2, -obj.height / 2, obj.rotation);
+            obj.body.setRectangle(obj.width, obj.height, obj.width / 2, obj.height / 2, obj.rotation);
 
             obj.body[props.bodyType || props.tileprops.bodyType || 'static'] = true;
 
