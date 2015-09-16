@@ -124,6 +124,7 @@ Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
         props.tileprops = {};
         props.animation = null;
 
+        var texture = props.texture;
         // gid means a sprite from a tileset texture
         if (o.gid) {
             set = this.map.getTileset(o.gid);
@@ -140,8 +141,12 @@ Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
         o.type = o.type || props.type || props.tileprops.type || '';
 
         // a manually specified string texture
-        if (typeof props.texture === 'string') {
-            props.texture = PIXI.TextureCache[props.texture];
+        if (typeof texture === 'string') {
+            props.texture = this.game.cache.getPixiTexture(texture);
+        }
+
+        if (typeof props.tileprops.texture === 'string') {
+            props.texture = this.game.cache.getPixiTexture(props.tileprops.texture);
         }
 
         // when props.texture is empty it will just create an empty sprite.
@@ -152,7 +157,7 @@ Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
         obj.rotation = o.rotation;
         obj.objectType = o.type;
 
-        if (!obj.texture) {
+        if (!props.texture) {
             obj.width = o.width;
             obj.height = o.height;
         }
@@ -164,7 +169,7 @@ Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
         if (props.collides || props.tileprops.collides) {
             this.game.physics.enable(obj, physicsBodyType, props.debug || props.tileprops.debug);
 
-            obj.body.setRectangle(obj.width, obj.height, obj.width / 2, -obj.height / 2, obj.rotation);
+            obj.body.setRectangle(obj.width, obj.height, obj.width / 2, obj.height / 2, obj.rotation);
 
             obj.body[props.bodyType || props.tileprops.bodyType || 'static'] = true;
 
