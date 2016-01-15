@@ -436,7 +436,7 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
 
     // if off the map, just ignore it
     if (toTileX < 0 || toTileY < 0 || toTileX >= this.map.size.x || toTileY >= this.map.size.y) {
-        return;
+        return null;
     }
 
     var tile,
@@ -446,7 +446,7 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
 
     // if no tileset, return
     if (!tileset) {
-        return;
+        return null;
     }
 
     // grab a new tile from the pool

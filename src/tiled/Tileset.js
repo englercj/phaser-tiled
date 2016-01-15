@@ -284,24 +284,23 @@ Tileset.prototype.getTileAnimations = function (tileId) {
     if (this.tileanimations[tileId]) {
         return this.tileanimations[tileId];
     }
-    else {
-        if (this._tilesData[tileId] && this._tilesData[tileId].animation) {
-            this.tileanimations[tileId] = {
-                rate: 1000 / this._tilesData[tileId].animation[0].duration,
-                data: new Phaser.FrameData()
-            };
 
-            for (var i = 0; i < this._tilesData[tileId].animation.length; ++i) {
-                var frame = this.getTileTexture(this._tilesData[tileId].animation[i].tileid + this.firstgid).frame;
+    if (this._tilesData[tileId] && this._tilesData[tileId].animation) {
+        this.tileanimations[tileId] = {
+            rate: 1000 / this._tilesData[tileId].animation[0].duration,
+            data: new Phaser.FrameData()
+        };
 
-                this.tileanimations[tileId].data.addFrame(
-                    new Phaser.Frame(i, frame.x, frame.y, frame.width, frame.height)
-                );
-            }
+        for (var i = 0; i < this._tilesData[tileId].animation.length; ++i) {
+            var frame = this.getTileTexture(this._tilesData[tileId].animation[i].tileid + this.firstgid).frame;
+
+            this.tileanimations[tileId].data.addFrame(
+                new Phaser.Frame(i, frame.x, frame.y, frame.width, frame.height)
+            );
         }
-
-        return null;
     }
+
+    return null;
 };
 
 /**
@@ -328,21 +327,20 @@ Tileset.prototype.getTileTexture = function (tileId) {
     if (this.multiImage || this.textures[tileId]) {
         return this.textures[tileId];
     }
+
     // generate this tile's texture then cache it.
-    else {
-        // convert the tileId to x,y coords of the tile in the Texture
-        var y = Phaser.Math.floorTo(tileId / this.numTiles.x),
-            x = (tileId - (y * this.numTiles.x));
+    // convert the tileId to x,y coords of the tile in the Texture
+    var y = Phaser.Math.floorTo(tileId / this.numTiles.x),
+        x = (tileId - (y * this.numTiles.x));
 
-        // get location in pixels
-        x = (x * this.tileWidth) + (x * this.spacing) + this.margin;
-        y = (y * this.tileHeight) + (y * this.spacing) + this.margin;
+    // get location in pixels
+    x = (x * this.tileWidth) + (x * this.spacing) + this.margin;
+    y = (y * this.tileHeight) + (y * this.spacing) + this.margin;
 
-        return (this.textures[tileId] = new PIXI.Texture(
-            this.baseTexture,
-            new Phaser.Rectangle(x, y, this.tileWidth, this.tileHeight)
-        ));
-    }
+    return (this.textures[tileId] = new PIXI.Texture(
+        this.baseTexture,
+        new Phaser.Rectangle(x, y, this.tileWidth, this.tileHeight)
+    ));
 };
 
 /**

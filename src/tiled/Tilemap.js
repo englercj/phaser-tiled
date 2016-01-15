@@ -723,10 +723,8 @@ Tilemap.prototype.getTile = function (x, y, layer, nonNull) {
     {
         return this.layers[layer].tiles[y] ? this.layers[layer].tiles[y][x] : null;
     }
-    else
-    {
-        return null;
-    }
+
+    return null;
 
 };
 

@@ -1,26 +1,21 @@
-var gulp = require('gulp'),
-    path = require('path'),
-    git = require('gulp-git'),
-    bump = require('gulp-bump'),
-    gutil = require('gulp-util'),
-    jshint = require('gulp-jshint'),
+var gulp    = require('gulp');
+var path    = require('path');
+var gutil   = require('gulp-util');
+var eslint  = require('gulp-eslint');
+var jscs    = require('gulp-jscs');
 
-    es = require('event-stream'),
-    source = require('vinyl-source-stream'),
-    watchify = require('watchify'),
-    browserify = require('browserify'),
+var pkg = require('./package.json');
 
-    index = './src/index.js',
-    outdir = './build',
-    bundle = 'Phaser.Plugin.Tiled',
-    outfile = 'phaser-tiled.js',
-    ver = {
-        major: 0,
-        minor: 1,
-        patch: 2
-    },
-    pkg = require('./package.json'),
-    version = pkg.version.split('.');
+var source = require('vinyl-source-stream');
+var watchify = require('watchify');
+var browserify = require('browserify');
+
+var index = './src/index.js';
+var outdir = './build';
+var bundle = 'Phaser.Plugin.Tiled';
+var outfile = 'phaser-tiled.js';
+
+var version = pkg.version.split('.');
 
 function rebundle(file) {
     if (file) {
@@ -61,51 +56,21 @@ gulp.task('build', function () {
 });
 
 /*****
- * JSHint task, lints the lib and test *.js files.
+ * ESLint task, lints the lib and test *.js files.
  *****/
-gulp.task('jshint', function () {
+gulp.task('lint', function () {
     return gulp.src([
             './src/**/*.js',
-            'gulpfile.js'
+            'gulpfile.js',
+            '!node_modules/**'
         ])
-        .pipe(jshint())
-        .pipe(jshint.reporter('jshint-summary'));
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(jscs())
+        .pipe(jscs.reporter());
 });
 
 /*****
  * Base task
  *****/
-gulp.task('default', ['jshint', 'build']);
-
-
-/*****
- * Release task
- *****/
-gulp.task('release', ['jshint', 'build'], function (cb) {
-    var up = process.argv[3] || 'patch';
-
-    up = up.replace('--', '');
-
-    if (Object.keys(ver).indexOf(up) === -1) {
-        return cb(new Error('Please specify major, minor, or patch release.'));
-    }
-
-    version[ver[up]]++;
-    for (var i = 0; i < 3; ++i) {
-        if (i > ver[up]) {
-            version[i] = 0;
-        }
-    }
-
-    version = 'v' + version.join('.');
-
-    return es.merge(
-            gulp.src('./package.json')
-                .pipe(bump({ type: up }))
-                .pipe(gulp.dest('./')),
-            gulp.src(outdir + '/' + outfile)
-                .pipe(gulp.dest('./dist'))
-        )
-        .pipe(git.commit('release ' + version))
-        .pipe(git.tag(version, version, function () {}));
-});
+gulp.task('default', ['lint', 'build']);
