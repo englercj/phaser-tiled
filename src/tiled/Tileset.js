@@ -29,7 +29,7 @@ var utils = require('../utils');
 //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
 function Tileset(game, key, settings) {
     var txkey = utils.cacheKey(key, 'tileset', settings.name),
-        tx = PIXI.BaseTextureCache[txkey],
+        tx = game.cache.getPixiBaseTexture(txkey),
         ids,
         ttxkey,
         ttx,
@@ -45,7 +45,7 @@ function Tileset(game, key, settings) {
         for (var i = 0; i < ids.length; ++i) {
             if (settings.tiles[ids[i]].image) {
                 ttxkey = utils.cacheKey(key, 'tileset_image_' + ids[i], settings.name);
-                ttx = PIXI.TextureCache[ttxkey];
+                ttx = game.cache.getPixiTexture(ttxkey);
 
                 if (!ttx) {
                     console.warn(
@@ -146,9 +146,9 @@ function Tileset(game, key, settings) {
      * @property numTiles
      * @type Vector
      */
-    this.numTiles = this.multiImage ? numTileTextures : new Phaser.Point(
-        Phaser.Math.floor((this.baseTexture.width - this.margin) / (this.tileWidth - this.spacing)),
-        Phaser.Math.floor((this.baseTexture.height - this.margin) / (this.tileHeight - this.spacing))
+    this.numTiles = this.multiImage ? tileTextures.length : new Phaser.Point(
+        Math.round((this.baseTexture.width - this.margin) / (this.tileWidth + this.spacing)),
+        Math.round((this.baseTexture.height - this.margin) / (this.tileHeight + this.spacing))
     );
 
     /**
@@ -331,7 +331,7 @@ Tileset.prototype.getTileTexture = function (tileId) {
     // generate this tile's texture then cache it.
     else {
         // convert the tileId to x,y coords of the tile in the Texture
-        var y = Phaser.Math.floor(tileId / this.numTiles.x),
+        var y = Phaser.Math.floorTo(tileId / this.numTiles.x),
             x = (tileId - (y * this.numTiles.x));
 
         // get location in pixels

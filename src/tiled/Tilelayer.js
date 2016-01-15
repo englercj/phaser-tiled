@@ -192,18 +192,18 @@ module.exports = Tilelayer;
 
 Tilelayer.prototype.setupRenderArea = function () {
     // calculate the X/Y start of the render area as the tile location of the top-left of the camera view.
-    this._renderArea.x = this.game.math.clampBottom(this.game.math.floor(this._scroll.x / this.map.scaledTileWidth), 0);
-    this._renderArea.y = this.game.math.clampBottom(this.game.math.floor(this._scroll.y / this.map.scaledTileHeight), 0);
+    this._renderArea.x = this.game.math.clampBottom(this.game.math.floorTo(this._scroll.x / this.map.scaledTileWidth), 0);
+    this._renderArea.y = this.game.math.clampBottom(this.game.math.floorTo(this._scroll.y / this.map.scaledTileHeight), 0);
 
     // the width of the render area is the camera view width in tiles
-    this._renderArea.width = this.game.math.ceil(this.game.camera.view.width / this.map.scaledTileWidth);
+    this._renderArea.width = this.game.math.ceilTo(this.game.camera.view.width / this.map.scaledTileWidth);
 
     // ensure we don't go outside the map width
     this._renderArea.width = (this._renderArea.x + this._renderArea.width > this.map.size.x) ?
         (this.map.size.x - this._renderArea.x) : this._renderArea.width;
 
     // the height of the render area is the camera view height in tiles
-    this._renderArea.height = this.game.math.ceil(this.game.camera.view.height / this.map.scaledTileHeight);
+    this._renderArea.height = this.game.math.ceilTo(this.game.camera.view.height / this.map.scaledTileHeight);
 
     // ensure we don't go outside the map height
     this._renderArea.height = (this._renderArea.y + this._renderArea.height > this.map.size.y) ?
