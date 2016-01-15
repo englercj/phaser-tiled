@@ -6,7 +6,10 @@ the [Tiled Map Editor][1].
 
 This plugin optimizes the rendering of large scrolling tilemaps. It also adds support for
 many more Tiled features and lots of advanced functionality. You can read [Why use this plugin?][2]
-below for more details
+below for more details.
+
+**Note**: The recommended version of Tiled for use with this plugin is `v0.15`. Any other version
+is not officially supported.
 
 [0]: https://github.com/photonstorm/phaser
 [1]: http://www.mapeditor.org/
@@ -30,8 +33,12 @@ game.add.plugin(Phaser.Plugin.Tiled);
 Then you can add a Tiled map to your game like this:
 
 ```js
-// By using the built-in cache key creator, the plugin can
-// automagically find all the necessary items in the cache
+// By using the built-in cache key creator, the plugin can automagically
+// find all the necessary items in the cache.
+// The params are (map-key, type, tiled-name). The `key` is an arbitrary key
+// you make up to identify the map it belongs to. The `type` is the type of
+// resource it is loading. The `tiled-name` is for layers, the name should match
+// the name of the layer in the map.
 var cacheKey = Phaser.Plugin.Tiled.utils.cacheKey;
 
 // load the tiled map, notice it is "tiledmap" and not "tilemap"
@@ -58,7 +65,7 @@ var map = game.add.tiledmap('my-tiledmap');
 That can get pretty heavy, and hardcoding what to load and how to name it can stink! Luckily, there is an easier
 way to handle it. Instead of hard-coding what the tilemap should load and be named, this plugin has a gulp task
 that can generate a Phaser Asset Pack that describes what and how to load the tiledmap. If you have this pack
-it becomes this simple to load and create a tiledmap:
+it becomes trivial to load and create a tiledmap:
 
 ```js
 // the key will be the filename of the map without the extension.
