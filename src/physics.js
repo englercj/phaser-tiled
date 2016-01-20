@@ -139,7 +139,8 @@ module.exports = {
                 }
                 // currently only circles are supported by P2, so we just use the width
                 else if (object.ellipse) {
-                    body.addCircle(object.width, object.width / 2, object.width / 2, object.rotation);
+                    var radius = (object.width + object.height) / 4;
+                    body.addCircle(radius, object.width / 2, object.height / 2, object.rotation);
                 }
                 // no polygon, use rectangle defined by object itself
                 else {
