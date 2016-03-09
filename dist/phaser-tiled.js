@@ -735,7 +735,7 @@ function base64Write (buf, string, offset, length) {
 }
 
 function utf16leWrite (buf, string, offset, length) {
-  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length)
+  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length, 2)
   return charsWritten
 }
 
@@ -1223,7 +1223,7 @@ Buffer.prototype.copy = function (target, target_start, start, end) {
 
   var len = end - start
 
-  if (len < 100 || !Buffer.TYPED_ARRAY_SUPPORT) {
+  if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
     for (var i = 0; i < len; i++) {
       target[i + target_start] = this[i + start]
     }
@@ -1292,6 +1292,7 @@ var BP = Buffer.prototype
  * Augment a Uint8Array *instance* (not the Uint8Array class!) with Buffer methods
  */
 Buffer._augment = function (arr) {
+  arr.constructor = Buffer
   arr._isBuffer = true
 
   // save reference to original Uint8Array get/set methods before overwriting
@@ -1418,7 +1419,8 @@ function base64ToBytes (str) {
   return base64.toByteArray(str)
 }
 
-function blitBuffer (src, dst, offset, length) {
+function blitBuffer (src, dst, offset, length, unitSize) {
+  if (unitSize) length -= length % unitSize;
   for (var i = 0; i < length; i++) {
     if ((i + offset >= dst.length) || (i >= src.length))
       break
@@ -2036,15 +2038,16 @@ module.exports = {
         * In Ninja the Tiles have an ID from 0 to 33, where 0 is 'empty', 1 is a full tile, 2 is a 45-degree slope,
         * etc. You can find the ID list either at the very bottom of `Tile.js`, or in a handy visual reference in the
         * `resources/Ninja Physics Debug Tiles` folder in the repository. The slopeMap parameter is an array that controls
-        * how the indexes of the tiles in your tilemap data will map to the Ninja Tile IDs. For example if you had 6
+        * how the indexes of the tiles in your tilemap data will map to the Ninja Tile slopes. For example if you had 6
         * tiles in your tileset: Imagine the first 4 should be converted into fully solid Tiles and the other 2 are 45-degree
-        * slopes. Your slopeMap array would look like this: `[ 1, 1, 1, 1, 2, 3 ]`. Where each element of the array is
-        * a tile in your tilemap and the resulting Ninja Tile it should create.
+        * slopes. Your slopeMap array would look like this: `{0:1, 1:1, 2:1,
+        * 3:1, 4:2, 5:3 }`. Where each element of the map is a tile in your
+        * tileset and the resulting Ninja Tile it should create.
         *
         * @method Phaser.Physics.Ninja#convertTilemap
         * @param {Phaser.Tilemap} map - The Tilemap to get the map data from.
         * @param {number|string|Phaser.TilemapLayer} [layer] - The layer to operate on. Defaults to map.currentLayer.
-        * @param {object} [slopeMap] - The tilemap index to Tile ID map.
+        * @param {object} [slopeMap] - Map of tileIds to Ninja Physics slope IDs
         * @return {array} An array of the Phaser.Physics.Ninja.Tile objects that were created.
         */
         convertTiledmap: function (map, layer, slopeMap) {
@@ -2066,24 +2069,25 @@ module.exports = {
 
                 for (var x = 0, w = layer.size.x; x < w; x++)
                 {
-                    var tile = layer.tiles[y][x],
-                        index = (y * layer.size.x) + x;
+                    if (layer.tiles[y] && layer.tiles[y][x]) {
+                        var tile = layer.tiles[y][x];
 
-                    if (tile && slopeMap.hasOwnProperty(index))
-                    {
-                        var body = new Phaser.Physics.Ninja.Body(
-                            this,
-                            null,
-                            3,
-                            slopeMap[index],
-                            0,
-                            tile.worldX + tile.centerX,
-                            tile.worldY + tile.centerY,
-                            tile.width,
-                            tile.height
-                        );
+                        if (tile && slopeMap.hasOwnProperty(tile.tileId))
+                        {
+                            tile.body = new Phaser.Physics.Ninja.Body(
+                                this,
+                                null,
+                                3,
+                                slopeMap[tile.tileId],
+                                0,
+                                tile.worldX + tile.centerX,
+                                tile.worldY + tile.centerY,
+                                tile.width,
+                                tile.height
+                            );
 
-                        layer.bodies.push(body);
+                            layer.bodies.push(tile.body);
+                        }
                     }
                 }
             }
@@ -2519,6 +2523,12 @@ function Tile(game, x, y, tileId, tileset, layer) {
     * @property {object} tileset - The tileset that this tile's texture is from.
     */
     this.tileset = tileset;
+
+    /**
+    * @property {number} tileId - The index of this tile within the map data
+    * corresponding to the tileset, or -1 if this represents a blank/null tile.
+    */
+    this.tileId = tileId;
 
     /**
     * @property {Phaser.Point} tilePosition - The position of the tile in 'tile coords'
