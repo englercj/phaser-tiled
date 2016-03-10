@@ -147,6 +147,7 @@ module.exports = {
                 }
 
                 body.data.shapes[0].sensor = !!(object.properties && object.properties.sensor);
+                body.data.shapes[0].collisionResponse = (object.properties && object.properties.collisionResponse === 'false') ? false : true;
 
                 var bodyType = object.properties && object.properties.bodyType || 'static';
 
