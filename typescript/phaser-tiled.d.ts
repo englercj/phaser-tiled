@@ -24,16 +24,23 @@ declare module Phaser {
         }
 
         module Tiled {
-            interface TiledObject {
+            interface ITiledObject {
+                id: number;
                 name: string;
-                height: number;
-                width: number;
+                type: string;
                 x: number;
                 y: number;
-                visible: boolean;
-                type: string;
+                width: number;
+                height: number;
                 rotation: number;
+                gid: number;
+                visible: boolean;
                 properties: any;
+            }
+
+            interface ITileAnimation {
+                rate: number;
+                data: Phaser.FrameData;
             }
 
             class Tile extends Phaser.Sprite {
@@ -75,11 +82,6 @@ declare module Phaser {
                 copy(tile: Tile): void;
             }
 
-            interface TileAnimation {
-                rate: number;
-                data: Phaser.FrameData;
-            }
-
             class Tileset extends PIXI.Texture {
                 constructor(game: Phaser.Game, key: string, settings: any);
 
@@ -98,10 +100,10 @@ declare module Phaser {
                 tileproperties: any;
                 size: Phaser.Point;
                 textures: PIXI.Texture[];
-                tileanimations: { [key: string]: TileAnimation };
+                tileanimations: { [key: string]: ITileAnimation };
 
                 getTileProperties(tileId: number): any;
-                getTileAnimations(tileId: number): TileAnimation;
+                getTileAnimations(tileId: number): ITileAnimation;
                 getTileTexture(tileId: number): PIXI.Texture;
                 contains(tileId: number): boolean;
             }
@@ -129,7 +131,7 @@ declare module Phaser {
                 needToRecalculate: boolean;
                 dirty: boolean;
 
-                setTileSize(tileWidth: number, tileHeight: number);
+                setTileSize(tileWidth: number, tileHeight: number): void;
                 getTilelayerIndex(name: string): number;
                 getTilesetIndex(name: string): number;
                 getImagelayerIndex(name: string): number;
@@ -183,13 +185,13 @@ declare module Phaser {
                 name: string;
                 color: string;
                 properties: any;
-                objects: (Phaser.Sprite|Phaser.Group)[];
+                objects: ITiledObject[];
                 layerType: string;
                 bodies: any[];
 
-                spawn(physicsBodyType?: number, spawnCallback?: () => any): Objectlayer;
+                spawn(physicsBodyType?: number, spawnCallback?: () => void): Objectlayer;
                 despawn(destroy?: boolean): Objectlayer;
-                getObject(name: string): (Phaser.Sprite|Phaser.Group);
+                getObject(name: string): ITiledObject;
             }
 
             class utils {
