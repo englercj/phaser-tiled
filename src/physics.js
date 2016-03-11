@@ -146,6 +146,11 @@ module.exports = {
                     body.addRectangle(object.width, object.height, object.width / 2, object.height / 2, object.rotation);
                 }
 
+                if (!body.data.shapes[0]) {
+                    console.warn('No shape created for object:', object);
+                    continue;
+                }
+
                 body.data.shapes[0].sensor = !!(object.properties && object.properties.sensor);
                 body.data.shapes[0].collisionResponse =
                     (object.properties && typeof object.properties.collisionResponse !== 'undefined') ? object.properties.collisionResponse : true;
