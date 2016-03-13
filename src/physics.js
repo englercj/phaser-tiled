@@ -17,92 +17,92 @@ module.exports = {
         *       to save processing. However it means you cannot perform specific Tile to Body collision responses.
         * @return {array} An array of the Phaser.Physics.P2.Body objects that were created.
         */
-        convertTiledmap: function (map, layer, addToWorld, optimize) {
-
-            if (typeof addToWorld === 'undefined') { addToWorld = true; }
-            if (typeof optimize === 'undefined') { optimize = true; }
-            if (typeof layer === 'undefined') { layer = map.currentLayer; }
-
-            layer = map.getTilelayer(layer);
-
-            if (!layer) {
-                return;
-            }
-
-            //  If the bodies array is already populated we need to nuke it
-            this.clearTilemapLayerBodies(map, layer.index);
-
-            var width = 0,
-                sx = 0,
-                sy = 0,
-                tile, body, right;
-
-            for (var y = 0, h = layer.size.y; y < h; y++)
-            {
-                width = 0;
-
-                for (var x = 0, w = layer.size.x; x < w; x++)
-                {
-                    if (!layer.tiles[y]) {
-                        continue;
-                    }
-
-                    tile = layer.tiles[y][x];
-
-                    if (tile && tile.collides)
-                    {
-                        if (optimize)
-                        {
-                            right = map.getTileRight(layer.index, x, y);
-
-                            if (width === 0)
-                            {
-                                sx = tile.x;
-                                sy = tile.y;
-                                width = tile.width;
-                            }
-
-                            if (right && right.collides)
-                            {
-                                width += tile.width;
-                            }
-                            else
-                            {
-                                body = this.createBody(sx, sy, 0, false);
-
-                                body.addRectangle(width, tile.height, width / 2, tile.height / 2, 0);
-
-                                if (addToWorld)
-                                {
-                                    this.addBody(body);
-                                }
-
-                                layer.bodies.push(body);
-
-                                width = 0;
-                            }
-                        }
-                        else
-                        {
-                            body = this.createBody(tile.x, tile.y, 0, false);
-
-                            body.clearShapes();
-                            body.addRectangle(tile.width, tile.height, tile.width / 2, tile.height / 2, tile.rotation);
-
-                            if (addToWorld)
-                            {
-                                this.addBody(body);
-                            }
-
-                            layer.bodies.push(body);
-                        }
-                    }
-                }
-            }
-
-            return layer.bodies;
-
-        },
+        // convertTiledmap: function (map, layer, addToWorld, optimize) {
+        //
+        //     if (typeof addToWorld === 'undefined') { addToWorld = true; }
+        //     if (typeof optimize === 'undefined') { optimize = true; }
+        //     if (typeof layer === 'undefined') { layer = map.currentLayer; }
+        //
+        //     layer = map.getTilelayer(layer);
+        //
+        //     if (!layer) {
+        //         return;
+        //     }
+        //
+        //     //  If the bodies array is already populated we need to nuke it
+        //     this.clearTilemapLayerBodies(map, layer.index);
+        //
+        //     var width = 0,
+        //         sx = 0,
+        //         sy = 0,
+        //         tile, body, right;
+        //
+        //     for (var y = 0, h = layer.size.y; y < h; y++)
+        //     {
+        //         width = 0;
+        //
+        //         for (var x = 0, w = layer.size.x; x < w; x++)
+        //         {
+        //             if (!layer.tiles[y]) {
+        //                 continue;
+        //             }
+        //
+        //             tile = layer.tiles[y][x];
+        //
+        //             if (tile && tile.collides)
+        //             {
+        //                 if (optimize)
+        //                 {
+        //                     right = map.getTileRight(layer.index, x, y);
+        //
+        //                     if (width === 0)
+        //                     {
+        //                         sx = tile.x;
+        //                         sy = tile.y;
+        //                         width = tile.width;
+        //                     }
+        //
+        //                     if (right && right.collides)
+        //                     {
+        //                         width += tile.width;
+        //                     }
+        //                     else
+        //                     {
+        //                         body = this.createBody(sx, sy, 0, false);
+        //
+        //                         body.addRectangle(width, tile.height, width / 2, tile.height / 2, 0);
+        //
+        //                         if (addToWorld)
+        //                         {
+        //                             this.addBody(body);
+        //                         }
+        //
+        //                         layer.bodies.push(body);
+        //
+        //                         width = 0;
+        //                     }
+        //                 }
+        //                 else
+        //                 {
+        //                     body = this.createBody(tile.x, tile.y, 0, false);
+        //
+        //                     body.clearShapes();
+        //                     body.addRectangle(tile.width, tile.height, tile.width / 2, tile.height / 2, tile.rotation);
+        //
+        //                     if (addToWorld)
+        //                     {
+        //                         this.addBody(body);
+        //                     }
+        //
+        //                     layer.bodies.push(body);
+        //                 }
+        //             }
+        //         }
+        //     }
+        //
+        //     return layer.bodies;
+        //
+        // },
         /**
         * Converts all of the polylines objects inside a Tiled ObjectGroup into physics bodies that are added to the world.
         * Note that the polylines must be created in such a way that they can withstand polygon decomposition.
@@ -146,7 +146,14 @@ module.exports = {
                     body.addRectangle(object.width, object.height, object.width / 2, object.height / 2, object.rotation);
                 }
 
+                if (!body.data.shapes[0]) {
+                    console.warn('No shape created for object:', object);
+                    continue;
+                }
+
                 body.data.shapes[0].sensor = !!(object.properties && object.properties.sensor);
+                body.data.shapes[0].collisionResponse =
+                    (object.properties && typeof object.properties.collisionResponse !== 'undefined') ? object.properties.collisionResponse : true;
 
                 var bodyType = object.properties && object.properties.bodyType || 'static';
 
@@ -185,50 +192,50 @@ module.exports = {
         * @param {object} [slopeMap] - The tilemap index to Tile ID map.
         * @return {array} An array of the Phaser.Physics.Ninja.Tile objects that were created.
         */
-        convertTiledmap: function (map, layer, slopeMap) {
-
-            layer = map.getTilelayer(layer);
-
-            if (!layer) {
-                return;
-            }
-
-            //  If the bodies array is already populated we need to nuke it
-            this.clearTilemapLayerBodies(map, layer);
-
-            for (var y = 0, h = layer.size.y; y < h; y++)
-            {
-                if (!layer.tiles[y]) {
-                    continue;
-                }
-
-                for (var x = 0, w = layer.size.x; x < w; x++)
-                {
-                    var tile = layer.tiles[y][x],
-                        index = (y * layer.size.x) + x;
-
-                    if (tile && slopeMap.hasOwnProperty(index))
-                    {
-                        var body = new Phaser.Physics.Ninja.Body(
-                            this,
-                            null,
-                            3,
-                            slopeMap[index],
-                            0,
-                            tile.worldX + tile.centerX,
-                            tile.worldY + tile.centerY,
-                            tile.width,
-                            tile.height
-                        );
-
-                        layer.bodies.push(body);
-                    }
-                }
-            }
-
-            return layer.bodies;
-
-        }
+        // convertTiledmap: function (map, layer, slopeMap) {
+        //
+        //     layer = map.getTilelayer(layer);
+        //
+        //     if (!layer) {
+        //         return;
+        //     }
+        //
+        //     //  If the bodies array is already populated we need to nuke it
+        //     this.clearTilemapLayerBodies(map, layer);
+        //
+        //     for (var y = 0, h = layer.size.y; y < h; y++)
+        //     {
+        //         if (!layer.tiles[y]) {
+        //             continue;
+        //         }
+        //
+        //         for (var x = 0, w = layer.size.x; x < w; x++)
+        //         {
+        //             var tile = layer.tiles[y][x],
+        //                 index = (y * layer.size.x) + x;
+        //
+        //             if (tile && slopeMap.hasOwnProperty(index))
+        //             {
+        //                 var body = new Phaser.Physics.Ninja.Body(
+        //                     this,
+        //                     null,
+        //                     3,
+        //                     slopeMap[index],
+        //                     0,
+        //                     tile.worldX + tile.centerX,
+        //                     tile.worldY + tile.centerY,
+        //                     tile.width,
+        //                     tile.height
+        //                 );
+        //
+        //                 layer.bodies.push(body);
+        //             }
+        //         }
+        //     }
+        //
+        //     return layer.bodies;
+        //
+        // }
     }
 };
 

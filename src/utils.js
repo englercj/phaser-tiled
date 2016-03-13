@@ -1,16 +1,27 @@
-/* jshint maxlen:200 */
+var zlib    = require('zlibjs');
+var Buffer  = require('buffer').Buffer;
 
-var zlib = require('zlibjs'),
-    Buffer = require('buffer').Buffer,
-    decodeB64 = (typeof window !== 'undefined' && window.atob) || require('Base64').atob;
+var decodeB64 = (typeof window !== 'undefined' && window.atob) || require('Base64').atob;
 
 var utils = module.exports = {};
 
-utils.stringToBuffer = function (str) {
-    var len = str.length,
-        buf = new Buffer(len);
+utils.destroyTexture = function (texture, callDestroy) {
+    if (callDestroy !== false) {
+        texture.destroy();
+    }
 
-    for(var i = 0; i < len; i++) {
+    texture.baseTexture = null;
+    texture.frame = null;
+    texture.trim = null;
+    texture.crop = null;
+    texture._uvs = null;
+};
+
+utils.stringToBuffer = function (str) {
+    var len = str.length;
+    var buf = new Buffer(len);
+
+    for (var i = 0; i < len; i++) {
         buf[i] = str.charCodeAt(i);
     }
 
@@ -22,11 +33,11 @@ utils.cacheKey = function (key, type, name) {
 };
 
 utils.decompressBase64Data = function (raw, encoding, compression) {
-    //TODO: This assumes base64 encoding, need to check encoding param
+    // TODO: This assumes base64 encoding, need to check encoding param
     var str = decodeB64(raw),
         buf = utils.stringToBuffer(str);
 
-    //decompress
+    // decompress
     if (compression === 'gzip') {
         return zlib.gunzipSync(buf);
     }
@@ -50,7 +61,7 @@ utils.decompressBase64Data = function (raw, encoding, compression) {
 utils.parseHitArea = function (hv) {
     var shape;
 
-    //odd number of values
+    // odd number of values
     if (hv.length % 2 !== 0 && hv.length !== 3) {
         throw new RangeError(
             'Strange number of values for hitArea! Should be a flat array of values, like: ' +
@@ -58,15 +69,15 @@ utils.parseHitArea = function (hv) {
         );
     }
 
-    //a circle x,y,r
+    // a circle x,y,r
     if (hv.length === 3) {
         shape = new Phaser.Circle(hv[0], hv[1], hv[2]);
     }
-    //a rectangle x,y,w,h
+    // a rectangle x,y,w,h
     else if (hv.length === 4) {
         shape = new Phaser.Rectangle(hv[0], hv[1], hv[2], hv[3]);
     }
-    //generic polygon
+    // generic polygon
     else {
         shape = new Phaser.Polygon(hv);
     }
@@ -90,9 +101,9 @@ utils.parseTiledProperties = function (obj) {
         return obj;
     }
 
-    for(var k in obj) {
-        var v = obj[k],
-            n = parseFloat(v, 10);
+    for (var k in obj) {
+        var v = obj[k];
+        var n = parseFloat(v, 10);
 
         // try to massage numbers
         if (n === 0 || n) {
@@ -108,10 +119,12 @@ utils.parseTiledProperties = function (obj) {
         }
         // anything else is either a string or json
         else {
-            try{
+            try {
                 v = JSON.parse(v);
                 obj[k] = v;
-            } catch(e) {}
+            } catch (e) {
+                // ignore error
+            }
         }
     }
 

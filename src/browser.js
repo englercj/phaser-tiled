@@ -1,6 +1,5 @@
-/* jshint -W106 */
-var utils = require('./utils'),
-    physics = require('./physics');
+var utils = require('./utils');
+var physics = require('./physics');
 
 /**
  * @class Phaser.Plugin.Tiled
@@ -22,7 +21,7 @@ Tiled.prototype.constructor = Tiled;
 
 module.exports = Tiled;
 
-Tiled.Tile          = require('./tiled/Tile');
+// Tiled.Tile          = require('./tiled/Tile');
 Tiled.Tileset       = require('./tiled/Tileset');
 Tiled.Tilemap       = require('./tiled/Tilemap');
 Tiled.Tilelayer     = require('./tiled/Tilelayer');
@@ -108,13 +107,13 @@ function GameObjectFactory_tiledmap(key, group) {
 function Loader_tiledmap(key, url, data, format) {
     if (typeof format === 'undefined') { format = Tiled.Tilemap.CSV; }
 
-    /* jshint -W116 */
+    /*eslint-disable no-eq-null, eqeqeq */
     if (url == null && data == null) {
         console.warn('Phaser.Loader.tiledmap - Both url and data are null. One must be set.');
 
         return this;
     }
-    /* jshint +W116 */
+    /*eslint-enable no-eq-null, eqeqeq */
 
     //  A map data object has been given
     if (data) {
@@ -242,7 +241,6 @@ function Loader_processPack(pack) {
         return;
     }
 
-
     for (var i = 0; i < packData.length; i++)
     {
         var file = packData[i];
@@ -316,5 +314,3 @@ function Loader_processPack(pack) {
         }
     }
 }
-
-/* jshint +W106 */
