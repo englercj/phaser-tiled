@@ -93,7 +93,8 @@ function Objectlayer(game, map, layer, index) {
 
     if (this.properties.batch) {
         this.container = this.addChild(new Phaser.SpriteBatch(game));
-    } else {
+    }
+    else {
         this.container = this;
     }
 }
@@ -114,12 +115,12 @@ module.exports = Objectlayer;
 Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
     // we go through these backwards so that things that are higher in the
     // list of object gets rendered on top.
-    for(var i = this.objects.length - 1; i >= 0; --i) {
-        var o = this.objects[i],
-            props = o.properties,
-            set,
-            // interactive,
-            obj;
+    for (var i = this.objects.length - 1; i >= 0; --i) {
+        var o = this.objects[i];
+        var props = o.properties;
+        var set;
+        // var interactive;
+        var obj;
 
         props.tileprops = {};
         props.animation = null;
@@ -162,8 +163,8 @@ Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
             obj.height = o.height;
         }
 
-        obj.blendMode = (props.blendMode || this.properties.blendMode) ?
-            PIXI.blendModes[(props.blendMode || this.properties.blendMode)] : PIXI.blendModes.NORMAL;
+        var blendMode = props.blendMode || this.properties.blendMode;
+        obj.blendMode = blendMode ? Phaser.blendModes[blendMode] : Phaser.blendModes.NORMAL;
 
         // create physics if this body is physical.
         if (props.collides || props.tileprops.collides) {
@@ -217,7 +218,7 @@ Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
             obj.rotation = o.rotation;
         }
 
-        //visible was recently added to Tiled, default old versions to true
+        // visible was recently added to Tiled, default old versions to true
         obj.visible = o.visible !== undefined ? !!o.visible : true;
 
         // if (this.map.orientation === 'isometric') {
@@ -244,14 +245,14 @@ Objectlayer.prototype.spawn = function (physicsBodyType, spawnCallback) {
         //     obj.mouseupoutside = this.onObjectEvent.bind(this, 'mouseupoutside', obj);
         // }
 
-        //set custom properties
+        // set custom properties
         obj.properties = {};
-        for(var t in props.tileprops) {
+        for (var t in props.tileprops) {
             obj.properties[t] = props.tileprops[t];
         }
 
-        for(var k in props) {
-            if(k !== 'tileprops') {
+        for (var k in props) {
+            if (k !== 'tileprops') {
                 obj.properties[k] = props[k];
             }
         }
@@ -297,7 +298,7 @@ Objectlayer.prototype.onObjectEvent = function (eventName, obj, data) {
  */
 Objectlayer.prototype._getPolygon = function (o) {
     var points = [];
-    for(var i = 0, il = o.polygon.length; i < il; ++i) {
+    for (var i = 0, il = o.polygon.length; i < il; ++i) {
         points.push(new Phaser.Point(o.polygon[i].x, o.polygon[i].y));
     }
 
@@ -314,7 +315,7 @@ Objectlayer.prototype._getPolygon = function (o) {
  */
 Objectlayer.prototype._getPolyline = function (o) {
     var points = [];
-    for(var i = 0, il = o.polyline.length; i < il; ++i) {
+    for (var i = 0, il = o.polyline.length; i < il; ++i) {
         points.push(new Phaser.Point(o.polyline[i].x, o.polyline[i].y));
     }
 
@@ -355,13 +356,13 @@ Objectlayer.prototype._getRectangle = function (o) {
  * @private
  */
 Objectlayer.prototype._getInteractive = function (set, props) {
-    //TODO: This is wrong, if 'false' is set on a lower level a higher level will override
-    //first check the lowest level value (on the tile iteself)
-    return props.interactive || //obj interactive
-            props.tileprops.interactive || //tile object interactive
-            (set && set.properties.interactive) || //tileset interactive
-            this.properties.interactive || //layer interactive
-            this.map.properties.interactive; //map interactive
+    // TODO: This is wrong, if 'false' is set on a lower level a higher level will override
+    // first check the lowest level value (on the tile iteself)
+    return props.interactive || // obj interactive
+            props.tileprops.interactive || // tile object interactive
+            (set && set.properties.interactive) || // tileset interactive
+            this.properties.interactive || // layer interactive
+            this.map.properties.interactive; // map interactive
 };
 
 /**

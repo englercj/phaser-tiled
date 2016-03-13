@@ -1,10 +1,10 @@
-var Tilelayer = require('./Tilelayer'),
-    Objectlayer = require('./Objectlayer'),
-    Tile = require('./Tile'),
-    Tileset = require('./Tileset'),
-    TilemapParser = require('./TilemapParser'),
-    utils = require('../utils'),
-    C = require('../constants');
+var Tilelayer = require('./Tilelayer');
+var Objectlayer = require('./Objectlayer');
+var Tile = require('./Tile');
+var Tileset = require('./Tileset');
+var TilemapParser = require('./TilemapParser');
+var utils = require('../utils');
+var C = require('../constants');
 
 /**
  * Tiled map that represents an entire tile map with multiple layers or object groups.
@@ -142,17 +142,17 @@ function Tilemap(game, key, group) {
     this.game.world.setBounds(0, 0, this.widthInPixels, this.heightInPixels);
 
     // create each tileset
-    for(var t = 0, tl = data.tilesets.length; t < tl; ++t) {
+    for (var t = 0, tl = data.tilesets.length; t < tl; ++t) {
         var ts = data.tilesets[t];
         this.tilesets.push(new Tileset(game, key, ts));
     }
 
     // create each layer
-    for(var i = 0, il = data.layers.length; i < il; ++i) {
-        var lyr,
-            ldata = data.layers[i];
+    for (var i = 0, il = data.layers.length; i < il; ++i) {
+        var lyr;
+        var ldata = data.layers[i];
 
-        switch(ldata.type) {
+        switch (ldata.type) {
             case 'tilelayer':
                 lyr = new Tilelayer(game, this, ldata, this.layers.length);
                 this.layers.push(lyr);
@@ -287,7 +287,6 @@ Tilemap.prototype.getObjectlayerIndex = function (name) {
 
 };
 
-
 /**
 * Gets the layer based on its name.
 *
@@ -359,7 +358,7 @@ Tilemap.prototype.setPreventRecalculate = function (value) {
     if ((value ===  false) && (this.preventingRecalculate === true))
     {
         this.preventingRecalculate = false;
-        for(var i in this.needToRecalculate){
+        for (var i in this.needToRecalculate) {
             this.calculateFaces(i);
         }
         this.needToRecalculate = false;
@@ -627,8 +626,8 @@ Tilemap.prototype.putTile = function (tile, x, y, layer) {
 
     layer = this.getTilelayerIndex(layer);
 
-    var tileId,
-        tileset;
+    var tileId;
+    var tileset;
 
     if (x >= 0 && x < this.layers[layer].size.x && y >= 0 && y < this.layers[layer].size.y)
     {
@@ -812,7 +811,7 @@ Tilemap.prototype.dump = function () {
  * @return {TiledTileset} Returns the tileset if found, undefined if not
  */
 Tilemap.prototype.getTileset = function (tileId) {
-    for(var i = 0, il = this.tilesets.length; i < il; ++i) {
+    for (var i = 0, il = this.tilesets.length; i < il; ++i) {
         if (this.tilesets[i].contains(tileId)) {
             return this.tilesets[i];
         }
@@ -842,7 +841,7 @@ Tilemap.prototype.postUpdate = function () {
  * @chainable
  */
 Tilemap.prototype.spawnObjects = function (spawnCallback) {
-    for(var i = 0, il = this.objects.length; i < il; ++i) {
+    for (var i = 0, il = this.objects.length; i < il; ++i) {
         this.objects[i].spawn(spawnCallback);
     }
 
@@ -857,7 +856,7 @@ Tilemap.prototype.spawnObjects = function (spawnCallback) {
  * @chainable
  */
 Tilemap.prototype.despawnObjects = function () {
-    for(var i = 0, il = this.objects.length; i < il; ++i) {
+    for (var i = 0, il = this.objects.length; i < il; ++i) {
         this.objects[i].despawn();
     }
 
@@ -872,7 +871,7 @@ Tilemap.prototype.despawnObjects = function () {
  * @chainable
  */
 Tilemap.prototype.clearTiles = function () {
-    for(var i = 0, il = this.layers.length; i < il; ++i) {
+    for (var i = 0, il = this.layers.length; i < il; ++i) {
         this.layers[i].clearTiles();
     }
 

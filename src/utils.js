@@ -34,8 +34,8 @@ utils.cacheKey = function (key, type, name) {
 
 utils.decompressBase64Data = function (raw, encoding, compression) {
     // TODO: This assumes base64 encoding, need to check encoding param
-    var str = decodeB64(raw),
-        buf = utils.stringToBuffer(str);
+    var str = decodeB64(raw);
+    var buf = utils.stringToBuffer(str);
 
     // decompress
     if (compression === 'gzip') {

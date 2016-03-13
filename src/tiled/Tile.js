@@ -118,8 +118,8 @@ function Tile(game, x, y, tileId, tileset, layer) {
     }
 
     // set the blend mode
-    this.blendMode = (this.properties.blendMode || layer.properties.blendMode) ?
-        Phaser.blendModes[(this.properties.blendMode || layer.properties.blendMode)] : Phaser.blendModes.NORMAL;
+    var blendMode = this.properties.blendMode || layer.properties.blendMode;
+    this.blendMode = blendMode ? Phaser.blendModes[blendMode] : Phaser.blendModes.NORMAL;
 
     // setup the flipped states
     if (this.properties.flippedX) {

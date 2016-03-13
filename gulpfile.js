@@ -4,8 +4,6 @@ var gutil   = require('gulp-util');
 var eslint  = require('gulp-eslint');
 var jscs    = require('gulp-jscs');
 
-var pkg = require('./package.json');
-
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
 var browserify = require('browserify');
@@ -14,8 +12,6 @@ var index = './src/index.js';
 var outdir = './build';
 var bundle = 'Phaser.Plugin.Tiled';
 var outfile = 'phaser-tiled.js';
-
-var version = pkg.version.split('.');
 
 function rebundle(file) {
     if (file) {
@@ -39,7 +35,7 @@ function createBundler(args) {
 /*****
  * Dev task, incrementally rebuilds the output bundle as the the sources change
  *****/
-gulp.task('dev', function() {
+gulp.task('dev', function () {
     watchify.args.standalone = bundle;
     var bundler = watchify(createBundler(watchify.args));
 

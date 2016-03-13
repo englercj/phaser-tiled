@@ -25,16 +25,16 @@ var utils = require('../utils');
  * @param [settings.imagewidth] {Number} An override for the image width
  * @param [settings.imageheight] {Number} An override for the image height
  */
-//TODO: Support external tilesets (TSX files) via the "source" attribute
-//see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
+// TODO: Support external tilesets (TSX files) via the "source" attribute
+// see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
 function Tileset(game, key, settings) {
-    var txkey = utils.cacheKey(key, 'tileset', settings.name),
-        tx = game.cache.getPixiBaseTexture(txkey),
-        ids,
-        ttxkey,
-        ttx,
-        tileTextures = {},
-        numTileTextures = 0;
+    var txkey = utils.cacheKey(key, 'tileset', settings.name);
+    var tx = game.cache.getPixiBaseTexture(txkey);
+    var ids;
+    var ttxkey;
+    var ttx;
+    var tileTextures = {};
+    var numTileTextures = 0;
 
     // if no main texture, check if multi-image tileset
     if (!tx && settings.tiles) {
@@ -74,7 +74,7 @@ function Tileset(game, key, settings) {
 
     this.multiImage = numTileTextures > 0;
 
-    //Tiled Editor properties
+    // Tiled Editor properties
 
     /**
      * The first tileId in the tileset
@@ -135,10 +135,10 @@ function Tileset(game, key, settings) {
         settings.tileoffset ? settings.tileoffset.y : 0
     );
 
-    //TODO: Support for "terraintypes," "image"
-    //see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
+    // TODO: Support for "terraintypes," "image"
+    // see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
 
-    //Custom/Optional properties
+    // Custom/Optional properties
 
     /**
      * The number of tiles calculated based on size, margin, and spacing
@@ -234,10 +234,10 @@ Tileset.prototype.getTileProperties = function (tileId) {
         return null;
     }
 
-    var flags = Tileset.FLAGS,
-        flippedX = tileId & flags.FLIPPED_HORZ,
-        flippedY = tileId & flags.FLIPPED_VERT,
-        flippedAD = tileId & flags.FLIPPED_ANTI_DIAG;
+    var flags = Tileset.FLAGS;
+    var flippedX = tileId & flags.FLIPPED_HORZ;
+    var flippedY = tileId & flags.FLIPPED_VERT;
+    var flippedAD = tileId & flags.FLIPPED_ANTI_DIAG;
 
     tileId = (tileId & ~Tileset.FLAGS.ALL) - this.firstgid;
 
@@ -247,9 +247,9 @@ Tileset.prototype.getTileProperties = function (tileId) {
     }
 
     var props = this.tileproperties[tileId] ?
-        //get this value
+        // get this value
         this.tileproperties[tileId] :
-        //set this id to default values and cache
+        // set this id to default values and cache
         this.tileproperties[tileId] = {
             collides: false
         };
@@ -330,8 +330,8 @@ Tileset.prototype.getTileTexture = function (tileId) {
 
     // generate this tile's texture then cache it.
     // convert the tileId to x,y coords of the tile in the Texture
-    var y = Phaser.Math.floorTo(tileId / this.numTiles.x),
-        x = (tileId - (y * this.numTiles.x));
+    var y = Phaser.Math.floorTo(tileId / this.numTiles.x);
+    var x = (tileId - (y * this.numTiles.x));
 
     // get location in pixels
     x = (x * this.tileWidth) + (x * this.spacing) + this.margin;
@@ -396,7 +396,7 @@ Tileset.FLAGS = {
 };
 
 var mask = 0;
-for(var f in Tileset.FLAGS) {
+for (var f in Tileset.FLAGS) {
     mask |= Tileset.FLAGS[f];
 }
 

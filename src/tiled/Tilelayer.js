@@ -166,13 +166,14 @@ function Tilelayer(game, map, layer, index) {
     // if batch is true, store children in a spritebatch
     if (this.properties.batch) {
         this.container = this.addChild(new Phaser.SpriteBatch(game));
-    } else {
+    }
+    else {
         this.container = this;
     }
 
     for (var i = 0; i < this.tileIds.length; ++i) {
-        var x = i % this.size.x,
-            y = (i - x) / this.size.x;
+        var x = i % this.size.x;
+        var y = (i - x) / this.size.x;
 
         if (!this.tiles[y]) {
             this.tiles[y] = {};
@@ -356,16 +357,16 @@ Tilelayer.prototype._createTile = function () {
 
 Tilelayer.prototype._resetTile = function (tile, x, y, tileId, tileset) {
     // calculate some values for the tile
-    var texture = tileset.getTileTexture(tileId),
-        props = tileset.getTileProperties(tileId),
-        animData = tileset.getTileAnimations(tileId);
+    var texture = tileset.getTileTexture(tileId);
+    var props = tileset.getTileProperties(tileId);
+    var animData = tileset.getTileAnimations(tileId);
+    var blendMode = props.blendMode || this.properties.blendMode;
 
     tile.reset(x, y);
 
     tile.setTexture(texture);
 
-    tile.blendMode = (props.blendMode || this.properties.blendMode) ?
-        Phaser.blendModes[(props.blendMode || this.properties.blendMode)] : Phaser.blendModes.NORMAL;
+    tile.blendMode = blendMode ? Phaser.blendModes[blendMode] : Phaser.blendModes.NORMAL;
 
     // add animations if there are any
     if (animData) {
@@ -439,10 +440,10 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
         return null;
     }
 
-    var tile,
-        id = (toTileX + (toTileY * this.size.x)),
-        tileId = this.tileIds[id],
-        tileset = this.map.getTileset(tileId);
+    var tile;
+    var id = (toTileX + (toTileY * this.size.x));
+    var tileId = this.tileIds[id];
+    var tileset = this.map.getTileset(tileId);
 
     // if no tileset, return
     if (!tileset) {
@@ -470,7 +471,6 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
         tileId,
         tileset
     );
-
 
     // update sprite reference in the map
     this.tiles[toTileY][toTileX] = tile;
@@ -634,8 +634,8 @@ Tilelayer.prototype.getTiles = function (x, y, width, height, collides, interest
     this._mc.th = (this.game.math.snapToCeil(height, this._mc.ch) + this._mc.ch) / this._mc.ch;
 
     //  This should apply the layer x/y here
-    var results = [],
-        tile = null;
+    var results = [];
+    var tile = null;
 
     for (var wy = this._mc.ty; wy < this._mc.ty + this._mc.th; wy++)
     {
@@ -670,7 +670,7 @@ Tilelayer.prototype.getTile = function (x, y) {
 Tilelayer.prototype._renderLeft = function (forceNew) {
     this._renderArea.x--;
 
-    //move all the far right tiles to the left side
+    // move all the far right tiles to the left side
     for (var i = 0; i < this._renderArea.height; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.right,
@@ -693,7 +693,7 @@ Tilelayer.prototype._renderLeft = function (forceNew) {
  * @private
  */
 Tilelayer.prototype._renderRight = function (forceNew) {
-    //move all the far left tiles to the right side
+    // move all the far left tiles to the right side
     for (var i = 0; i < this._renderArea.height; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.left,
@@ -722,7 +722,7 @@ Tilelayer.prototype._renderRight = function (forceNew) {
 Tilelayer.prototype._renderUp = function (forceNew) {
     this._renderArea.y--;
 
-    //move all the far bottom tiles to the top side
+    // move all the far bottom tiles to the top side
     for (var i = 0; i < this._renderArea.width; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.left + i,
@@ -745,7 +745,7 @@ Tilelayer.prototype._renderUp = function (forceNew) {
  * @private
  */
 Tilelayer.prototype._renderDown = function (forceNew) {
-    //move all the far top tiles to the bottom side
+    // move all the far top tiles to the bottom side
     for (var i = 0; i < this._renderArea.width; ++i) {
         this.moveTileSprite(
             forceNew ? -1 : this._renderArea.left + i,
