@@ -24,6 +24,7 @@ Simply download the `phaser-tiled.js` script from the [latest release](https://g
 <script src="phaser-tiled.js"></script>
 ```
 
+### Javascript
 After adding the script to the page you can activate it by enabling the plugin:
 
 ```js
@@ -79,6 +80,47 @@ var map = game.add.tiledmap('my-tiledmap');
 Wow, that was a lot easier! You can find out more about the generator on [it's GitHub page][10].
 
 [10]: https://github.com/englercj/gulp-phaser-tiled-pack
+
+### Typescript
+
+First of all you need to make sure you add a reference to the phaser and phaser-tiled typescript files.
+
+```ts
+/// <reference path="lib/phaser.d.ts"/>
+/// <reference path="lib/phaser-tiled.d.ts"/>
+```
+
+Now you need to load the plugin. This needs to be done in the preload function.
+
+```ts
+//This is in the preload function
+this.game.add.plugin(new Tiled(this.game, this.game.stage));
+
+//Now you need to load the tiledmap. Notice that it says tiledmap.
+var cacheKey = Phaser.Plugin.Tiled.utils.cacheKey;
+//Since you can't add methods to existing classes in typescript you need to cast to any.
+(<any>this.game.load).tiledmap(cacheKey('myTiledMap', 'tiledmap'), 'maps/myTiledMap.json', null, Phaser.Tilemap.TILED_JSON);
+
+//Now you need to load the tilesets.
+this.game.load.image(cacheKey('myTiledMap', 'tileset', 'Grass'), 'images/tilesets/Grass.png');
+this.game.load.image(cacheKey('myTiledMap', 'tileset', 'Dirt'), 'images/tilesets/Dirt.png');
+
+// You can load image layers like this:
+this.game.load.image(cacheKey('myTiledMap', 'layer', 'yourLayerName'), 'images/imageLayers/layer.png');
+//The last parameter should be the name of your layer in your tiled map
+
+```
+
+Now the loading part is done and we will continue after the loading is complete.
+
+```ts
+//This is normally in the create method
+//Make sure you cast it to any again.
+var map = (<any>this.game.add).tiledmap('myTiledMap');
+```
+
+The automatic map loading is basically the same as in javascript. 
+
 
 ### Physics
 
