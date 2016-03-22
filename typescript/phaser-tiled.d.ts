@@ -196,7 +196,7 @@ declare module Phaser {
 
             class utils {
                 static stringToBuffer(str: string): any;
-                static cacheKey(key: string, type: string, name: string): string;
+                static cacheKey(key: string, type: string, name?: string): string;
                 static decompressBase64Data(raw: string, encoding: string, compression: string): any;
                 static parseHitArea(value: number[]): (Phaser.Circle|Phaser.Rectangle|Phaser.Polygon);
                 static parseTiledProperties(obj: any): any;
