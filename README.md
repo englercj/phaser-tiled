@@ -17,7 +17,7 @@ is not officially supported.
 
 ## Usage
 
-Simply download the `phaser-tiled.js` [latest release](https://github.com/englercj/phaser-tiled/releases) script and include it on your page after including Phaser:
+Simply download the `phaser-tiled.js` script from the [latest release](https://github.com/englercj/phaser-tiled/releases) and include it on your page after including Phaser:
 
 ```html
 <script src="phaser.js"></script>
