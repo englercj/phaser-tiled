@@ -2,7 +2,7 @@
 
 declare module Phaser {
     module Plugin {
-        class Tiled implements Phaser.IStateCycle {
+        class Tiled implements Phaser.Plugin {
 
             constructor(game: Phaser.Game, parent: PIXI.DisplayObject);
 
