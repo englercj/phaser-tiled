@@ -83,6 +83,9 @@ Wow, that was a lot easier! You can find out more about the generator on [it's G
 
 ### Typescript
 
+Download the phaser-tiled.d.ts and add it to your project. (The file is located in the typescript folder)
+You also need the normal [phaser-tiled.js](https://github.com/englercj/phaser-tiled/releases) file.
+
 First of all you need to make sure you add a reference to the phaser and phaser-tiled typescript files.
 
 ```ts
@@ -118,8 +121,6 @@ Now the loading part is done and we will continue after the loading is complete.
 //Make sure you cast it to any again.
 var map = (<any>this.game.add).tiledmap('myTiledMap');
 ```
-
-The automatic map loading is basically the same as in javascript. 
 
 
 ### Physics
