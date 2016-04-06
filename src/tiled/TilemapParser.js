@@ -75,6 +75,25 @@ var TilemapParser = {
 
         data.format = Phaser.TILED_JSON;
 
+        var layers = data.layers;
+
+        // decode any encoded/compressed layers
+        if (Array.isArray(layers)) {
+            for (var i = 0; i < layers.length; i++) {
+                var layer = layers[i];
+
+                if (layer && layer.encoding === 'base64') {
+                    var decomp = utils.decompressBase64Data(layer.data, layer.encoding, layer.compression);
+
+                    layer.data = new Uint32Array(decomp.buffer, 0, decomp.length / 4);
+
+                    // remove metadata as layer is no longer encoded or compressed
+                    delete layer.encoding;
+                    delete layer.compression;
+                }
+            }
+        }
+
         return data;
     },
 
@@ -152,9 +171,14 @@ var TilemapParser = {
                     layer.compression = dataElement.attributes.getNamedItem('compression').value;
                 }
 
-                var decomp = utils.decompressBase64Data(layer.rawData, layer.encoding, layer.compression);
+                if (layer.encoding === 'base64') {
+                    var decomp = utils.decompressBase64Data(layer.rawData, layer.encoding, layer.compression);
 
-                layer.data = new Uint32Array(decomp.buffer, 0, decomp.length / 4);
+                    layer.data = new Uint32Array(decomp.buffer, 0, decomp.length / 4);
+                }
+                else if (layer.encoding === 'csv') {
+                    layer.data = JSON.parse('[' + layer.rawData + ']');
+                }
 
                 map.layers.push(layer);
             }

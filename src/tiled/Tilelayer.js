@@ -518,7 +518,7 @@ Tilelayer.prototype.updatePan = function () {
     // Here is where the actual panning gets done, we check if the pan
     // delta is greater than a scaled tile and if so pan that direction.
     // The reason we do it in a while loop is because the delta can be
-    // large than 1 scaled tile and may require multiple render pans
+    // larger than 1 scaled tile and may require multiple render pans
     // (this can happen if you can .pan(x, y) with large values)
 
     // moved position right, so render left
