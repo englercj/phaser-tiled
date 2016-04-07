@@ -399,10 +399,16 @@ Tilelayer.prototype._resetTile = function (tile, x, y, tileId, tileset) {
         tile.scale.x = -1;
         tile.position.x += tileset.tileWidth;
     }
+    else {
+        tile.scale.x = 1;
+    }
 
     if (props.flippedY) {
         tile.scale.y = -1;
         tile.position.y += tileset.tileHeight;
+    }
+    else {
+        tile.scale.y = 1;
     }
 
     if (props.flippedAD) {
@@ -416,6 +422,9 @@ Tilelayer.prototype._resetTile = function (tile, x, y, tileId, tileset) {
         var halfDiff = Math.abs(tile.height / 2) - Math.abs(tile.width / 2);
         tile.position.y += halfDiff;
         tile.position.x += halfDiff;
+    }
+    else {
+        tile.rotation = 0;
     }
 };
 
