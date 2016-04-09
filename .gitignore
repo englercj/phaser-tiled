@@ -19,4 +19,6 @@ npm-debug.log
 !.gitkeep
 *__temp
 node_modules
+testmaps/maps/tilemap-assets.json
+testmaps/node_modules
 build

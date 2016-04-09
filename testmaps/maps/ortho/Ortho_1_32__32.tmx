@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="20" height="23" tilewidth="32" tileheight="32">
+ <properties>
+  <property name="interactive" value="true"/>
+ </properties>
+ <tileset firstgid="1" name="32_3_tiles" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="../gfx/png/32_3_tiles.png" trans="ff00ff" width="100" height="34"/>
+ </tileset>
+ <layer name="Dirt" width="20" height="23">
+  <data encoding="base64" compression="zlib">
+   eJxjZGBgYBzFo3gUj+JRPIpHMV4MAIBCAc0=
+  </data>
+ </layer>
+ <layer name="green" width="20" height="23">
+  <data encoding="base64" compression="zlib">
+   eJytlFEKwDAIQ4P3P/R+t9BoUicUSjXP0G4WgIKOMhfw5fzBZB6f3frsdFueYrteJxbvJ6ZiOX7d++ti8nrLU8yE9a5Jat18Wu/k0nNHl77DppfT+6RzPDqsrjb5t5VO5VJf3feczIqTnvesS2eSW+PO4m2fqX8SrH0AW4MBUw==
+  </data>
+ </layer>
+ <layer name="red" width="20" height="23">
+  <data encoding="base64" compression="zlib">
+   eJzNlEsKADEIQwu9/51nK0GTqF2M4KI1Pvv1nNpucGVMg5ybzDm8Sq/WWOVU2lcsFcviXX2cd+7J4U1ZyNtwkLflRN4LVudvuKw47uSyceS7/9jVo1bV7p5VloN9ZGKsF22ZzP/AdXpxp4azPuddsNqTPbtM1Cr7AKhgAaU=
+  </data>
+ </layer>
+</map>

@@ -1,0 +1,37 @@
+{
+  "name": "phaser-tiled-tests",
+  "version": "1.0.0",
+  "description": "Test suite for phaser-tiled, includes maps to exercise all features",
+  "author": "Chad Engler <chad@pantherdev.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/englercj/phaser-tiled-tests",
+  "scripts": {
+    "start": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/englercj/phaser-tiled-tests.git"
+  },
+  "bugs": {
+    "url": "https://github.com/englercj/phaser-tiled-tests/issues"
+  },
+  "keywords": [
+    "phaser",
+    "html5",
+    "tilemap",
+    "tile",
+    "map"
+  ],
+  "dependencies": {
+    "phaser": "^2.1.1",
+    "phaser-tiled": "^1.0.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.8",
+    "gulp-connect": "^2.0.6",
+    "gulp-phaser-tiled-pack": "^1.1.0"
+  },
+  "engine": {
+    "phaser": "^2.1.0"
+  }
+}

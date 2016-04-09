@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="isometric" renderorder="right-down" width="10" height="10" tilewidth="32" tileheight="16">
+ <properties>
+  <property name="interactive" value="true"/>
+ </properties>
+ <tileset firstgid="1" name="aqua_xoffset_5__yoffset_1" tilewidth="64" tileheight="64">
+  <tileoffset x="-5" y="1"/>
+  <image source="../gfx/png/32x16_XY_offset/aqua_xoffset_5__yoffset_1.png" trans="ff00ff" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="2" name="black_xoffset_32__yoffset_32" tilewidth="64" tileheight="64">
+  <tileoffset x="-32" y="32"/>
+  <image source="../gfx/png/32x16_XY_offset/black_xoffset_32__yoffset_32.png" trans="ff00ff" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="3" name="blue_xoffset_17__yoffset_5" tilewidth="64" tileheight="64">
+  <tileoffset x="-17" y="5"/>
+  <image source="../gfx/png/32x16_XY_offset/blue_xoffset_17__yoffset_5.png" trans="ff00ff" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="4" name="red_xoffset_5__yoffset_45" tilewidth="64" tileheight="64">
+  <tileoffset x="-5" y="45"/>
+  <image source="../gfx/png/32x16_XY_offset/red_xoffset_5__yoffset_45.png" trans="ff00ff" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="5" name="yellow_xoffset_0__yoffset_0" tilewidth="64" tileheight="64">
+  <image source="../gfx/png/32x16_XY_offset/yellow_xoffset_0__yoffset_0.png" trans="ff00ff" width="64" height="64"/>
+ </tileset>
+ <layer name="Aqua_Layer_0" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjZGBgYCQCD3ZAyI2MaDQhM3CpQxfHpg6bGmLdBwAU0AAW
+  </data>
+ </layer>
+ <layer name="Black_Layer_1" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAOMBGJBxLgsh9dHJs6YsRw8fH5mwkHG5caACUgACs=
+  </data>
+ </layer>
+ <layer name="Blue_Layer_2" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAuYCYS0wqgm43LLmYi1BCSo7Y6kBwAL0QANw==
+  </data>
+ </layer>
+ <layer name="Red_Layer_3" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgYwEIkJtdsZBpdHBefWDFc7mIhQg2yHDY1ADzwAFU=
+  </data>
+ </layer>
+ <layer name="Yellow_Layer_4" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYEAAVgbiAD3VsRKJqWk3MWK4zGclQg2yHLoaAFYsAHQ=
+  </data>
+ </layer>
+</map>
