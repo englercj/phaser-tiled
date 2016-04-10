@@ -363,8 +363,6 @@ Tilelayer.prototype._resetTile = function (tile, x, y, tileId, tileset) {
     var blendMode = props.blendMode || this.properties.blendMode;
 
     tile.reset(x, y);
-    tile.scale.x = 1;
-    tile.scale.y = 1;
 
     tile.setTexture(texture);
 
