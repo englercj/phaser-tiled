@@ -46,7 +46,10 @@ gulp.task('watch', function () {
     });
 
     gulp.watch('testmaps/maps/**/*', ['packmaps']);
-    gulp.watch('testmaps/js/*', ['lint']);
+    gulp.watch('testmaps/js/*', function (file) {
+        gulp.start('lint');
+        gulp.src('testmaps/js/*').pipe(connect.reload(file));
+    });
 
     connect.server({
         root: '',
