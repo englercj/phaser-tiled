@@ -21,7 +21,7 @@ define(function () {
             'maps/iso/Isometric_cubes.tmx',
             'maps/iso/Isometric_cubes_large.tmx',
             'maps/iso/Isometric_cubes_with_objects.tmx',
-            'maps/iso/Isometric_cubes_large_with_objects.tmx',
+            'maps/iso/Isometric_cubes_with_objects_large.tmx',
             'maps/iso/Isometric_land.tmx'
         ]
     };
