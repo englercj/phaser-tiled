@@ -113,6 +113,7 @@ var TilemapParser = {
             tilewidth: parseInt(mapElement.attributes.getNamedItem('tilewidth').value, 10),
             tileheight: parseInt(mapElement.attributes.getNamedItem('tileheight').value, 10),
             orientation: mapElement.attributes.getNamedItem('orientation').value,
+            renderorder: mapElement.attributes.getNamedItem('renderorder').value,
             format: Phaser.Tilemap.TILED_XML,
             properties: {},
             layers: [],

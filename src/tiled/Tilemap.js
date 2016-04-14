@@ -64,6 +64,16 @@ function Tilemap(game, key, group) {
     this.orientation = data.orientation;
 
     /**
+     * @property {string} renderorder - The renderorder of the map
+     */
+    this.renderorder = data.renderorder;
+
+    /**
+     * @property {boolean} obeyRenderorder - If true then the map's renderorder will be obeyed.  Defaults to false.
+     */
+    this.obeyRenderorder = false;
+
+    /**
      * @property {number} format - The format of the map data, either Phaser.Tilemap.CSV or Phaser.Tilemap.TILED_JSON.
      */
     this.format = data.format;

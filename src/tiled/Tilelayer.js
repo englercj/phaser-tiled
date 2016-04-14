@@ -308,6 +308,20 @@ Tilelayer.prototype.setupTiles = function () {
             this.moveTileSprite(-1, -1, x, y);
         }
     }
+
+    this.sortTiles();
+};
+
+/**
+ * Sorts the tiles based on their sort order (which will be set according to the map's renderorder) if
+ * the map's obeyRenderorder is set to true
+ *
+ * @method sortTiles
+ */
+Tilelayer.prototype.sortTiles = function () {
+    if (this.map.obeyRenderorder) {
+        this.sort('sortOrder', Phaser.Group.SORT_ASCENDING);
+    }
 };
 
 /**
@@ -333,6 +347,7 @@ Tilelayer.prototype.clearTile = function (tile) {
         this._animTexturePool.push(tile.texture);
     }
 
+    tile.sortOrder = 0;
     tile.visible = false;
     tile.animations.stop();
     this._tilePool.push(tile);
@@ -349,6 +364,7 @@ Tilelayer.prototype._createTile = function () {
     var s = new Phaser.Sprite(this.game);
 
     s.type = Phaser.TILESPRITE;
+    s.sortOrder = 0;
 
     this.container.addChild(s);
 
@@ -426,6 +442,7 @@ Tilelayer.prototype._resetTile = function (tile, x, y, tileId, tileset) {
     else {
         tile.rotation = 0;
     }
+
 };
 
 /**
@@ -481,6 +498,24 @@ Tilelayer.prototype.moveTileSprite = function (fromTileX, fromTileY, toTileX, to
         tileset
     );
 
+    // sort order of tile, could/should be in _resetTile but it would need the map coordinates
+    if (this.map.obeyRenderorder) {
+        if (this.map.orientation === 'orthogonal') {
+            if (this.map.renderorder === 'right-up') {
+                tile.sortOrder = toTileX - this.map.size.x * toTileY;
+            }
+            else if (this.map.renderorder === 'right-down') {
+                tile.sortOrder = toTileX + this.map.size.x * toTileY;
+            }
+            else if (this.map.renderorder === 'left-up') {
+                tile.sortOrder = -toTileX - this.map.size.x * toTileY;
+            }
+            else if (this.map.renderorder === 'left-down') {
+                tile.sortOrder = -toTileX + this.map.size.x * toTileY;
+            }
+        }
+    }
+
     // update sprite reference in the map
     this.tiles[toTileY][toTileX] = tile;
 
@@ -530,28 +565,38 @@ Tilelayer.prototype.updatePan = function () {
     // larger than 1 scaled tile and may require multiple render pans
     // (this can happen if you can .pan(x, y) with large values)
 
+    var sortRequired = false;
+
     // moved position right, so render left
     while (this._scrollDelta.x >= this.map.scaledTileWidth) {
         this._renderLeft();
         this._scrollDelta.x -= this.map.scaledTileWidth;
+        sortRequired = true;
     }
 
     // moved position left, so render right
     while (this._scrollDelta.x <= -this.map.scaledTileWidth) {
         this._renderRight();
         this._scrollDelta.x += this.map.scaledTileWidth;
+        sortRequired = true;
     }
 
     // moved position down, so render up
     while (this._scrollDelta.y >= this.map.scaledTileHeight) {
         this._renderUp();
         this._scrollDelta.y -= this.map.scaledTileHeight;
+        sortRequired = true;
     }
 
     // moved position up, so render down
     while (this._scrollDelta.y <= -this.map.scaledTileHeight) {
         this._renderDown();
         this._scrollDelta.y += this.map.scaledTileHeight;
+        sortRequired = true;
+    }
+
+    if (sortRequired) {
+        this.sortTiles();
     }
 };
 
