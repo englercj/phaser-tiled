@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="isometric" renderorder="right-down" width="21" height="30" tilewidth="64" tileheight="32">
+ <properties>
+  <property name="interactive" value="true"/>
+ </properties>
+ <tileset firstgid="1" name="greyBlack" tilewidth="64" tileheight="64" spacing="1" margin="1">
+  <tileoffset x="0" y="32"/>
+  <image source="../gfx/png/greyBlack.png" trans="ff00ff" width="131" height="66"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="21" height="30">
+  <data encoding="base64" compression="zlib">
+   eJxjZGBgYAJiRirS1DRrpJtJbfeN+n3UTFxy2AClcUSOmbRw50g2czQfDX4zR+NoNDyp6XcAImcDeg==
+  </data>
+ </layer>
+</map>

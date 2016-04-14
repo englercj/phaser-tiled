@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="isometric" renderorder="right-down" width="5" height="5" tilewidth="64" tileheight="32" nextobjectid="25">
+ <properties>
+  <property name="interactive" value="true"/>
+ </properties>
+ <tileset firstgid="1" name="greyBlack" tilewidth="64" tileheight="64" spacing="1" margin="1" tilecount="2" columns="2">
+  <tileoffset x="0" y="32"/>
+  <properties>
+   <property name="hitArea" value="[32,-32,0,-48,32,-64,64,-48]"/>
+  </properties>
+  <image source="../gfx/png/greyBlack.png" trans="ff00ff" width="131" height="66"/>
+ </tileset>
+ <tileset firstgid="3" name="greenBlue_x0_y32" tilewidth="64" tileheight="64" spacing="1" margin="1" tilecount="2" columns="2">
+  <tileoffset x="0" y="32"/>
+  <image source="../gfx/png/greenBlue_x0_y32.png" trans="ff00ff" width="131" height="66"/>
+ </tileset>
+ <tileset firstgid="5" name="miniGreen" tilewidth="64" tileheight="64" spacing="1" margin="1" tilecount="2" columns="2">
+  <tileoffset x="0" y="32"/>
+  <image source="../gfx/png/miniGreen.png" trans="ff00ff" width="131" height="66"/>
+ </tileset>
+ <tileset firstgid="7" name="singleTallBall" tilewidth="64" tileheight="72" spacing="1" margin="1" tilecount="1" columns="1">
+  <tileoffset x="0" y="40"/>
+  <image source="../gfx/png/singleTallBall.png" trans="ff00ff" width="66" height="74"/>
+ </tileset>
+ <tileset firstgid="8" name="blue_x10" tilewidth="75" tileheight="64" spacing="1" margin="1" tilecount="1" columns="1">
+  <tileoffset x="-10" y="32"/>
+  <image source="../gfx/png/blue_x10.png" trans="ff00ff" width="76" height="66"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="5" height="5">
+  <data encoding="base64" compression="zlib">
+   eJxjZGBgYAJiRhrSAAfoACY=
+  </data>
+ </layer>
+ <objectgroup name="object_indiv" visible="0">
+  <object id="1" x="32" y="32" width="32" height="32"/>
+  <object id="2" x="116" y="47" width="36" height="57"/>
+  <object id="3" x="32" y="96" width="64" height="32"/>
+  <object id="4" x="71" y="6" width="25" height="26"/>
+  <object id="5" x="0" y="0" width="32" height="64"/>
+  <object id="6" x="66" y="61" width="72" height="25"/>
+ </objectgroup>
+ <objectgroup name="object_large" visible="0">
+  <object id="7" x="0" y="128" width="128" height="32"/>
+  <object id="8" x="0" y="32" width="96" height="64"/>
+ </objectgroup>
+ <objectgroup name="polygon" visible="0">
+  <object id="9" x="0" y="64">
+   <polygon points="0,0 32,0 0,32"/>
+  </object>
+  <object id="10" x="64" y="96">
+   <polygon points="0,0 0,-32 32,-32"/>
+  </object>
+  <object id="11" x="64" y="0">
+   <polygon points="0,0 0,32 96,0"/>
+  </object>
+  <object id="12" x="32" y="128">
+   <polygon points="0,0 0,32 -32,32"/>
+  </object>
+ </objectgroup>
+ <objectgroup name="polylines" visible="0">
+  <object id="13" x="96" y="0">
+   <polyline points="0,0 64,0 64,32 32,0 32,32 0,32 0,0"/>
+  </object>
+  <object id="14" x="0" y="0">
+   <polyline points="0,0 64,0 64,32 32,0 32,32 0,0"/>
+  </object>
+ </objectgroup>
+ <objectgroup name="PolylineCrazy" visible="0">
+  <object id="15" x="96" y="32">
+   <polyline points="0,0 -32,0 -32,32 -64,64 -64,32 -32,0 -64,32 -64,-32"/>
+  </object>
+  <object id="16" x="128" y="64">
+   <polyline points="0,0 0,32 -32,32 0,64 -32,96 32,96 32,-64 -32,-64 32,0 0,0"/>
+  </object>
+ </objectgroup>
+ <objectgroup name="Polygone Crazy" visible="0">
+  <object id="17" x="0" y="0">
+   <polygon points="0,0 160,32 96,64 160,160 0,32 32,32"/>
+  </object>
+ </objectgroup>
+ <objectgroup name="noffsetImageObject">
+  <object id="18" gid="4" x="128" y="96" width="64" height="64"/>
+  <object id="19" gid="3" x="32" y="96" width="64" height="64"/>
+ </objectgroup>
+ <objectgroup name="minGreen">
+  <object id="20" gid="5" x="32" y="32" width="64" height="64"/>
+  <object id="21" gid="6" x="160" y="32" width="64" height="64"/>
+ </objectgroup>
+ <objectgroup name="tallBlue">
+  <object id="22" gid="7" x="96" y="160" width="64" height="72"/>
+  <object id="23" gid="7" x="64" y="128" width="64" height="72"/>
+ </objectgroup>
+ <objectgroup name="normalBlue_XOffset">
+  <object id="24" gid="8" x="160" y="160" width="75" height="64"/>
+ </objectgroup>
+</map>

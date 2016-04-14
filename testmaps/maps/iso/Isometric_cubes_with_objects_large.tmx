@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="isometric" renderorder="right-down" width="100" height="100" tilewidth="64" tileheight="32" nextobjectid="11">
+ <properties>
+  <property name="interactive" value="true"/>
+ </properties>
+ <tileset firstgid="1" name="greyBlack" tilewidth="64" tileheight="64" spacing="1" margin="1" tilecount="2" columns="2">
+  <tileoffset x="0" y="32"/>
+  <properties>
+   <property name="hitArea" value="[32,-32,0,-48,32,-64,64,-48]"/>
+  </properties>
+  <image source="../gfx/png/greyBlack.png" trans="ff00ff" width="131" height="66"/>
+ </tileset>
+ <tileset firstgid="3" name="singleTallBall" tilewidth="64" tileheight="72" spacing="1" margin="1" tilecount="1" columns="1">
+  <tileoffset x="0" y="40"/>
+  <image source="../gfx/png/singleTallBall.png" trans="ff00ff" width="66" height="74"/>
+ </tileset>
+ <tileset firstgid="4" name="miniGreen" tilewidth="64" tileheight="64" spacing="1" margin="1" tilecount="2" columns="2">
+  <tileoffset x="0" y="32"/>
+  <image source="../gfx/png/miniGreen.png" trans="ff00ff" width="131" height="66"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJztxTERAAAIAKHX/qE1CAPHVPvGtm3btm3btm3btm3btm3btm3btm3btm3btm3btm3btm3btm3btm3btm3btm3btm3btm3btm3btm3bdgeZrTqZ
+  </data>
+ </layer>
+ <objectgroup name="Object Layer 1">
+  <object id="1" gid="3" x="128" y="64" width="64" height="72"/>
+  <object id="2" gid="3" x="256" y="128" width="64" height="72"/>
+  <object id="3" x="128" y="416"/>
+  <object id="4" gid="3" x="160" y="384" width="64" height="72"/>
+ </objectgroup>
+ <objectgroup name="Object Layer 2">
+  <object id="5" gid="4" x="32" y="128" width="64" height="64"/>
+  <object id="6" gid="4" x="352" y="288" width="64" height="64"/>
+  <object id="7" gid="4" x="416" y="288" width="64" height="64"/>
+  <object id="8" gid="4" x="256" y="512" width="64" height="64"/>
+  <object id="9" gid="4" x="384" y="576" width="64" height="64"/>
+  <object id="10" x="224" y="512"/>
+ </objectgroup>
+</map>

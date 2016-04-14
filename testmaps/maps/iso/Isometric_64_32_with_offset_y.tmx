@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="isometric" renderorder="right-down" width="11" height="9" tilewidth="64" tileheight="32">
+ <properties>
+  <property name="interactive" value="true"/>
+ </properties>
+ <tileset firstgid="1" name="aqua_xoffset_0__yoffset_17" tilewidth="64" tileheight="64">
+  <tileoffset x="0" y="17"/>
+  <image source="../gfx/png/64x32/aqua_xoffset_0__yoffset_17.png" trans="ff00ff" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="2" name="blue_xoffset_0__yoffset_0" tilewidth="64" tileheight="32">
+  <image source="../gfx/png/64x32/blue_xoffset_0__yoffset_0.png" trans="ff00ff" width="64" height="32"/>
+ </tileset>
+ <tileset firstgid="3" name="green_xoffset_0__yoffset_16" tilewidth="64" tileheight="64">
+  <tileoffset x="0" y="16"/>
+  <image source="../gfx/png/64x32/green_xoffset_0__yoffset_16.png" trans="ff00ff" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="4" name="pink_xoffset_0__yoffset_20" tilewidth="64" tileheight="64">
+  <tileoffset x="0" y="20"/>
+  <image source="../gfx/png/64x32/pink_xoffset_0__yoffset_20.png" trans="ff00ff" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="5" name="salmon_xoffset_0__yoffset_15" tilewidth="64" tileheight="64">
+  <tileoffset x="0" y="15"/>
+  <image source="../gfx/png/64x32/salmon_xoffset_0__yoffset_15.png" trans="ff00ff" width="64" height="64"/>
+ </tileset>
+ <layer name="Aqua_Layer_0" width="11" height="9">
+  <data encoding="base64" compression="zlib">
+   eJxjZGBgYCQSDzWAzc24xEhRS4x9xIQXur0AFWgAFg==
+  </data>
+ </layer>
+ <layer name="Blue_Layer_1" width="11" height="9">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAeMJGABwvA5hZc7qNULbocsWEBUwMAJFQAKQ==
+  </data>
+ </layer>
+ <layer name="Green_Layer_2" width="11" height="9">
+  <data encoding="base64" compression="zlib">
+   eJxjYKANYCYB0xpgswOXveSqJcYfhPwLAC98ADo=
+  </data>
+ </layer>
+ <layer name="Pink_Layer_3" width="11" height="9">
+  <data encoding="base64" compression="zlib">
+   eJxjYBh4wEICpsQOYsSIUYuLjc9uQupA8gA3jABR
+  </data>
+ </layer>
+ <layer name="Salmon_Layer_4" width="11" height="9">
+  <data encoding="base64" compression="zlib">
+   eJxjYBhagJUEjE0vMWKUqMWlBl09NnUAOfQAYA==
+  </data>
+ </layer>
+</map>

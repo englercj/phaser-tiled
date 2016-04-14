@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="isometric" renderorder="right-down" width="10" height="10" tilewidth="64" tileheight="32">
+ <properties>
+  <property name="interactive" value="true"/>
+ </properties>
+ <tileset firstgid="1" name="isometric_grass_and_water" tilewidth="64" tileheight="64">
+  <tileoffset x="0" y="16"/>
+  <image source="../gfx/png/isometric_grass_and_water.png" width="256" height="384"/>
+ </tileset>
+ <tileset firstgid="25" name="green_xoffset_0__yoffset_16" tilewidth="64" tileheight="64">
+  <tileoffset x="0" y="16"/>
+  <image source="../gfx/png/64x32/green_xoffset_0__yoffset_16.png" trans="ff00ff" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="26" name="blue_xoffset_0__yoffset_0" tilewidth="64" tileheight="32">
+  <image source="../gfx/png/64x32/blue_xoffset_0__yoffset_0.png" trans="ff00ff" width="64" height="32"/>
+ </tileset>
+ <tileset firstgid="27" name="salmon_xoffset_0__yoffset_15" tilewidth="64" tileheight="64">
+  <tileoffset x="0" y="15"/>
+  <image source="../gfx/png/64x32/salmon_xoffset_0__yoffset_15.png" trans="ff00ff" width="64" height="64"/>
+ </tileset>
+ <layer name="grass" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjZGBgYBzFgwYDAFB4AGU=
+  </data>
+ </layer>
+ <layer name="green" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYGBgkGSAABjNgMSXxCJODSBJJB5p9gIAWhIDbA==
+  </data>
+ </layer>
+ <layer name="pink" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJyTZkAF0gzYgTSRmNpgpNkLABLZA2E=
+  </data>
+ </layer>
+ <layer name="blue" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjYIAAKQYEkELjkwKkiMTUBsPFXgCgzgNb
+  </data>
+ </layer>
+</map>
