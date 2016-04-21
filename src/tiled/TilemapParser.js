@@ -58,7 +58,7 @@ var TilemapParser = {
 
         map.tilewidth = map.tileWidth;
         map.tileheight = map.tileHeight;
-        
+
         return map;
     },
 
