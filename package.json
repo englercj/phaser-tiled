@@ -21,6 +21,13 @@
     "2d",
     "tiled"
   ],
+  "files": [
+    "src/",
+    "typescript/",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
   "dependencies": {
     "Base64": "^0.3.0",
     "xmldom": "^0.1.21",
