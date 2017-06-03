@@ -298,6 +298,8 @@ Tileset.prototype.getTileAnimations = function (tileId) {
                 new Phaser.Frame(i, frame.x, frame.y, frame.width, frame.height)
             );
         }
+
+        return this.tileanimations[tileId];
     }
 
     return null;
