@@ -1,6 +1,6 @@
 {
   "name": "phaser-tiled",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "A tilemap implementation for phaser focusing on large complex maps",
   "author": "Chad Engler <chad@pantherdev.com>",
   "license": "MIT",
