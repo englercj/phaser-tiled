@@ -29,7 +29,7 @@ var utils = require('../utils');
 // see: https://github.com/bjorn/tiled/wiki/TMX-Map-Format#tileset
 function Tileset(game, key, settings) {
     var txkey = utils.cacheKey(key, 'tileset', settings.name);
-    var tx = game.cache.getPixiBaseTexture(txkey);
+    var tx = game.cache.getBaseTexture(txkey);
     var ids;
     var ttxkey;
     var ttx;
